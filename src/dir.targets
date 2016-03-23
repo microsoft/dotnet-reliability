@@ -18,5 +18,9 @@
   <Import Project="Microsoft.DotNet.Build.Tasks\Targets\Build.Common.targets" Condition="'$(UseLiveBuildTools)' == 'true'" />
   <Import Project="$(ToolsDir)Build.Common.targets" Condition="'$(UseLiveBuildTools)' != 'true' AND Exists('$(ToolsDir)Build.Common.targets')" />
   <Import Project="..\override.targets" Condition="Exists('..\override.targets')"/>
+  
+  <Target Name="AfterBuild" Condition="Exists('$(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec')">
+    <Exec Command="$(NuGetToolPath) pack $(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec -OutputDirectory $(NugetPackageOutDir) -Properties Configuration=$(Configuration);BinDir=$(OutputPath) -Version $(ReliabilityNugetVersion)" />
+  </Target>
 
 </Project>
