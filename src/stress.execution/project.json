@@ -1,14 +1,13 @@
 {
 
   "dependencies": {
-    "System.Diagnostics.Process": "4.1.0-rc3-23803",
+    "System.Diagnostics.Process": "4.1.0-rc2-23923",
     "xunit.core": "2.1.0",
-    "Microsoft.NETCore": "5.0.0",
-    "Microsoft.NETCore.Portable.Compatibility": "1.0.0"
+    "Microsoft.NETCore": "5.0.1-rc2-23923",
   },
   "frameworks": {
-    "dnxcore50": {
-      "imports": "portable-net452+win81"
+    "netstandard1.3": {
+      "imports": "portable-net45+win8"
     }
   }
 }
