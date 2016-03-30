@@ -1,6 +1,9 @@
 syntax: glob
 
 ### VisualStudio ###
+# Tool Runtime Dir
+[Tt]ools/
+
 #nuget lock files
 project.lock.json
 
