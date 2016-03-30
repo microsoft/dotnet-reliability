@@ -44,6 +44,7 @@
   </Target>
   
   <Target Name="AfterBuild" Condition="Exists('$(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec')">
+    <MakeDir Directories="$(NugetPackageOutDir)" Condition="!Exists('$(NugetPackageOutDir)')"/>
     <Exec Command="$(NuGetToolPath) pack $(MSBuildThisFileDirectory)$(MSBuildProjectName).nuspec -OutputDirectory $(NugetPackageOutDir) -Properties Configuration=$(Configuration);BinDir=$(OutputPath) -Version $(ReliabilityNugetVersion)" />
   </Target>
 
