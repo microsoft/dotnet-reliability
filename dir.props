@@ -10,22 +10,17 @@
 
   <!-- Build Tools Versions -->
   <PropertyGroup>
-    <BuildToolsVersion>1.0.25-prerelease-00094</BuildToolsVersion>
-    <DnxVersion>1.0.0-beta7</DnxVersion>
-    <DnxPackageName Condition="'$(DnxPackageName)' == '' and '$(OsEnvironment)'!='Unix'">dnx-coreclr-win-x86.$(DnxVersion)</DnxPackageName>
-    <DnxPackageName Condition="'$(DnxPackageName)' == '' and '$(OsEnvironment)'=='Unix'">dnx-mono.$(DnxVersion)</DnxPackageName>
     <RoslynVersion>1.0.0-rc3-20150510-01</RoslynVersion>
     <RoslynPackageName>Microsoft.Net.ToolsetCompilers</RoslynPackageName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <AssemblyMetadata Include=".NETFrameworkAssembly">
-      <Value></Value>
-    </AssemblyMetadata>
-    <AssemblyMetadata Include="Serviceable">
-      <Value>True</Value>
-    </AssemblyMetadata>
-  </ItemGroup>
+  <!--
+    Switching to the .NET Core version of the BuildTools tasks seems to break numerous scenarios, such as VS intellisense and resource designer
+    as well as runnning the build on mono. Until we can get these sorted out we will continue using the .NET 4.5 version of the tasks.
+  -->
+  <PropertyGroup>
+    <BuildToolsTargets45>true</BuildToolsTargets45>
+  </PropertyGroup>
 
   <!-- Common repo directories -->
   <PropertyGroup>
@@ -35,17 +30,51 @@
     <!-- Output directories -->
     <BinDir Condition="'$(BinDir)'==''">$(ProjectDir)bin/</BinDir>
     <ObjDir Condition="'$(ObjDir)'==''">$(BinDir)obj/</ObjDir>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$(BinDir)tests/</TestWorkingDir>
     <PackagesOutDir Condition="'$(PackagesOutDir)'==''">$(BinDir)packages/</PackagesOutDir>
 
     <!-- Input Directories -->
     <PackagesDir Condition="'$(PackagesDir)'==''">$(ProjectDir)packages/</PackagesDir>
-    <ToolsDir Condition="'$(ToolsDir)'==''">$(PackagesDir)Microsoft.DotNet.BuildTools.$(BuildToolsVersion)/lib/</ToolsDir>
+    <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
+    <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true'">$(ToolsDir)net45/</BuildToolsTaskDir>
+    <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/bin/</DotnetCliPath>
   </PropertyGroup>
+
+  <!-- Setting up Versioning -->
+  <PropertyGroup>
+    <VersionComparisonDate>2016-01-01</VersionComparisonDate>
+  </PropertyGroup>
+  <Import Project="$(ToolsDir)BuildVersion.targets" />
+
+  <!-- Import Build tools common props file where repo-independent properties are found -->
+  <Import Project="$(ToolsDir)Build.Common.props" />
+
+  <!-- Test runtime -->
+  <PropertyGroup>
+    <TestRuntimeProjectJson Condition="'$(TestRuntimeProjectJson)' == ''">$(SourceDir)Microsoft.DotNet.Build.Tasks/PackageFiles/test-runtime/project.json</TestRuntimeProjectJson>
+    <TestRuntimeProjectLockJson Condition="'$(TestRuntimeProjectLockJson)' == ''">$(SourceDir)Microsoft.DotNet.Build.Tasks/PackageFiles/test-runtime/project.lock.json</TestRuntimeProjectLockJson>
+  </PropertyGroup>
+
+  <!-- Package dependency validation -->
+  <PropertyGroup>
+    <ValidatePackageVersions>true</ValidatePackageVersions>
+    <ProhibitFloatingDependencies>true</ProhibitFloatingDependencies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ValidationPattern Include="^(?i)((System\..%2A)|(Microsoft\.Cci)|(Microsoft\.CSharp)|(Microsoft\.NETCore.%2A)|(Microsoft\.Win32\..%2A)|(Microsoft\.VisualBasic))(?&lt;!TestData)$">
+      <ExpectedPrerelease>rc2-23923</ExpectedPrerelease>
+    </ValidationPattern>
+    <ValidationPattern Include="^(?i)xunit$">
+      <ExpectedVersion>2.1.0</ExpectedVersion>
+    </ValidationPattern>
+  </ItemGroup>
 
   <!-- list of nuget package sources passed to nuget.exe -->
   <ItemGroup>
-    <NuGetSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools" />
+    <NuGetSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools" />
     <NuGetSourceList Include="https:%2F%2Fwww.nuget.org/api/v2" />
   </ItemGroup>
 
@@ -67,34 +96,35 @@
   <!-- list of nuget package sources passed to dnu -->
   <ItemGroup>
     <!-- Need to escape double forward slash (%2F) or MSBuild will normalize to one slash on Unix. -->
-    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-core/" />
-    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-coreclr/" />
-    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-corefx/" />
-    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-corefxtestdata/" />
-    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/dotnet-buildtools/" />
-    <DnuSourceList Include="https:%2F%2Fwww.nuget.org/api/v2/" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-core/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fdotnet.myget.org/F/dotnet-buildtools/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fwww.myget.org/F/nugetbuild/api/v3/index.json" />
+    <DnuSourceList Include="https:%2F%2Fapi.nuget.org/v3/index.json" />
   </ItemGroup>
 
-    <!-- list of directories to perform batch restore -->
+  <!-- list of directories to perform batch restore -->
   <ItemGroup>
-    <DnuRestoreDir Include="&quot;$(MSBuildProjectDirectory)\src&quot;" />
-    <DnuRestoreDir Include="&quot;$(ToolsDir)&quot;" />
+    <DnuRestoreDir Include="$(MSBuildProjectDirectory)\src" />
   </ItemGroup>
 
   <PropertyGroup>
-    <DnxPackageDir Condition="'$(DnxPackageDir)'==''">$(PackagesDir)/$(DnxPackageName)/</DnxPackageDir>
-    <DnuToolPath Condition="'$(DnuToolPath)'=='' and '$(OsEnvironment)'!='Unix'">$(DnxPackageDir)\bin\dnu.cmd</DnuToolPath>
-    <DnuToolPath Condition="'$(DnuToolPath)'=='' and '$(OsEnvironment)'=='Unix'">$(DnxPackageDir)/bin/dnu</DnuToolPath>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)'=='' and '$(OsEnvironment)'!='Unix'">$(DotnetCliPath)dotnet.exe</DotnetToolCommand>
+    <DotnetToolCommand Condition="'$(DotnetToolCommand)'=='' and '$(OsEnvironment)'=='Unix'">$(DotnetCliPath)dotnet</DotnetToolCommand>
 
     <DnuRestoreSource>@(DnuSourceList -> '--source %(Identity)', ' ')</DnuRestoreSource>
-    <DnuRestoreDirs>@(DnuRestoreDir -> '%(Identity)', ' ')</DnuRestoreDirs>
+    <DnuRestoreDirs>@(DnuRestoreDir -> '&quot;%(Identity)&quot;', ' ')</DnuRestoreDirs>
 
-    <DnuRestoreCommand>"$(DnuToolPath)"</DnuRestoreCommand>
+    <DnuRestoreCommand>"$(DotnetToolCommand)"</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) restore</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(ParallelRestore)'=='true'">$(DnuRestoreCommand) --parallel</DnuRestoreCommand>
     <DnuRestoreCommand>$(DnuRestoreCommand) --packages "$(PackagesDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</DnuRestoreCommand>
     <DnuRestoreCommand Condition="'$(LockDependencies)' == 'true'">$(DnuRestoreCommand) --lock</DnuRestoreCommand>
   </PropertyGroup>
+
+  <!-- Create a collection of all project.json files for dependency updates. -->
+  <ItemGroup>
+    <ProjectJsonFiles Include="$(SourceDir)**/project.json" />
+  </ItemGroup>
 
   <PropertyGroup Condition="'$(BuildAllProjects)'=='true'">
     <!-- When we do a traversal build we get all packages up front, don't restore them again -->
@@ -116,10 +146,10 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <!--
-      Delay signing with the ECMA key currently doesn't work.
-      https://github.com/dotnet/roslyn/issues/2444
+      Full signing with Open key doesn't work with Portable Csc.
+      https://github.com/dotnet/roslyn/issues/8210
     -->
-    <UseECMAKey>false</UseECMAKey>
+    <UseOpenKey>false</UseOpenKey>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OsEnvironment)'=='Unix'">
@@ -134,6 +164,11 @@
       Second, we aren't yet building pdbs, which the nuspecs specify.
     -->
     <SkipBuildPackages>true</SkipBuildPackages>
+  </PropertyGroup>
+
+  <!-- Set the default strong name sig to use the "open" key -->
+  <PropertyGroup Condition="'$(UseOpenKey)' == ''">
+    <UseOpenKey>true</UseOpenKey>
   </PropertyGroup>
 
   <!-- 
@@ -160,7 +195,8 @@
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('Linux'))">Linux</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('OSX'))">OSX</OSGroup>
     <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('FreeBSD'))">FreeBSD</OSGroup>
-    <OSGroup Condition="'$(OSGroup)'==''">Windows_NT</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'=='' and $(Configuration.StartsWith('NetBSD'))">NetBSD</OSGroup>
+    <OSGroup Condition="'$(OSGroup)'==''">AnyOS</OSGroup>
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -203,7 +239,6 @@
     <BaseOutputPath Condition="'$(BaseOutputPath)'==''">$(BinDir)</BaseOutputPath>
     <OutputPath Condition="'$(OutputPath)'==''">$(BaseOutputPath)$(OSPlatformConfig)\$(MSBuildProjectName)\</OutputPath>
 
-    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(ObjDir)</BaseIntermediateOutputPath>
     <IntermediateOutputRootPath Condition="'$(IntermediateOutputRootPath)' == ''">$(BaseIntermediateOutputPath)$(OSPlatformConfig)\</IntermediateOutputRootPath>
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' == ''">$(IntermediateOutputRootPath)$(MSBuildProjectName)\</IntermediateOutputPath>
 
@@ -218,21 +253,9 @@
     <TargetsLinux Condition="'$(OSGroup)' == 'Linux'">true</TargetsLinux>
     <TargetsOSX Condition="'$(OSGroup)' == 'OSX'">true</TargetsOSX>
     <TargetsFreeBSD Condition="'$(OSGroup)' == 'FreeBSD'">true</TargetsFreeBSD>
+    <TargetsNetBSD Condition="'$(OSGroup)' == 'NetBSD'">true</TargetsNetBSD>
 
-    <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true'">true</TargetsUnix>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <!-- Work around known Dev14 bug - see
-         https://connect.microsoft.com/VisualStudio/feedback/details/1000796/connect-file-uap-props-not-found-cant-build-a-portable-lib-on-vs14
-    -->
-    <_WindowsKitBinPath>$(MSBuildProgramFiles32)\Windows Kits\8.1\bin\x86</_WindowsKitBinPath>
-    <_WindowsPhoneKitBinPath>$(MSBuildProgramFiles32)\Windows Phone Kits\8.1\bin</_WindowsPhoneKitBinPath>
-    <MakePriExeFullPath>$(_WindowsKitBinPath)\makepri.exe</MakePriExeFullPath>
-    <MakeAppxExeFullPath>$(_WindowsKitBinPath)\makeappx.exe</MakeAppxExeFullPath>
-    <SignAppxPackageExeFullPath>$(_WindowsKitBinPath)\signtool.exe</SignAppxPackageExeFullPath>
-    <MakePriExtensionPath>$(_WindowsPhoneKitBinPath)\x86\MrmEnvironmentExtDl.dll</MakePriExtensionPath>
-    <MakePriExtensionPath_x64>$(_WindowsPhoneKitBinPath)\x64\MrmEnvironmentExtDl.dll</MakePriExtensionPath_x64>
+    <TargetsUnix Condition="'$(TargetsLinux)' == 'true' or '$(TargetsOSX)' == 'true' or '$(TargetsFreeBSD)' == 'true' or '$(TargetsNetBSD)' == 'true'">true</TargetsUnix>
   </PropertyGroup>
 
   <Import Project="$(RoslynPropsFile)"
