@@ -12,6 +12,7 @@ project.lock.json
 *.user
 *.userosscache
 *.sln.docstates
+*.VC.opendb
 .vs
 
 # Build results
