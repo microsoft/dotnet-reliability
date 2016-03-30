@@ -13,24 +13,18 @@
     <Project Include="triage.storage\triage.storage.csproj" />
   </ItemGroup>
 
-  <Import Project="dir.targets" />
+  <Import Project=".\dir.targets" />
 
   <Import Project="..\dir.traversal.targets" />
+  
+  <PropertyGroup>
+    <BuildToolsTaskDir>$(ToolsDir)</BuildToolsTaskDir>
+  </PropertyGroup>
 
-  <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
   <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
 
-  <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
-    <TraversalBuildDependsOn>
-      $(TraversalBuildDependsOn);
-      BuildPackages;
-    </TraversalBuildDependsOn>
-  </PropertyGroup>
-
   <PropertyGroup>
-    <GenerateCodeCoverageReportForAll>true</GenerateCodeCoverageReportForAll>
+    <GenerateCodeCoverageReportForAll>false</GenerateCodeCoverageReportForAll>
   </PropertyGroup>
-  <Import Project="$(ToolsDir)CodeCoverage.targets" Condition="Exists('$(ToolsDir)CodeCoverage.targets')" />
-  <Import Project="$(ToolsDir)PerfTesting.targets" Condition="Exists('$(ToolsDir)PerfTesting.targets')" />
-
+  
 </Project>

@@ -3,7 +3,7 @@
 
   <PropertyGroup>
     <NugetPackageOutDir>$(BinDir)packages</NugetPackageOutDir>
-    <ReliabilityNugetVersion>1.0.0-alpha-00031</ReliabilityNugetVersion>
+    <ReliabilityNugetVersion>1.0.0-alpha-00037</ReliabilityNugetVersion>
   </PropertyGroup>
 
   </Project>
