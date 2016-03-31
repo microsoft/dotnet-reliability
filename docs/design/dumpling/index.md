@@ -18,7 +18,7 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
    - `todo` Get Status
    - `todo` Retrieve Dump File
 3. `todo` Status Table
-4. `todo` ** dump + runtime artifacts storage **
+4. `todo` **dump + runtime artifacts storage**
 5. `stable`**analysis** Infrastructure
 	- (**queue**) Azure Topic
 	- Workers
