@@ -24,7 +24,7 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
 	- Workers
 		- Ubuntu 14.04 VM
 		- CentOS VM
-6. `todo` ** analysis artifacts storage **
+6. `todo` **analysis artifacts storage**
 7. `todo` Report Viewing
    - `todo` PowerBI for high-level status
    - `todo` ASP.Net WebViews for actionable data
