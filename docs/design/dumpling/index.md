@@ -14,9 +14,9 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
    - Tools
    - Humans
 2. `todo`RESTful Front-End
-   - `todo`**upload dump file**
-   - `todo` Get Status
-   - `todo` Retrieve Dump File
+   - **upload dump file**
+   - Get Status
+   - Retrieve Dump File
 3. `todo` Status Table
 4. `todo` **dump + runtime artifacts storage**
 5. `stable`**analysis** Infrastructure
