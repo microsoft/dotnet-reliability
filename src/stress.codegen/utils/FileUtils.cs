@@ -16,15 +16,15 @@ namespace stress.codegen.utils
 {
     internal static class FileUtils
     {
-        public static async Task<long> CopyDirAsync(string srcPath, string destPath, bool onlyIfNewer = true, bool nuke = false, bool recursive = true, int retryCount = 5, int retryWait = 500)
+        public static async Task<long> CopyDirAsync(string srcPath, string destPath, bool onlyIfNewer = true, bool clean = false, bool recursive = true, int retryCount = 5, int retryWait = 500)
         {
             long size = 0;
             List<Task> copyTasks = new List<Task>();
 
             bool destExists = Directory.Exists(destPath);
 
-            //if the directory exists and nuke is true
-            if (Directory.Exists(destPath) && nuke)
+            //if the directory exists and clean is true
+            if (Directory.Exists(destPath) && clean)
             {
                 //delete the directory recursively before starting the copy
                 Action deleteDir = () => Directory.Delete(destPath, true);
@@ -60,7 +60,7 @@ namespace stress.codegen.utils
                 {
                     var destSubDir = Path.Combine(destPath, Path.GetFileName(subDir));
 
-                    Task subDirTask = CopyDirAsync(subDir, destSubDir, onlyIfNewer, nuke, recursive).ContinueWith(task => Interlocked.Add(ref size, task.Result));
+                    Task subDirTask = CopyDirAsync(subDir, destSubDir, onlyIfNewer, clean, recursive).ContinueWith(task => Interlocked.Add(ref size, task.Result));
 
                     copyTasks.Add(subDirTask);
                 }
