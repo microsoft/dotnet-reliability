@@ -15,11 +15,11 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
    - Tools
    - Humans
 2. `todo`[RESTful Front-End](rest.md)
-   - [**upload dump file**](state-and-storage.md)
+   - **upload dump file**state-and-storage.md
    - Get Status
    - Retrieve Dump File
 3. `todo` [Status Table](state-and-storage.md)
-4. `todo` **dump + runtime artifacts storage**
+4. `todo` [**dump + runtime artifacts storage**](state-and-storage.md)
 5. `stable`**analysis** Infrastructure
 	- (**queue**) Azure Topic
 	- Workers
