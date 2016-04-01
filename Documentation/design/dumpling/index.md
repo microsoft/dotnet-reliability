@@ -18,7 +18,7 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
    - **upload dump file**state-and-storage.md
    - Get Status
    - Retrieve Dump File
-3. `todo` [Status Table](state-and-storage.md)
+3. `todo` [State Table](state-and-storage.md)
 4. `todo` [**dump + runtime artifacts storage**](state-and-storage.md)
 5. `stable`**analysis** Infrastructure
 	- (**queue**) Azure Topic
