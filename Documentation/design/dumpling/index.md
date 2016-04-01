@@ -15,17 +15,17 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
    - Tools
    - Humans
 2. `todo`[RESTful Front-End](rest.md)
-   - **upload dump file**
+   - [**upload dump file**](state-and-storage.md)
    - Get Status
    - Retrieve Dump File
-3. `todo` Status Table
+3. `todo` [Status Table](state-and-storage.md)
 4. `todo` **dump + runtime artifacts storage**
 5. `stable`**analysis** Infrastructure
 	- (**queue**) Azure Topic
 	- Workers
 		- Ubuntu 14.04 VM
 		- CentOS VM
-6. `todo` **analysis artifacts storage**
+6. `todo` [**analysis artifacts storage**](state-and-storage.md)
 7. `todo` Report Viewing
    - `todo` PowerBI for high-level status
    - `todo` ASP.Net WebViews for actionable data
