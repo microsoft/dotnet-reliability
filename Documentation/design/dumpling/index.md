@@ -6,14 +6,15 @@
 #####The Vision
 A runtime developer is looking for bugs to fix, and visits the `dumpling` website. They are presented with a view of the most impactful runtime issues. If they come across a failure they'd like to investigate, they may download the offending zipped up dump file and extract it to their machines for further review.
 
-##### -`The Status`The Pieces
+
+#####`The Status`The Pieces
 ![For Context](images/drawing1.png)
 
 1. Supported Users
    - Automated Infrastructure
    - Tools
    - Humans
-2. `todo`RESTful Front-End
+2. `todo`[RESTful Front-End](rest.md)
    - **upload dump file**
    - Get Status
    - Retrieve Dump File
@@ -30,11 +31,11 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
    - `todo` ASP.Net WebViews for actionable data
 
 #####The Gap Tasks
-These are the remaining actionable tasks to meet the bare-minimum of our vision.
+These are the remaining actionable tasks to meet the minimum-viable product of our vision.
 
 1. Bring up SQL Database
     - `sschaabs` has a code-first Entity Framework base laid out that has withstood the test of time.
-2. Create REST Interface
+2. [Create REST Interface](rest.md)
 	- (POST) AddDump
 	- (GET) GetStatus
 	- (GET) RetrieveDump
@@ -46,5 +47,4 @@ These are the remaining actionable tasks to meet the bare-minimum of our vision.
 	- PowerBI (pass success)
 	- Write HTML/JavaScript to be viewed.
 	- Adjusted/Unadjusted mean time to failure.
-
-
+ 
