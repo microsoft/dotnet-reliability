@@ -41,7 +41,7 @@ These are the remaining actionable tasks to meet the minimum-viable product of o
 	- (GET) RetrieveDump
 	- (POST/UPDATE) Update/AppendData
 	- (methods) APIs for retrieving results to pre-defined SQL queries.
-3. Spawn State Table
+3. [Spawn State Table](state-and-storage.md)
 4. Create web view that displays the results of our dumps.
 	- Write SQL queries to be displayed
 	- PowerBI (pass success)
