@@ -53,11 +53,8 @@ def unpack(strZipPath):
         zip = zipfile.ZipFile(f)
 
         for path in zip.namelist():
-            if os.path.exists('/' + path):
-                print 'skipping     /' + path
-            else:
-                print 'extracting   /' + path
-                zip.extract(path, '/')
+            print 'extracting   /' + os.path.join(os.path.basename(strZipPath).replace('.zip', ''), path)
+            zip.extract(path, os.path.join(os.curdir, os.path.basename(strZipPath).replace('.zip', '')))
         zip.close()
     print '\nall files extracted\n'
 
