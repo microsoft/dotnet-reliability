@@ -3,7 +3,7 @@ Azure Storage Table
 
 Right before we begin receiving the dumpfile, we generate a dumpling-id. Upon generating the dumpling-id we create a row in the state table. The values within the state table update as dump moves through the pipeline. Upon creation the default state is 'uploading', and all of the uri values and the flight-messages are 'null'.
 
-| owner | dumpling-id | timestamp | state | symbols-uri | dump-uri | results-uri | flight-messages |
+| owner | dumpling-id | timestamp | state | symbols-uri | dump-uri | results-uri | messages |
 |---|---|---|---|---|---|---|---|
 |a |b | c | d |e |f | g | h |
 d: **possible states**
@@ -17,9 +17,8 @@ d: **possible states**
 - done
 - error
 
-h: **index to another table** (partitionkey/rowkey value) - flight-type / doppler-id
-- possible flight-type values: error, informative, verbose
-
+h: *messages*
+- JSON array of "message_type","message" objects
 
 #Storage
 
