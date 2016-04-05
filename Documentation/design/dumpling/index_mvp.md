@@ -1,7 +1,7 @@
-##`dumpling`
-#####What is `dumpling`?
+##`dumpling` service
+#####What is `dumpling` service?
 
-`dumpling` is the name of the DotNet dump analytics and storage service. Given a dump file, the service extracts information and catalogues it for future review.
+`dumpling` is the name of the DotNet dump analytics cli, and its storage service. Given a dump file, the service extracts information and catalogues it for future review.
 
 #####The Vision
 A runtime developer is looking for bugs to fix, and visits the `dumpling` website. They are presented with a view of the most impactful runtime issues. If they come across a failure they'd like to investigate, they may download the offending zipped up dump file and extract it to their machines for further review.
