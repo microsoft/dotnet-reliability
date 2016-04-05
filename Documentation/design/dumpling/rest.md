@@ -4,7 +4,7 @@
 
 |state| api | parameters | returns | description |
 |---|---|---|---|---|
-|`todo` | http://(clrrap)/dumpling/storage/{owner}/{targetos} | `owner`, `targetos`, `file` | (*string*) `dumpling-id` | upload a zip file that contains a core dump, as well as the runtime artifacts responsible for the crash. |
+|`todo` | http://(clrrap)/dumpling/storage/{owner}/{targetos} | `owner`, `targetos`, `file` | (*string*) `dumplingid` | upload a zip file that contains a core dump, as well as the runtime artifacts responsible for the crash. |
 |`todo` | http://(clrrap)/dumpling/status/{owner}/{dumplingid} | `owner`, `dumplingid` | (*string*) `status` | after a dump has been uploaded, we enqueue it for analysis. To find out how far along in the process a dump submission is, you can query its state using this api. |
 |`todo` | http://(clrrap)/dumpling/storage/{owner}/{dumplingid} | `owner`, `dumplingid` | (*binary*) `zip-file` | download a previously uploaded dump zip file. |
 
