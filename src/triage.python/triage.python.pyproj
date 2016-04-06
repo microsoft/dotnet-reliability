@@ -32,8 +32,17 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="analysis.py" />
+    <Compile Include="analysis_worker.py" />
+    <Compile Include="dumpling_util.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="nearby_config.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="analysis_worker_config.json" />
+    <Content Include="analysis_worker_monitor.sh" />
     <Content Include="triage.ini" />
   </ItemGroup>
   <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />
