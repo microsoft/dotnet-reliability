@@ -18,6 +18,9 @@ class DbgEngine(threading.local):
         thread = self.target.GetProcess().GetSelectedThread()
         return [DbgFrame(f) for f in thread.frames]
 
+    def get_stack(self, thread):
+        return [DbgFrame(f) for f in thread.frames]
+
     # find the first frame matching the supplied routine name
     # strRoutine - string name of the routine to find on the selected thread
     # returns    - a DbgFrame index of the first frame matching the supplied routine name
@@ -89,7 +92,8 @@ def analyze(debugger, command, result, internal_dict):
     eng.add_analyzer(StackTriageAnalyzer())
     eng.add_analyzer(StopReasonAnalyzer())
     eng.add_analyzer(LastExceptionAnalyzer())
-    eng.add_analyzer(HeapCorruptionAnalyzer())
+    eng.add_analyzer(HeapCorruptionAnalyzer())  
+    eng.add_analyzer(AllThreadsAnalyzer())
     
     dictProps = { }
 
@@ -227,7 +231,7 @@ class DbgFrame(object):
         self.strFullFrame = self.strModule + '!' + self.strFullRoutine
 
     def __str__(self):
-        return self.strFrame
+        return self.strFullFrame
 
     def tryget_managed_frame_info(self):
         sos = SosInterpreter()
@@ -245,6 +249,15 @@ class DbgFrame(object):
                     if 'File' in  classProps:
                         strFile = classProps['File']
                         self.strModule = string.rsplit(string.rsplit(strFile, '.', 1)[0], '/', 1)[1] 
+
+class DbgThread(object):
+    def __init__(self, sbThread):
+        self.Osid = sbThread.id
+        self.Index = sbThread.idx
+        self.Frames = g_dbg.get_stack(sbThread)
+                                                       
+    def __str__(self):
+        return '#' + str(self.Index) + ' OSID: ' + str(self.Osid) + '\n' + "\n".join([str(f) for f in self.Frames])
 
 class StackTriageRule(object):
     """description of class"""
@@ -281,6 +294,7 @@ class StackTriageRule(object):
         self.bExactModule = "*" not in self.strModule
         self.bExactRoutine = "*" not in self.strRoutine
         self.bExactFrame = self.bExactModule and self.bExactRoutine
+
 
 class StackTriageEngine(object):
     def __init__(self):
@@ -416,7 +430,8 @@ class StackTriageAnalyzer(AnalysisEngine):
         #get the eventing thread stack
         lstFrame = g_dbg.get_current_stack()
 
-
+        
+        dictProps["FAULT_THREAD"] = str(g_dbg.target.GetProcess().GetSelectedThread())
         dictProps["FAULT_STACK"] = "\n".join([str(f) for f in lstFrame])
 
         #triage with the triage engine
@@ -520,3 +535,17 @@ class HeapCorruptionAnalyzer(AnalysisEngine):
         if pc == 0:
             pc = g_dbg.tryget_frame_uint('GcInfoDecoder::EnumerateLiveSlots', 'pRD->ControlPC')
         return pc
+
+class AllThreadsAnalyzer(AnalysisEngine):
+    def __init__(self):
+        self.initVoid = None
+
+    def analyze(self, dictProps, dictArgs):
+        lstThread = [ ]
+
+        proc = g_dbg.target.GetProcess()
+       
+        for i, t in enumerate(proc.threads):
+            lstThread.append(DbgThread(t))
+
+        dictProps['ALL_THREADS'] = '\n\n'.join([str(t) for t in lstThread])
