@@ -32,11 +32,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="analysis.py" />
-    <Compile Include="worker.py" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="config.json" />
-    <Content Include="monitor.sh" />
     <Content Include="triage.ini" />
   </ItemGroup>
   <Import Condition="Exists($(PtvsTargetsFile))" Project="$(PtvsTargetsFile)" />
