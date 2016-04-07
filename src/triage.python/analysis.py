@@ -118,6 +118,10 @@ def analyze(debugger, command, result, internal_dict):
         with open(dictArgs['-o'], 'w') as f:
             f.write(json.dumps(dictProps))
 
+    if '-v' not in dictArgs:
+        dictProps.pop('ALL_THREADS', None)
+        
+
     for key in dictProps.keys():
         result.AppendMessage(" ")
         result.AppendMessage(key + ":")
