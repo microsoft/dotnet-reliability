@@ -1,0 +1,124 @@
+swagger: '2.0'
+info:
+  version: v1
+  title: dumplingWeb
+host: dotnetrp.azurewebsites.net
+schemes:
+  - http
+paths:
+  '/dumpling/status/{owner}/{dumplingid}':
+    get:
+      tags:
+        - DumplingService
+      summary: returns the current status of a dumpling.
+      operationId: DumplingService_GetStatus
+      consumes: []
+      produces:
+        - application/json
+        - text/json
+        - application/xml
+        - text/xml
+      parameters:
+        - name: owner
+          in: path
+          description: ''
+          required: true
+          type: string
+        - name: dumplingid
+          in: path
+          description: ''
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      deprecated: false
+  '/dumpling/test/hi/im/{name}':
+    get:
+      tags:
+        - DumplingService
+      summary: "This is just here to test service availability. \r\n            \r\n            \r\n            curl http://[dotnetrp].net/dumpling/test/hi/im/(yourname)"
+      operationId: DumplingService_SayHi
+      consumes: []
+      produces:
+        - application/json
+        - text/json
+        - application/xml
+        - text/xml
+      parameters:
+        - name: name
+          in: path
+          description: ''
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      deprecated: false
+  '/dumpling/store/geturl/{owner}/{dumplingid}':
+    get:
+      tags:
+        - DumplingService
+      operationId: DumplingService_GetDumpUrl
+      consumes: []
+      produces:
+        - application/json
+        - text/json
+        - application/xml
+        - text/xml
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          type: string
+        - name: dumplingid
+          in: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      deprecated: false
+  '/dumpling/store/chunk/{owner}/{targetos}/{index}/{filesize}':
+    post:
+      tags:
+        - DumplingService
+      operationId: DumplingService_PostDumpChunk
+      consumes: []
+      produces:
+        - application/json
+        - text/json
+        - application/xml
+        - text/xml
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          type: string
+        - name: targetos
+          in: path
+          required: true
+          type: string
+        - name: index
+          in: path
+          required: true
+          type: integer
+          format: int32
+        - name: filesize
+          in: path
+          required: true
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      deprecated: false
+definitions: {}
