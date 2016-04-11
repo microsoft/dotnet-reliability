@@ -15,8 +15,49 @@ class DbgEngine(threading.local):
     # get a list of the frames in the current stack
     # returns  - a list of DbgFrame objects from the current stack
     def get_current_stack(self):
-        thread = self.target.GetProcess().GetSelectedThread()
-        return [DbgFrame(f) for f in thread.frames]
+        return self.get_stack(self.target.GetProcess().GetSelectedThread())
+                                                                  
+    # get a list of the frames in the specified threads stack
+    # sbThread - the thread to retrieve stack frames for  (an lldb.SBThread object)
+    # returns  - a list of DbgFrame objects from the current stack
+    def get_stack(self, sbThread):
+        return [DbgFrame.FromSBFrame(f) for f in sbThread.frames]
+
+    # get a list of the frames in the specified threads stack using clrstack to augment the managed frames
+    # sbThread - the thread to retrieve stack frames for  (an lldb.SBThread object)
+    # returns  - a list of DbgFrame objects from the current stack
+    def get_clrstack(self, sbThread):
+        proc = self.target.GetProcess()
+        #get the originally selected thread so we can restore when we're done
+        sbThreadOrig = proc.GetSelectedThread()
+        #set the selected thread to the specified thread (clrstack can only operate on the current stack)
+        proc.SetSelectedThread(sbThread)
+        frames = self.get_current_clrstack()
+        #restore the current thread to it's previous value
+        proc.SetSelectedThread(sbThreadOrig)
+        return frames
+        
+    # get a list of the frames in the current stack using clrstack to augment the managed frames
+    # returns  - a list of DbgFrame objects from the current stack
+    def get_current_clrstack(self):
+        frames = []
+        sos = SosInterpreter()
+        clrstackLines = sos.clrstackF().splitlines();
+        for line in clrstackLines:
+            #try to split into three strings childsp, ip, callsite
+            splitline = string.split(line, ' ', 2)
+
+            #if the three strings are in the expected format
+            if len(splitline) == 3 and self.__ishexstr(splitline[0]) and self.__ishexstr(splitline[1]) and len(splitline[2]) > 0:
+                strIp = splitline[1]
+                splitFrame = string.split(splitline[2], '!', 1)
+                strMod = splitFrame[0]
+                strMeth = ''
+                if len(splitFrame) > 1:
+                    strMeth = string.split(splitFrame[1], ' + ', 1)[0]
+                dbgFrame = DbgFrame.FromStrs(strIp, strMod, strMeth)
+                frames.append(dbgFrame)
+        return frames;
 
     # find the first frame matching the supplied routine name
     # strRoutine - string name of the routine to find on the selected thread
@@ -50,6 +91,10 @@ class DbgEngine(threading.local):
         if frame is not None:
             val = self.eval_uint(frame, strExpr)
         return val
+
+    def __ishexstr(self, str):
+        return str is not None and len(str) > 0 and all(c in string.hexdigits for c in str)
+
 
 g_dbg = DbgEngine()
 g_bPrintDebug = False
@@ -89,7 +134,8 @@ def analyze(debugger, command, result, internal_dict):
     eng.add_analyzer(StackTriageAnalyzer())
     eng.add_analyzer(StopReasonAnalyzer())
     eng.add_analyzer(LastExceptionAnalyzer())
-    eng.add_analyzer(HeapCorruptionAnalyzer())
+    eng.add_analyzer(HeapCorruptionAnalyzer())  
+    eng.add_analyzer(AllThreadsAnalyzer())
     
     dictProps = { }
 
@@ -113,6 +159,10 @@ def analyze(debugger, command, result, internal_dict):
     if '-o' in dictArgs:
         with open(dictArgs['-o'], 'w') as f:
             f.write(json.dumps(dictProps))
+
+    if '-v' not in dictArgs:
+        dictProps.pop('ALL_THREADS', None)
+        
 
     for key in dictProps.keys():
         result.AppendMessage(" ")
@@ -173,6 +223,10 @@ class SosInterpreter(object):
         strOut = self.run_command(cmd)
         return strOut
 
+    def clrstackF(self):
+        clrstackOut = self.run_command('clrstack -f')
+        return clrstackOut
+
     def get_symbol(self, strIp):
         strRoutine='UNKNOWN'
         strModule='UNKNOWN'
@@ -205,37 +259,65 @@ class SosInterpreter(object):
     
 class DbgFrame(object):
 
-    def __init__(self, sbFrame):
-        self.sbFrame = sbFrame
-        self.strIp = string.rstrip(hex(self.sbFrame.addr.GetLoadAddress(g_dbg.target)), 'L')
-        self.strModule = sbFrame.module.file.basename
-        self.strRoutine = sbFrame.symbol.name
-        
-        if (self.strModule is None or self.strModule == '') and (self.strRoutine is None or self.strRoutine == ''):
-            self.tryget_managed_frame_info()
+    def __init__(self):
+        self.sbFrame = None
+        self.strIp = None
+        self.strModule = None
+        self.strRoutine = None
+        self.strFullRoutine = None
+        self.strFullFrame = None
 
-            
+    def __str__(self):
+        return self.strFullFrame
+    
+    @staticmethod
+    def FromSBFrame(sbFrame):
+        frame = DbgFrame()
+        frame.sbFrame = sbFrame
+
+        strIp = string.rstrip(hex(sbFrame.addr.GetLoadAddress(g_dbg.target)), 'L')
+        strModule = sbFrame.module.file.basename
+        strRoutine = sbFrame.symbol.name 
+        
+        if (strModule is None or strModule == '') and (strRoutine is None or strRoutine == ''):
+            tplFrame = self.__tryget_managed_frame_info()
+            strModule = tplFrame[0]
+            strRoutine = tplFrame[1]
+
+        frame.__populate_frame_strs(strIp, strModule, strRoutine)
+        return frame
+
+    @staticmethod
+    def FromStrs(strIp, strModule, strFullRoutine):
+        frame = DbgFrame()
+        frame.__populate_frame_strs(strIp, strModule, strFullRoutine)
+        return frame
+
+    def __populate_frame_strs(self, strIp, strModule, strFullRoutine):
+        self.strIp = strIp        
+        self.strModule = strModule;
+        self.strFullRoutine = strFullRoutine         
+        
         if self.strModule is None or self.strModule == '':
             self.strModule = 'UNKNOWN'
             
-        if self.strRoutine is None or self.strRoutine == '':
-            self.strRoutine = 'UNKNOWN'
-            
-        self.strFullRoutine = self.strRoutine
-        self.strRoutine = string.split(self.strRoutine, '(')[0]
+        if self.strFullRoutine is None or self.strFullRoutine == '':
+            self.strFullRoutine = 'UNKNOWN'
+        
+        self.strRoutine = string.split(strFullRoutine, '(')[0]        
         self.strFrame = self.strModule + '!' + self.strRoutine
         self.strFullFrame = self.strModule + '!' + self.strFullRoutine
-
-    def __str__(self):
-        return self.strFrame
-
-    def tryget_managed_frame_info(self):
-        sos = SosInterpreter()
-        ip2mdOut = sos.ip2md(self.strIp)
+        
+    @staticmethod
+    def __tryget_managed_frame_info(strIp):
+        sos = SosInterpreter()     
+        strModule = None
+        strRoutine = None
+        ip2mdOut = sos.ip2md(strIp)
         ip2mdProps = _str_to_dict(ip2mdOut)
         _dbg_write(str(ip2mdProps))
         if 'Method Name' in ip2mdProps: 
-            self.strRoutine = ip2mdProps['Method Name']
+            strRoutine = ip2mdProps['Method Name']
             if 'Class' in ip2mdProps:
                 classPtr = ip2mdProps['Class']
                 if classPtr is not None and classPtr <> '':
@@ -244,7 +326,17 @@ class DbgFrame(object):
                     _dbg_write(str(classProps))
                     if 'File' in  classProps:
                         strFile = classProps['File']
-                        self.strModule = string.rsplit(string.rsplit(strFile, '.', 1)[0], '/', 1)[1] 
+                        strModule = string.rsplit(string.rsplit(strFile, '.', 1)[0], '/', 1)[1] 
+        return strModule, strRoutine
+
+class DbgThread(object):
+    def __init__(self, sbThread):
+        self.Osid = sbThread.id
+        self.Index = sbThread.idx
+        self.Frames = g_dbg.get_clrstack(sbThread)
+                                                       
+    def __str__(self):
+        return '#' + str(self.Index) + ' OSID: ' + str(self.Osid) + '\n' + "\n".join([str(f) for f in self.Frames])
 
 class StackTriageRule(object):
     """description of class"""
@@ -281,6 +373,7 @@ class StackTriageRule(object):
         self.bExactModule = "*" not in self.strModule
         self.bExactRoutine = "*" not in self.strRoutine
         self.bExactFrame = self.bExactModule and self.bExactRoutine
+
 
 class StackTriageEngine(object):
     def __init__(self):
@@ -324,16 +417,16 @@ class StackTriageEngine(object):
             rule = self.dictExactFrame[frame.strFrame];
         #check if frame matches rule with an exact module
         if (rule is None and frame.strModule in self.dictExactModule):
-            ruleIdx = self.find_indexof_first_match(frame.strRoutine, [rule.strRoutine for rule in self.dictExactModule[frame.strModule]])
+            ruleIdx = self.__find_indexof_first_match(frame.strRoutine, [rule.strRoutine for rule in self.dictExactModule[frame.strModule]])
             if (ruleIdx >= 0):
                 rule = self.dictExactModule[frame.strModule][ruleIdx]
         #check if frame matches rule with an exact routine
         if (rule is None and frame.strRoutine in self.dictExactRoutine):
-            ruleIdx = self.find_indexof_first_match(frame.strRoutine, [rule.strModule for rule in self.dictExactRoutine[frame.strRoutine]])
+            ruleIdx = self.__find_indexof_first_match(frame.strRoutine, [rule.strModule for rule in self.dictExactRoutine[frame.strRoutine]])
             if (ruleIdx >= 0):
                 rule = self.dictExactModule[frame.strModule][ruleIdx]
         #check if frame matches wildcard rule
-        ruleIdx = self.find_indexof_first_match(frame.strRoutine, [rule.strFrame for rule in self.lstWildRules])
+        ruleIdx = self.__find_indexof_first_match(frame.strRoutine, [rule.strFrame for rule in self.lstWildRules])
         if (ruleIdx >= 0):
                 rule = self.lstWildRules[ruleIdx]
         return rule
@@ -341,9 +434,9 @@ class StackTriageEngine(object):
     ## private - finds the index of the first wildcard expression matching the specified string
     ##           str - string to find a matching expression
     ##           lstExpr - a list of expression to evaluate against the specified string
-    def find_indexof_first_match(self, str, lstExpr):
+    def __find_indexof_first_match(self, str, lstExpr):
         for i, expr in enumerate(lstExpr):
-            if self.is_wildcard_match(str, expr):
+            if self.__is_wildcard_match(str, expr):
                 return i;
         return -1;
     
@@ -351,7 +444,7 @@ class StackTriageEngine(object):
     ##           str - string to evaluage against the wild card expression
     ##           expr - wildcard expression using * to match any
     ##           returns - true if the specified string matches the given expression otherwise false
-    def is_wildcard_match(self, str, expr):
+    def __is_wildcard_match(self, str, expr):
         match = False
         
         splitOnWild = string.split(expr, "*")
@@ -414,9 +507,10 @@ class StackTriageAnalyzer(AnalysisEngine):
             self.load_triage_engine(dictArgs)
 
         #get the eventing thread stack
-        lstFrame = g_dbg.get_current_stack()
+        lstFrame = g_dbg.get_current_clrstack()
 
-
+        
+        dictProps["FAULT_THREAD"] = str(g_dbg.target.GetProcess().GetSelectedThread())
         dictProps["FAULT_STACK"] = "\n".join([str(f) for f in lstFrame])
 
         #triage with the triage engine
@@ -520,3 +614,17 @@ class HeapCorruptionAnalyzer(AnalysisEngine):
         if pc == 0:
             pc = g_dbg.tryget_frame_uint('GcInfoDecoder::EnumerateLiveSlots', 'pRD->ControlPC')
         return pc
+
+class AllThreadsAnalyzer(AnalysisEngine):
+    def __init__(self):
+        self.initVoid = None
+
+    def analyze(self, dictProps, dictArgs):
+        lstThread = [ ]
+
+        proc = g_dbg.target.GetProcess()
+       
+        for i, t in enumerate(proc.threads):
+            lstThread.append(DbgThread(t))
+
+        dictProps['ALL_THREADS'] = '\n\n'.join([str(t) for t in lstThread])
