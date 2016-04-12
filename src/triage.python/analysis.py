@@ -417,7 +417,7 @@ class StackTriageEngine(object):
     def triage_stack(self, lstFrame):
         for frame in lstFrame:
             rule = self.find_matching_rule(frame)
-            if rule is None or string.strip(rule.strFollowup.lower()) <> "ignore":
+            if (rule is None or string.strip(rule.strFollowup.lower()) <> 'ignore') and frame.strFullFrame <> 'UNKNOWN!UNKNOWN':
                 return (frame, rule)
         return None
     
@@ -522,8 +522,6 @@ class StackTriageAnalyzer(AnalysisEngine):
 
         #get the eventing thread stack
         lstFrame = g_dbg.get_current_stack()
-        
-
         
         dictProps["FAULT_THREAD"] = str(g_dbg.target.GetProcess().GetSelectedThread())
         dictProps["FAULT_STACK"] = "\n".join([str(f) for f in lstFrame])
