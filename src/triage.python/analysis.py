@@ -15,13 +15,27 @@ class DbgEngine(threading.local):
     # get a list of the frames in the current stack
     # returns  - a list of DbgFrame objects from the current stack
     def get_current_stack(self):
-        return self.get_stack(self.target.GetProcess().GetSelectedThread())
+        #try to get the stack via clrstack as this is the most acurate, but will not be available if sos is not loaded or the thread is purely unmanaged
+        stack = self.get_current_clrstack()
+        
+        #if the clrstack was not available get the native stack        
+        if stack is None or len(stack) == 0:
+            stack = self.get_stack(self.target.GetProcess().GetSelectedThread())
+        
+        return stack
                                                                   
     # get a list of the frames in the specified threads stack
     # sbThread - the thread to retrieve stack frames for  (an lldb.SBThread object)
     # returns  - a list of DbgFrame objects from the current stack
-    def get_stack(self, sbThread):
-        return [DbgFrame.FromSBFrame(f) for f in sbThread.frames]
+    def get_stack(self, sbThread):                                                                                                                      
+        #try to get the stack via clrstack as this is the most acurate, but will not be available if sos is not loaded or the thread is purely unmanaged
+        stack = self.get_clrstack(sbThread)
+                                                               
+        #if the clrstack was not available get the native stack
+        if stack is None or len(stack) == 0:
+            stack = [DbgFrame.FromSBFrame(f) for f in sbThread.frames]
+        
+        return stack
 
     # get a list of the frames in the specified threads stack using clrstack to augment the managed frames
     # sbThread - the thread to retrieve stack frames for  (an lldb.SBThread object)
@@ -280,7 +294,7 @@ class DbgFrame(object):
         strRoutine = sbFrame.symbol.name 
         
         if (strModule is None or strModule == '') and (strRoutine is None or strRoutine == ''):
-            tplFrame = self.__tryget_managed_frame_info()
+            tplFrame = DbgFrame.__tryget_managed_frame_info(strIp)
             strModule = tplFrame[0]
             strRoutine = tplFrame[1]
 
@@ -304,7 +318,7 @@ class DbgFrame(object):
         if self.strFullRoutine is None or self.strFullRoutine == '':
             self.strFullRoutine = 'UNKNOWN'
         
-        self.strRoutine = string.split(strFullRoutine, '(')[0]        
+        self.strRoutine = string.split(self.strFullRoutine, '(')[0]        
         self.strFrame = self.strModule + '!' + self.strRoutine
         self.strFullFrame = self.strModule + '!' + self.strFullRoutine
         
@@ -333,7 +347,7 @@ class DbgThread(object):
     def __init__(self, sbThread):
         self.Osid = sbThread.id
         self.Index = sbThread.idx
-        self.Frames = g_dbg.get_clrstack(sbThread)
+        self.Frames = g_dbg.get_stack(sbThread)
                                                        
     def __str__(self):
         return '#' + str(self.Index) + ' OSID: ' + str(self.Osid) + '\n' + "\n".join([str(f) for f in self.Frames])
@@ -507,7 +521,8 @@ class StackTriageAnalyzer(AnalysisEngine):
             self.load_triage_engine(dictArgs)
 
         #get the eventing thread stack
-        lstFrame = g_dbg.get_current_clrstack()
+        lstFrame = g_dbg.get_current_stack()
+        
 
         
         dictProps["FAULT_THREAD"] = str(g_dbg.target.GetProcess().GetSelectedThread())
