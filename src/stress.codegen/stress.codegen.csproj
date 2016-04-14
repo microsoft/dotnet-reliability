@@ -35,9 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Build.Framework"/>
-    <Reference Include="Microsoft.Build.Tasks.v4.0"/>
-    <Reference Include="Microsoft.Build.Utilities.v4.0"/>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Tasks.v4.0" />
+    <Reference Include="Microsoft.Build.Utilities.v4.0" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.5\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -55,7 +55,8 @@
   <ItemGroup>
     <Compile Include="ExecutionFileGenerator.cs" />
     <Compile Include="GenerateStressSuiteTask.cs" />
-    <Compile Include="HelixProjectFileGenerator.cs" />
+    <Compile Include="LoadTestProjectFileGenerator.cs" />
+    <Compile Include="HelixToFProjectFileGenerator.cs" />
     <Compile Include="LoadSuiteGenerator.cs" />
     <Compile Include="LoadTestSourceFileGenerator.cs" />
     <Compile Include="LoadTestInfo.cs" />

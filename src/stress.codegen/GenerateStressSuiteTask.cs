@@ -17,6 +17,8 @@ namespace stress.codegen
     {
         public bool DebugWaitForInput { get; set; }
 
+        public bool UseLegacyProject { get; set; }
+
         public string Seed { get; set; }
 
         [Required]
@@ -68,10 +70,9 @@ namespace stress.codegen
 
                 LoadSuiteGenerator suiteGen = new LoadSuiteGenerator();
 
-                suiteGen.GenerateSuite(this.ParseSeed(), this.SuiteName, this.SuitePath, this.ParseTestPaths(), this.ParseSearchStrings(), this.ParseFrameworkPaths(), this.GetSuiteConfig(), this.DiscoveryCachePath);
+                suiteGen.GenerateSuite(this.ParseSeed(), this.SuiteName, this.SuitePath, this.ParseTestPaths(), this.ParseSearchStrings(), this.ParseFrameworkPaths(), this.GetSuiteConfig(), this.DiscoveryCachePath, this.UseLegacyProject);
 
                 return true;
-                //return this.Log.HasLoggedErrors;
             }
             catch (Exception e)
             {
