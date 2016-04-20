@@ -61,7 +61,9 @@
     <Compile Include="LoadTestSourceFileGenerator.cs" />
     <Compile Include="LoadTestInfo.cs" />
     <Compile Include="LoadTestConfig.cs" />
+    <Compile Include="MergeAllProjectJsonsTask.cs" />
     <Compile Include="ProgramSourceFileGenerator.cs" />
+    <Compile Include="ProjectJsonInfo.cs" />
     <Compile Include="SourceFileInfo.cs" />
     <Compile Include="StandAloneTestDiscoverer.cs" />
     <Compile Include="ToFProjectFileGenerator.cs" />

@@ -29,7 +29,7 @@ bld/
 msbuild.log
 
 #External folder
-[Ee]xt/
+/test/unittests
 
 # Roslyn stuff
 *.sln.ide
@@ -253,3 +253,4 @@ Temporary Items
 Session.vim
 .netrwhist
 *~
+

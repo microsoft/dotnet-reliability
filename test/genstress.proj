@@ -24,9 +24,7 @@
   -->
   <PropertyGroup>
     <UnitTestFileMask Condition="'$(UnitTestDirectory)' == ''">*.Tests.dll</UnitTestFileMask>
-    <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)..\ext\tests\</UnitTestDirectory>
-    <ProductPackageDirectory Condition="'$(ProductPackageDirectory)' == ''">$(MSBuildThisFileDirectory)..\ext\packages\</ProductPackageDirectory>
-    <ProductBinDirectory Condition="'$(ProductBinDirectory)' == ''">$(MSBuildThisFileDirectory)..\ext\bin\</ProductBinDirectory>
+    <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)unittests\</UnitTestDirectory>
   </PropertyGroup>
   
   <!-- 
@@ -39,15 +37,49 @@
     <StressCodegenAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
     <StressExecAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.execution.dll</StressExecAssmPath>
   </PropertyGroup>
-
+  <PropertyGroup>
+    <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli\</UnitTestCLIProjDir>
+    <UnitTestCLIProjJson>$(UnitTestCLIProjDir)project.json</UnitTestCLIProjJson>
+    <UnitTestPackageDir>$(BaseIntermediateOutputPath)utpackage</UnitTestPackageDir>
+    <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends</UnitTestDependsBin>
+    <TestDependRestoreCommand>$(DotnetToolCommand) restore --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
+    <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependPublishCommand>
+  </PropertyGroup>
+  
   <Import Project="..\dir.targets" />
 
   <Import Project="..\dir.traversal.targets" />
   
+  <UsingTask TaskName="MergeAllProjectJsonsTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
 
-  <Target Name="Build">
+  <Target Name="RestoreTestDependsBin">
+    <Message Text="Restoring test dependencies..." />
+    
+    <RemoveDir Directories="$(UnitTestCLIProjDir)" />
+    <RemoveDir Directories="$(UnitTestPackageDir)" />
+    <RemoveDir Directories="$(UnitTestDependsBin)" />
+    
+    <!-- create a dummy project used to restore test binaries -->
+    <MakeDir Directories="$(UnitTestCLIProjDir)"/>
+    <Exec Command="$(DotnetToolCommand) new" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
 
+    <!-- delete the dummy project.json and replace with merged project json from the unit test drop -->
+    <Delete Files="$(UnitTestCLIProjJson)" />
+    <MergeAllProjectJsonsTask InPath="$(UnitTestDirectory)" OutPath="$(UnitTestCLIProjJson)"/>
+    
+    <!-- restore and publish the dummy project to get a flat  -->
+    <Exec Command="$(TestDependRestoreCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
+    <Exec Command="$(TestDependPublishCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
+  </Target>
+
+  
+  <Target Name="Build" DependsOnTargets="RestoreTestDependsBin">
+ 
+    <Error Condition="!Exists('$(SuiteConfigPath)')" Text="ERROR: File not found. Stress suite config path '$(SuiteConfigPath)' is invalid " />
+
+    <MakeDir Directories="$(StressGeneratedRoot)"/>
+    
     <Message Text="Generating stress test sources..." Importance="High" />
     
     <GenerateStressSuiteTask
@@ -58,7 +90,16 @@
       ConfigPath="$(SuiteConfigPath)"
       TestPaths="$(UnitTestDirectory)"
       TestSearchStrings="$(UnitTestFileMask)"
-      FrameworkPaths="$(ProductBinDirectory)"/>
+      FrameworkPaths="$(UnitTestDependsBin)"/>
   </Target>
-  
+
+  <Target Name="Clean">
+    
+    <Message Text="Cleaning generated source directory..." />
+    
+    <RemoveDir Directories="$(SuitePath)" />
+   
+    <RemoveDir Directories="$(UnitTestCLIProjDir)" />
+  </Target>
+
 </Project>
