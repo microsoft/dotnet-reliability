@@ -26,8 +26,8 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
 		- Ubuntu 14.04 VM
 		- CentOS VM
 6. `stable` [**analysis artifacts storage**](state-and-storage.md)
-7. `todo` Report Viewing
-   - `todo` PowerBI for high-level status
+7. `in-progress` Report Viewing
+   - `in-progress` PowerBI for high-level status
    - `todo` ASP.Net WebViews for actionable data
 
 #####The Gap Tasks
