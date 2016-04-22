@@ -35,7 +35,7 @@ required_files = {
             'sos_plugin':      str(_config.CONFIG_SOS_PLUGIN_PATH),
             'lldb_py':         str(_config.CONFIG_LLDB_PYTHON_PATH)
         }
-# Oy, because of the need to call site.addsitedir(...) I have to bring the 'required_files' stuff to here.
+
 safePaths.CheckTheseNamedPaths(required_files)
 site.addsitedir(safePaths.pathof('lldb_py'))
 import lldb
@@ -53,8 +53,11 @@ _bus_service = ServiceBusService(
 
 def UpdateWorkerState(context, newState):
     Logging.Verbose('Setting worker state to "%s"' % newState)
+
     metadata = _blob_service.get_container_metadata(context)
+
     metadata['worker_state'] = newState;
+
     _blob_service.set_container_metadata(context, metadata)
 
 ##
@@ -76,12 +79,14 @@ def DownZip(uris, state):
         # intermediate zip file. This will just get overwritten each time.
         zipFile = 'file.zip'
         
-        Logging.Event('StartDownload')
+        Logging.Event('StartDownload', 6)
         urllib.urlretrieve(line, filename = zipFile)
+        Logging.Event('StartUnzip', 7)
 
-        Logging.Event('StartUnzip')
         fh = open(zipFile, 'rb')
+
         z = zipfile.ZipFile(fh)
+
         locallist = [];
         
         # We want to know if we're not finding core files in the zip file.
@@ -111,7 +116,7 @@ def DownZip(uris, state):
     Logging.Verbose('downzip completed.')
     return workset
 
-def Obtain(uris, state):
+def Map(uris, state):
     if(not uris or len(uris) == 0):
         return uris
 
@@ -122,6 +127,7 @@ def Obtain(uris, state):
         spath = corePath.split('/')
         correlationId = spath[5]
         jobId = spath[7]
+
         Logging.Verbose('Correlation ID: ' + correlationId)
         Logging.Verbose('Job ID: ' + jobId)
         
@@ -131,17 +137,17 @@ def Obtain(uris, state):
         testname, ext = os.path.splitext(os.path.basename(glob.glob(mypath)[0])) # ew.
         Logging.Verbose(testname)        
 
-        pathtuple = (corePath, correlationId, jobId, testname) # meh, just gonna collect and pass on everything right now. I don't know exactly what we'll need.
-        Logging.Verbose('PATH TUPLE: ' + str(pathtuple))
+        pathContext = (corePath, correlationId, jobId, testname) # meh, just gonna collect and pass on everything right now. I don't know exactly what we'll need.
+        Logging.Verbose('PATH TUPLE: ' + str(pathContext))
 
-        analyzeList.append(pathtuple)        
+        analyzeList.append(pathContext)        
     
     return analyzeList
 
 # return a tuple that is the debugger, interpreter, target, and process
-def StartDebugger(pathTuple):
+def StartDebugger(pathContext):
     relativeHostPath = '../core_root/corerun' # relative to the core file.
-    corePath = pathTuple[0]
+    corePath = pathContext[0]
     hostPath = os.path.join(os.path.dirname(corePath), relativeHostPath)
 
     debugger = lldb.SBDebugger.Create()
@@ -167,7 +173,7 @@ def StartDebugger(pathTuple):
         interpreter.HandleCommand(str('plugin load %s' % safePaths.pathof('sos_plugin')), loadPluginResult)
         if loadPluginResult.Succeeded():
             Logging.Verbose('libsosplugin.so loaded.')
-            debuggerTuple = (debugger, interpreter, target, process, pathTuple)
+            debuggerTuple = (debugger, interpreter, target, process, pathContext)
 
             return debuggerTuple
         else:
@@ -178,25 +184,30 @@ def StartDebugger(pathTuple):
         Logging.Failure('no target.')
 
     return None
-
-# SOS is loaded before we get here.
-def RunAnalysis(debuggerTuple):
+    
+def RunAnalysisScript(debuggerContext):
     Logging.Verbose('In run_analysis.')
-    debugger = debuggerTuple[0]
-    interpreter = debuggerTuple[1]
-    target = debuggerTuple[2]
-    process = debuggerTuple[3]
-    pathTuple = debuggerTuple[4]
+
+    debugger = debuggerContext[0]
+    interpreter = debuggerContext[1]
+    target = debuggerContext[2]
+    process = debuggerContext[3]
+    pathTuple = debuggerContext[4]
+
     Logging.Verbose('Unwrapped tuples.')
 
     importScriptCommandResult  = lldb.SBCommandReturnObject()
     analyzeCommandResult       = lldb.SBCommandReturnObject()
 
     Logging.Verbose('Return objects prepared. Asking lldb to import %s' % safepaths.pathof('analysis.py'))
+
     interpreter.HandleCommand(str('command script import %s' % safePaths.pathof('analysis.py')), importScriptCommandResult)
+
     if importScriptCommandResult.Succeeded():
         Logging.Verbose('analysis.py imported. Running analyze.')
+
         interpreter.HandleCommand(str('analyze -i %s -o ./analysis.txt' % safePaths.pathof('triage.ini')), analyzeCommandResult)
+
         if analyzeCommandResult.Succeeded():
             Logging.Verbose('analysis command succeeded.')
 
@@ -213,34 +224,36 @@ def RunAnalysis(debuggerTuple):
 
     return '<no results>'
 
-def Analyze(testList, state):
+def Reduce(testContexts, state):
     UpdateWorkerState(state, 'analyzing')
-    Logging.Event('StartAnalyze')
 
-    if(not testList or len(testList) == 0):
-        return testList
+    Logging.Event('StartAnalyze', 8)
 
-    for corePath, correlationId, jobid, testname in testList:
+    if(not testContexts or len(testContexts) == 0):
+        return testContexts
+
+    for corePath, correlationId, jobid, testname in testContexts:
         Logging.Informative('running analyzer on ' + testname)
-        pathTuple = (corePath, correlationId, jobid, testname)
-        debuggerTuple = StartDebugger(pathTuple)
 
-        Logging.Verbose('We have a tuple here: ' + str(debuggerTuple))
-        result = RunAnalysis(debuggerTuple)
+        testContext = (corePath, correlationId, jobid, testname)
+        debuggerContext = StartDebugger(testContext)
+
+        Logging.Verbose('We have a tuple here: ' + str(debuggerContext))
+        result = RunAnalysisScript(debuggerContext)
         
-        Store(pathTuple, result, state)
+        SaveResult(result, testContext, state)
     
-    Cleanup(debuggerTuple, state)
+    Cleanup(debuggerContext, state)
 
 # stores analysis results in Azure blob
-def Store(pathTuple, result, state):
-    Logging.Event('StartStore')
+def SaveResult(result, testContext, state):
+    Logging.Event('SaveResults', 9)
     
-    #unpack our tuple
-    path = pathTuple[0]
-    correlationId = pathTuple[1]
-    jobId = pathTuple[2]
-    testName = pathTuple[3]
+    # unpack our tuple
+    path = testContext[0]
+    correlationId = testContext[1]
+    jobId = testContext[2]
+    testName = testContext[3]
     
     # put stuff in to blob storage
     _blob_service.create_blob_from_text(state, os.path.join(state, correlationId, jobId, testName), result)
@@ -258,23 +271,18 @@ def Store(pathTuple, result, state):
     metadata = _blob_service.get_container_metadata(state)
     Logging.Verbose(str(metadata))
 
-def Cleanup(debuggerTuple, state):
-    Logging.Event('StartCleanup')
+def Cleanup(debuggerContext, state):
     # unpack our tuple
-    debugger = debuggerTuple[0]
-    interpreter = debuggerTuple[1]
-    target = debuggerTuple[2]
-    process = debuggerTuple[3]
-    pathTuple = debuggerTuple[4]
+    debugger = debuggerContext[0]
+    interpreter = debuggerContext[1]
+    target = debuggerContext[2]
+    process = debuggerContext[3]
+    pathTuple = debuggerContext[4]
 
     # just delete the /home/DotNet folder for now.
     Logging.Verbose('cleaning up.')
     lldb.SBDebugger.Destroy(debugger)
     shutil.rmtree('/home/DotNetBot/') # This will likely not work in the future when we receive dumps from other people.
-
-
-    
-## TODO: Wrap HandleMessage and a method handler in to modules/objects?
 
 def HandleMessage(msg):
     # ensure our message is in ascii encoding.
@@ -290,12 +298,12 @@ def HandleMessage(msg):
     download_uris = obj['result_payload_uris']
 
     # sanity checks
-    Logging.Verbose('PARSED STATE: ' + state) 
+    Logging.Verbose('PARSED STATE: ' + str(state)) 
     Logging.Verbose('RESULTS URIS: ' + str(download_uris))
 
     # begin doing work
-    test_paths = Obtain(download_uris, state)
-    analysis_results = Analyze(test_paths, state)
+    test_contexts = Map(download_uris, state)
+    analysis_results = Reduce(test_contexts, state)
 
 from time import time
 
@@ -306,24 +314,23 @@ if __name__ == '__main__':
         Logging.Failure('specify \'ubuntu\' or \'centos\' value for property TARGET_OS in config.json')
     else:
         Logging.Informative('listening for ' + platform + ' messages')
-
-    Logging.Event('Start')
-    in_queue = _bus_service.get_subscription('dopplertasktopic', platform)
-
+    
+    Logging.Event('StartService', 5)
     while True:    
-        Logging.Verbose('msg count: ' + str(in_queue.message_count))
         try:
             # blocks until a message comes in.
             msg = _bus_service.peek_lock_subscription_message('dopplertasktopic', platform)
 
             work_start_time = time()
+
             if msg.body:
                 result = HandleMessage(msg)
                 Logging.Verbose('message handled. deleting it from the queue.')
                 msg.delete()
-                Logging.Event('Complete')
+                Logging.Event('Complete', 10)
 
             work_end_time = time()
+
             Logging.Verbose('Loop completed in ' + str(work_end_time - work_start_time) + ' seconds.')
         except Exception as details:
             # Log the Logging.Failure, but don't give up! 
