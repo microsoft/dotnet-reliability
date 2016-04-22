@@ -4,7 +4,6 @@
 
 import json
 from os import path
-from dumpling_util import Logging
 
 ## A NearbyConfig is just a json config that is serialized in to a python object. The 'Nearby' comes from the assumption that the configuration file
 ## is sitting exactly next to this script! 
@@ -36,7 +35,7 @@ def named(configfilename):
     fullpath = path.join(folder, configfilename)
 
     if not path.exists(fullpath):
-        Logging.Failure('expected a file "%s" to exist.' % fullpath)
+        print('expecting config at %s, but did not find it.' % str(fullpath))
 
     with open(str(fullpath), 'r') as configFile:
         data = configFile.read().replace('\n', '')

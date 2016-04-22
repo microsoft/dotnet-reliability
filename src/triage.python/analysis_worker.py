@@ -49,14 +49,13 @@ _bus_service = ServiceBusService(
     service_namespace= _config.SERVICE_BUS_NAMESPACE,
     shared_access_key_name= _config.SHARED_ACCESS_KEY_NAME,
     shared_access_key_value= _config.SERVICE_BUS_KEY)
-
+    
 
 def UpdateWorkerState(context, newState):
     Logging.Verbose('Setting worker state to "%s"' % newState)
     metadata = _blob_service.get_container_metadata(context)
     metadata['worker_state'] = newState;
     _blob_service.set_container_metadata(context, metadata)
-
 
 ##
 ## The Analysis Pipeline 
@@ -77,8 +76,10 @@ def DownZip(uris, state):
         # intermediate zip file. This will just get overwritten each time.
         zipFile = 'file.zip'
         
+        Logging.Event('StartDownload')
         urllib.urlretrieve(line, filename = zipFile)
-    
+
+        Logging.Event('StartUnzip')
         fh = open(zipFile, 'rb')
         z = zipfile.ZipFile(fh)
         locallist = [];
@@ -214,6 +215,7 @@ def RunAnalysis(debuggerTuple):
 
 def Analyze(testList, state):
     UpdateWorkerState(state, 'analyzing')
+    Logging.Event('StartAnalyze')
 
     if(not testList or len(testList) == 0):
         return testList
@@ -232,6 +234,8 @@ def Analyze(testList, state):
 
 # stores analysis results in Azure blob
 def Store(pathTuple, result, state):
+    Logging.Event('StartStore')
+    
     #unpack our tuple
     path = pathTuple[0]
     correlationId = pathTuple[1]
@@ -255,6 +259,7 @@ def Store(pathTuple, result, state):
     Logging.Verbose(str(metadata))
 
 def Cleanup(debuggerTuple, state):
+    Logging.Event('StartCleanup')
     # unpack our tuple
     debugger = debuggerTuple[0]
     interpreter = debuggerTuple[1]
@@ -266,6 +271,7 @@ def Cleanup(debuggerTuple, state):
     Logging.Verbose('cleaning up.')
     lldb.SBDebugger.Destroy(debugger)
     shutil.rmtree('/home/DotNetBot/') # This will likely not work in the future when we receive dumps from other people.
+
 
     
 ## TODO: Wrap HandleMessage and a method handler in to modules/objects?
@@ -301,6 +307,7 @@ if __name__ == '__main__':
     else:
         Logging.Informative('listening for ' + platform + ' messages')
 
+    Logging.Event('Start')
     in_queue = _bus_service.get_subscription('dopplertasktopic', platform)
 
     while True:    
@@ -314,6 +321,7 @@ if __name__ == '__main__':
                 result = HandleMessage(msg)
                 Logging.Verbose('message handled. deleting it from the queue.')
                 msg.delete()
+                Logging.Event('Complete')
 
             work_end_time = time()
             Logging.Verbose('Loop completed in ' + str(work_end_time - work_start_time) + ' seconds.')

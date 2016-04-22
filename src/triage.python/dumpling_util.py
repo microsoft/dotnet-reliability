@@ -3,7 +3,7 @@
 # See the LICENSE file in the project root for more information.
 
 
-## Simple Logging class
+## Logging class
 ## This class should be regarded as static. 
 ## There are three logging methods, 'Verbose(...)', 'Informative(...)', and 'Failure(...)'. 
 ## Depending on the value of Logging.OutStream (default is 'stdout') the output locations of these
@@ -12,6 +12,15 @@
 ## TODO: Implement 'cloud logging'
 from datetime import datetime
 from os import path
+from azure.servicebus   import ServiceBusService, Message
+
+import nearby_config
+_config = nearby_config.named('analysis_worker_config.json')
+
+_bus_service = ServiceBusService(
+    service_namespace = _config.EVENTHUB_NAMESPACE,
+    shared_access_key_name = _config.EVENTHUB_SA_KEY_NAME,
+    shared_access_key_value = _config.EVENTHUB_SA_KEY_VALUE)
 
 class Logging:
     # used for print debugging
@@ -31,7 +40,15 @@ class Logging:
             print(str(datetime.now()) + ' INFORMATIVE: ' + value)
 
     @staticmethod
+    def Event(kind, platform = _config.TARGET_OS):
+        message  = '{ "Type": "Dumpling-%sAnalyzer%s" }' % (str(platform), str(kind))
+        _bus_service.send_event('dumplinghub', message)
+        print("FIRED EVENT: " + message)
+
+    @staticmethod
     def Failure(value, error_code = 1, exitPython = True):
+        Logging.Event('Failure')
+
         print(str(datetime.now()) + ' FAILURE: ' + value)
         if exitPython:
             exit(error_code)
