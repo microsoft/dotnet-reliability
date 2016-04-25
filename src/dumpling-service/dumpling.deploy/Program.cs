@@ -1,4 +1,8 @@
-﻿using Microsoft.ServiceBus;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using System;
 using System.Collections.Generic;
@@ -13,13 +17,13 @@ namespace dumplingService
 {
     public static class DumplingDeployment
     {
-        delegate void CreationDelegate();
+        private delegate void CreationDelegate();
 
         /// <summary>
         /// This topic is used to route messages to the correct analysis machine for analytics.
         /// </summary>
         /// <returns></returns>
-        static async Task DeployAnalysisTopic(TextWriter writer, bool recreate = false)
+        private static async Task DeployAnalysisTopic(TextWriter writer, bool recreate = false)
         {
             var SubscriptionsAndConditions = new Dictionary<string, SqlFilter>()
             {
@@ -59,7 +63,6 @@ namespace dumplingService
             // Topic is created, now we'll do the subscriptions.
             foreach (var subscription in SubscriptionsAndConditions)
             {
-
                 // I use this to avoid repeating myself in the createSubscription(...) calls below.
                 CreationDelegate createSubscription = async () =>
                 {
@@ -88,7 +91,7 @@ namespace dumplingService
 
                     createSubscription();
                 }
-                else if(!exists)
+                else if (!exists)
                 {
                     createSubscription();
                 }
@@ -99,19 +102,19 @@ namespace dumplingService
             }
         }
 
-        static DumplingStorageAccount storage = new DumplingStorageAccount(NearbyConfig.Settings["dumpling-service storage account connection string"]);
+        private static DumplingStorageAccount s_storage = new DumplingStorageAccount(NearbyConfig.Settings["dumpling-service storage account connection string"]);
 
         /// <summary>
         /// Deploys the state table that tracks dumps as they move through the dumpling infrastructure and get processed. 
         /// </summary>
         /// <param name="recreate"></param>
         /// <returns></returns>
-        static async Task DeployStateTable(TextWriter writer, bool recreate = false)
+        private static async Task DeployStateTable(TextWriter writer, bool recreate = false)
         {
             var tableName = NearbyConfig.Settings["dumpling-service state table name"];
 
             writer.WriteLine($"creating state table {tableName}");
-            var table = storage.TableClient.GetTableReference(tableName);
+            var table = s_storage.TableClient.GetTableReference(tableName);
             var exists = await table.ExistsAsync();
 
             if (exists && recreate)
@@ -124,7 +127,7 @@ namespace dumplingService
             writer.WriteLine($"state table '{tableName}' created or existed already.");
         }
 
-        static async Task DeployDataWorkerQueue(TextWriter writer, bool recreate = false)
+        private static async Task DeployDataWorkerQueue(TextWriter writer, bool recreate = false)
         {
             // "dumpling-service data-worker queue path"
             // "dumpling-service bus connection string"
@@ -140,14 +143,14 @@ namespace dumplingService
             };
 
             var exists = await manager.QueueExistsAsync(dataworkerQueuePath);
-            if(exists && recreate)
+            if (exists && recreate)
             {
                 writer.WriteLine("dataworker queue exists; deleting current instance");
                 await manager.DeleteQueueAsync(dataworkerQueuePath);
 
                 createQueue();
             }
-            else if(!exists)
+            else if (!exists)
             {
                 createQueue();
             }
@@ -161,7 +164,7 @@ namespace dumplingService
         /// Deploys the event hub that sends messages to stream analytics, and then eventually to PowerBI.
         /// </summary>
         /// <returns></returns>
-        static async Task DeployEventHub(TextWriter writer, bool recreate = false)
+        private static async Task DeployEventHub(TextWriter writer, bool recreate = false)
         {
             writer.WriteLine("deploying event hub");
             var servicebusConnString = NearbyConfig.Settings["dumpling-service eventhub connection string"];
@@ -169,7 +172,7 @@ namespace dumplingService
 
             NamespaceManager manager = NamespaceManager.CreateFromConnectionString(servicebusConnString);
             var exists = await manager.EventHubExistsAsync(eventhubPath);
-            if(exists && recreate)
+            if (exists && recreate)
             {
                 writer.WriteLine("event hub exists and we want to recreate it; deleting current instance.");
             }
@@ -177,11 +180,10 @@ namespace dumplingService
             await manager.CreateEventHubIfNotExistsAsync(eventhubPath);
 
             writer.WriteLine($"event hub '{eventhubPath}' created or existed already.");
-
         }
 
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             using (var writer = Console.Out/*new StreamWriter(@"C:\temp\dumpling_deploy.log")*/)
             {
