@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.Collections.Generic;
 
@@ -34,11 +38,9 @@ namespace IO.Swagger.Client
         /// <param name="data">Data (parsed HTTP body)</param>
         public ApiResponse(int statusCode, IDictionary<string, string> headers, T data)
         {
-            this.StatusCode= statusCode;
+            this.StatusCode = statusCode;
             this.Headers = headers;
             this.Data = data;
         }
-
     }
-
 }

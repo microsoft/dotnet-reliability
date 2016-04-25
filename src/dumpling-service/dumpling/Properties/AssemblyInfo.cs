@@ -9,11 +9,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DumplingLib")]
+[assembly: AssemblyTitle("dumpling")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DumplingLib")]
+[assembly: AssemblyProduct("dumpling")]
 [assembly: AssemblyCopyright("Copyright \u00A9  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6eda8868-6df2-4a3e-a4b6-f48d9e95592c")]
+[assembly: Guid("03fa1e30-8964-466c-87ff-1e3e3a517567")]
 
 // Version information for an assembly consists of the following four values:
 //
