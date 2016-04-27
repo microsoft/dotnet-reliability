@@ -25,6 +25,7 @@
   <PropertyGroup>
     <UnitTestFileMask Condition="'$(UnitTestDirectory)' == ''">*.Tests.dll</UnitTestFileMask>
     <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)unittests\</UnitTestDirectory>
+    <UnitTestExtractedSemaphore Condition="'$(UnitTestExtractedSemaphore)' == ''">$(UnitTestDirectory)extracted</UnitTestExtractedSemaphore>
   </PropertyGroup>
   
   <!-- 
@@ -43,7 +44,7 @@
     <UnitTestPackageDir>$(BaseIntermediateOutputPath)utpackage</UnitTestPackageDir>
     <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends</UnitTestDependsBin>
     <TestDependRestoreCommand>$(DotnetToolCommand) restore --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
-    <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependPublishCommand>
+    <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64</TestDependPublishCommand>
   </PropertyGroup>
   
   <Import Project="..\dir.targets" />
@@ -52,8 +53,29 @@
   
   <UsingTask TaskName="MergeAllProjectJsonsTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
+  <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
-  <Target Name="RestoreTestDependsBin">
+  <ItemGroup>
+    <ZipFile Include="$(UnitTestDirectory)**\*.zip"/>
+  </ItemGroup>
+ 
+ <Target Name="UnzipAllTests" 
+    Condition="!Exists('$(UnitTestExtractedSemaphore)')"
+    DependsOnTargets="UnzipTest">
+    <WriteLinesToFile File="$(UnitTestExtractedSemaphore)" Lines="" Overwrite="false" />
+  </Target>
+ 
+ <Target Name="UnzipTest"
+    Inputs="@(ZipFile)"
+    Outputs="%(RootDir)%(Directory)%(ZipFile.FileName)">
+
+    <ZipFileExtractToDirectory Condition="!Exists('%(RootDir)%(Directory)%(ZipFile.FileName)')"
+        SourceArchive="%(ZipFile.FullPath)"
+        DestinationDirectory="%(RootDir)%(Directory)%(ZipFile.FileName)"
+        OverwriteDestination="true" />
+  </Target>
+  
+  <Target Name="RestoreTestDependsBin" DependsOnTargets="UnzipAllTests">
     <Message Text="Restoring test dependencies..." />
     
     <RemoveDir Directories="$(UnitTestCLIProjDir)" />
@@ -66,7 +88,10 @@
 
     <!-- delete the dummy project.json and replace with merged project json from the unit test drop -->
     <Delete Files="$(UnitTestCLIProjJson)" />
-    <MergeAllProjectJsonsTask InPath="$(UnitTestDirectory)" OutPath="$(UnitTestCLIProjJson)"/>
+    <MergeAllProjectJsonsTask 
+        InPath="$(UnitTestDirectory)" 
+        OutPath="$(UnitTestCLIProjJson)"
+        Debug="$(DebugMergeProjectJson)"/>
     
     <!-- restore and publish the dummy project to get a flat  -->
     <Exec Command="$(TestDependRestoreCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>

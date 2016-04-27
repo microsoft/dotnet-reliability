@@ -39,14 +39,14 @@
     <ToolsDir Condition="'$(ToolsDir)'==''">$(ProjectDir)Tools/</ToolsDir>
     <BuildToolsTaskDir Condition="'$(BuildToolsTargets45)' == 'true'">$(ToolsDir)net45/</BuildToolsTaskDir>
     <PackagingTaskDir>$(ToolsDir)net45/</PackagingTaskDir>
-    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/bin/</DotnetCliPath>
+    <DotnetCliPath Condition="'$(DotnetCliPath)'==''">$(ToolsDir)dotnetcli/</DotnetCliPath>
   </PropertyGroup>
 
   <!-- Setting up Versioning -->
   <PropertyGroup>
     <VersionComparisonDate>2016-01-01</VersionComparisonDate>
   </PropertyGroup>
-  <Import Project="$(ToolsDir)BuildVersion.targets" />
+  <Import Project="$(ToolsDir)BuildVersion.targets" Condition="Exists('$(ToolsDir)BuildVersion.targets')"/>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
   <Import Project="$(ToolsDir)Build.Common.props" />

@@ -5,7 +5,7 @@ set INIT_TOOLS_LOG=%~dp0init-tools.log
 set PACKAGES_DIR=%~dp0packages\
 set TOOLRUNTIME_DIR=%~dp0Tools
 set DOTNET_PATH=%TOOLRUNTIME_DIR%\dotnetcli\
-set DOTNET_CMD=%DOTNET_PATH%bin\dotnet.exe
+set DOTNET_CMD=%DOTNET_PATH%dotnet.exe
 if [%BUILDTOOLS_SOURCE%]==[] set BUILDTOOLS_SOURCE=https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
 set /P BUILDTOOLS_VERSION=< %~dp0BuildToolsVersion.txt
 set BUILD_TOOLS_PATH=%PACKAGES_DIR%Microsoft.DotNet.BuildTools\%BUILDTOOLS_VERSION%\lib\
@@ -42,17 +42,16 @@ if exist "%DOTNET_CMD%" goto :afterdotnetrestore
 
 echo Installing dotnet cli...
 if NOT exist "%DOTNET_PATH%" mkdir "%DOTNET_PATH%"
-set /p DOTNET_VERSION=< %~dp0DotnetCLIVersion.txt
-set DOTNET_ZIP_NAME=dotnet-win-x64.%DOTNET_VERSION%.zip
+set /p DOTNET_VERSION=< "%~dp0DotnetCLIVersion.txt"
+set DOTNET_ZIP_NAME=dotnet-dev-win-x64.%DOTNET_VERSION%.zip
 set DOTNET_REMOTE_PATH=https://dotnetcli.blob.core.windows.net/dotnet/beta/Binaries/%DOTNET_VERSION%/%DOTNET_ZIP_NAME%
 set DOTNET_LOCAL_PATH=%DOTNET_PATH%%DOTNET_ZIP_NAME%
-echo Installing '%DOTNET_REMOTE_PATH%' to '%DOTNET_LOCAL_PATH%' >> %INIT_TOOLS_LOG%
-powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object Net.WebClient).DownloadFile('%DOTNET_REMOTE_PATH%', '%DOTNET_LOCAL_PATH%'); Add-Type -Assembly 'System.IO.Compression.FileSystem' -ErrorVariable AddTypeErrors; if ($AddTypeErrors.Count -eq 0) { [System.IO.Compression.ZipFile]::ExtractToDirectory('%DOTNET_LOCAL_PATH%', '%DOTNET_PATH%') } else { (New-Object -com shell.application).namespace('%DOTNET_PATH%').CopyHere((new-object -com shell.application).namespace('%DOTNET_LOCAL_PATH%').Items(),16) }" >> %INIT_TOOLS_LOG%
+echo Installing '%DOTNET_REMOTE_PATH%' to '%DOTNET_LOCAL_PATH%' >> "%INIT_TOOLS_LOG%"
+powershell -NoProfile -ExecutionPolicy unrestricted -Command "(New-Object Net.WebClient).DownloadFile('%DOTNET_REMOTE_PATH%', '%DOTNET_LOCAL_PATH%'); Add-Type -Assembly 'System.IO.Compression.FileSystem' -ErrorVariable AddTypeErrors; if ($AddTypeErrors.Count -eq 0) { [System.IO.Compression.ZipFile]::ExtractToDirectory('%DOTNET_LOCAL_PATH%', '%DOTNET_PATH%') } else { (New-Object -com shell.application).namespace('%DOTNET_PATH%').CopyHere((new-object -com shell.application).namespace('%DOTNET_LOCAL_PATH%').Items(),16) }" >> "%INIT_TOOLS_LOG%"
 if NOT exist "%DOTNET_LOCAL_PATH%" (
   echo ERROR: Could not install dotnet cli correctly. See '%INIT_TOOLS_LOG%' for more details.
-  goto :EOF
+  exit /b 1
 )
-
 :afterdotnetrestore
 
 if exist "%BUILD_TOOLS_PATH%" goto :afterbuildtoolsrestore

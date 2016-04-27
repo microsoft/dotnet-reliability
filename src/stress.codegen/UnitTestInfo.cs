@@ -16,7 +16,7 @@ namespace stress.codegen
 
         public TestReferenceInfo ReferenceInfo { get; set; }
 
-        public ProjectJsonInfo PackageInfo { get; set; }
+        public ProjectJsonDependencyInfo PackageInfo { get; set; }
     }
 
 

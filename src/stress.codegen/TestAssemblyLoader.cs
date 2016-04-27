@@ -60,11 +60,11 @@ namespace stress.codegen
             return this.LoadError == null;
         }
 
-        private static ProjectJsonInfo LoadPackageRefs(string assemblyPath)
+        private static ProjectJsonDependencyInfo LoadPackageRefs(string assemblyPath)
         {
             var projJsonPath = Path.Combine(Path.GetDirectoryName(assemblyPath), "project.json");
 
-            return ProjectJsonInfo.FromFile(projJsonPath);
+            return ProjectJsonDependencyInfo.FromFile(projJsonPath);
         }
 
         public void AddTestReferenceAssembly(AssemblyName refAssm)
