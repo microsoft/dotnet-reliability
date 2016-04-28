@@ -43,8 +43,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,6 +60,7 @@
     <Compile Include="LoadTestProjectFileGenerator.cs" />
     <Compile Include="HelixToFProjectFileGenerator.cs" />
     <Compile Include="LoadSuiteGenerator.cs" />
+    <Compile Include="LoadTestProjectJsonFileGenerator.cs" />
     <Compile Include="LoadTestSourceFileGenerator.cs" />
     <Compile Include="LoadTestInfo.cs" />
     <Compile Include="LoadTestConfig.cs" />

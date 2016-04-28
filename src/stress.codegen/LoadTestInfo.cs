@@ -37,6 +37,16 @@ namespace stress.codegen
 
         public IList<SourceFileInfo> SourceFiles { get; private set; }
 
+        public ProjectJsonDependencyInfo PackageInfo
+        {
+            get
+            {
+                var jsonRefInfo = this.UnitTests.Select(ut => ut.ReferenceInfo.PackageInfo);
+
+                return ProjectJsonDependencyInfo.MergeToLatest(jsonRefInfo);
+            }
+        }
+
         public IEnumerable<string> AssemblyAliases
         {
             get

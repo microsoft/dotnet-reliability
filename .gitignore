@@ -28,8 +28,8 @@ bld/
 [Oo]bj/
 msbuild.log
 
-#External folder
-/test/unittests
+# Generated Stress Mixes
+/test/generated
 
 # Roslyn stuff
 *.sln.ide
