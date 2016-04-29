@@ -35,16 +35,9 @@ These are the remaining actionable tasks to meet the minimum-viable product of o
 
 1. Bring up SQL Database
     - `sschaabs` has a code-first Entity Framework base laid out that has withstood the test of time.
-2. [Create REST Interface](rest.md)
-	- (POST) AddDump
-	- (GET) GetStatus
-	- (GET) RetrieveDump
-	- (POST/UPDATE) Update/AppendData
-	- (methods) APIs for retrieving results to pre-defined SQL queries.
-3. [Spawn State Table](state-and-storage.md)
-4. Create web view that displays the results of our dumps.
+2. Create web view that displays the results of our dumps.
 	- Write SQL queries to be displayed
-	- PowerBI (pass success)
+	- PowerBI (funnel)
 	- Write HTML/JavaScript to be viewed.
 	- Adjusted/Unadjusted mean time to failure.
  
