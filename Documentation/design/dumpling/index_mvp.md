@@ -9,6 +9,7 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
 
 #####`The Status`The Pieces
 ![For Context](images/drawing1.png)
+[Events that emit in to EventHub](events.md)
 
 1. Supported Users
    - Automated Infrastructure
