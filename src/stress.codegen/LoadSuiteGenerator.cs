@@ -17,7 +17,7 @@ namespace stress.codegen
     {
         private UnitTestSelector _unitTestSelector;
 
-        public void GenerateSuite(int seed, string suiteName, string outputPath, string[] testPaths, string[] searchPatterns, string[] hintPaths, LoadSuiteConfig config, string cachePath = null)
+        public void GenerateSuite(int seed, string suiteName, string outputPath, string[] testPaths, string[] searchPatterns, string[] hintPaths, LoadSuiteConfig config, string cachePath = null, bool legacyProject = false)
         {
             int suiteTestCount = 0;
 
@@ -46,31 +46,41 @@ namespace stress.codegen
                     loadTestInfo.SourceDirectory = Path.Combine(outputPath, iConfig.ToString("00") + "_" + loadTestInfo.Duration.TotalHours.ToString("00.##") + "hr", loadTestInfo.TestName);
                     loadTestInfo.UnitTests = _unitTestSelector.NextUnitTests(loadTestConfig.NumTests).ToArray();
 
-                    this.GenerateTestSources(loadTestInfo);
+                    //if we want to generate a legacy project file (i.e. ToF project file) use HelixToFProjectFileGenerator otherwise use LoadTestProjectFileGenerator
+                    var projectFileGenerator = legacyProject ? (ISourceFileGenerator)new HelixToFProjectFileGenerator() : (ISourceFileGenerator)new LoadTestProjectFileGenerator();
+
+                    //build a list of all the sources files to generate for the load test
+                    //I believe the project file generator must be last, becuase it depends on discovering all the other source files
+                    //however the ordering beyond that should not matter
+                    var generators = new ISourceFileGenerator[]
+                    {
+                        new LoadTestSourceFileGenerator(),
+                        new ProgramSourceFileGenerator(),
+                        new ExecutionFileGeneratorWindows(),
+                        new ExecutionFileGeneratorLinux(),
+                        projectFileGenerator
+                    };
+
+                    this.GenerateTestSources(loadTestInfo, generators);
                     CodeGenOutput.Info($"Generated Load Test: {loadTestInfo.TestName}");
                     suiteTestCount++;
                 }
             }
         }
 
-        private void GenerateTestSources(LoadTestInfo loadTest)
+        private void GenerateTestSources(LoadTestInfo loadTest, params ISourceFileGenerator[] sourceFileGenerators)
         {
             Directory.CreateDirectory(loadTest.SourceDirectory);
 
-            CopyUnitTestAssemblyRefsAsync(loadTest);
+            CopyUnitTestAssemblyRefs(loadTest);
 
-            new LoadTestSourceFileGenerator().GenerateSourceFile(loadTest);
-
-            new ProgramSourceFileGenerator().GenerateSourceFile(loadTest);
-
-            // Check whether Linux/Mac or Windows...we don't actually want to do both here.
-            new ExecutionFileGeneratorWindows().GenerateSourceFile(loadTest);
-            new ExecutionFileGeneratorLinux().GenerateSourceFile(loadTest);
-
-            HelixProjectFileGenerator.GenerateProjectFile(loadTest);
+            foreach(var sourceGen in sourceFileGenerators)
+            {
+                sourceGen.GenerateSourceFile(loadTest);
+            }
         }
 
-        private void CopyUnitTestAssemblyRefsAsync(LoadTestInfo loadTest)
+        private void CopyUnitTestAssemblyRefs(LoadTestInfo loadTest)
         {
             string refDir = Path.Combine(loadTest.SourceDirectory, "refs");
 
@@ -84,7 +94,6 @@ namespace stress.codegen
                 {
                     File.Copy(assmPath, destPath);
                 }
-                //await FileUtils.CopyDirAsync(Path.GetDirectoryName(assmPath), refDir);
             }
         }
     }

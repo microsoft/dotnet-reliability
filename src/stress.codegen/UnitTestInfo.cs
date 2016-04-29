@@ -15,7 +15,10 @@ namespace stress.codegen
         public Assembly Assembly { get; set; }
 
         public TestReferenceInfo ReferenceInfo { get; set; }
+
+        public ProjectJsonInfo PackageInfo { get; set; }
     }
+
 
     [Serializable]
     public class TestReferenceInfo
