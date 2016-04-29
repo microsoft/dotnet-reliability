@@ -312,10 +312,10 @@ class DbgFrame(object):
         self.strModule = strModule;
         self.strFullRoutine = strFullRoutine         
         
-        if self.strModule is None or self.strModule == '':
+        if self.strModule is None or self.strModule == '' or self.strModule == '<unknown>':
             self.strModule = 'UNKNOWN'
             
-        if self.strFullRoutine is None or self.strFullRoutine == '':
+        if self.strFullRoutine is None or self.strFullRoutine == '' or self.strFullRoutine == '<unknown>':
             self.strFullRoutine = 'UNKNOWN'
         
         self.strRoutine = string.split(self.strFullRoutine, '(')[0]        
