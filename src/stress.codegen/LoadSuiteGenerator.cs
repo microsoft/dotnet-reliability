@@ -46,20 +46,26 @@ namespace stress.codegen
                     loadTestInfo.SourceDirectory = Path.Combine(outputPath, iConfig.ToString("00") + "_" + loadTestInfo.Duration.TotalHours.ToString("00.##") + "hr", loadTestInfo.TestName);
                     loadTestInfo.UnitTests = _unitTestSelector.NextUnitTests(loadTestConfig.NumTests).ToArray();
 
-                    //if we want to generate a legacy project file (i.e. ToF project file) use HelixToFProjectFileGenerator otherwise use LoadTestProjectFileGenerator
-                    var projectFileGenerator = legacyProject ? (ISourceFileGenerator)new HelixToFProjectFileGenerator() : (ISourceFileGenerator)new LoadTestProjectFileGenerator();
-
                     //build a list of all the sources files to generate for the load test
-                    //I believe the project file generator must be last, becuase it depends on discovering all the other source files
-                    //however the ordering beyond that should not matter
-                    var generators = new ISourceFileGenerator[]
+                    var generators = new List<ISourceFileGenerator>()
                     {
                         new LoadTestSourceFileGenerator(),
                         new ProgramSourceFileGenerator(),
                         new ExecutionFileGeneratorWindows(),
                         new ExecutionFileGeneratorLinux(),
-                        projectFileGenerator
                     };
+
+                    //if we want to generate a legacy project file (i.e. ToF project file) use HelixToFProjectFileGenerator otherwise use LoadTestProjectFileGenerator
+                    var projectFileGenerator = legacyProject ? (ISourceFileGenerator)new HelixToFProjectFileGenerator() : (ISourceFileGenerator)new LoadTestProjectFileGenerator();
+
+                    if(!legacyProject)
+                    {
+                        generators.Add(new LoadTestProjectJsonFileGenerator());
+                    }
+
+                    //I believe the project file generator must be last, becuase it depends on discovering all the other source files
+                    //however the ordering beyond that should not matter
+                    generators.Add(projectFileGenerator);
 
                     this.GenerateTestSources(loadTestInfo, generators);
                     CodeGenOutput.Info($"Generated Load Test: {loadTestInfo.TestName}");
@@ -68,7 +74,7 @@ namespace stress.codegen
             }
         }
 
-        private void GenerateTestSources(LoadTestInfo loadTest, params ISourceFileGenerator[] sourceFileGenerators)
+        private void GenerateTestSources(LoadTestInfo loadTest, IEnumerable<ISourceFileGenerator> sourceFileGenerators)
         {
             Directory.CreateDirectory(loadTest.SourceDirectory);
 

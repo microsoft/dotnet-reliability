@@ -70,6 +70,8 @@ namespace stress.codegen
         {
             HashSet<string> uniqueAssemblies = new HashSet<string>();
 
+            var packageInfo = loadTest.PackageInfo;
+
             StringBuilder snippet = new StringBuilder();
             foreach (var test in loadTest.UnitTests)
             {
@@ -87,7 +89,7 @@ namespace stress.codegen
 
                 foreach (var assmref in test.ReferenceInfo.ReferencedAssemblies)
                 {
-                    if (uniqueAssemblies.Add(assmref.Name))
+                    if (uniqueAssemblies.Add(assmref.Name) && !packageInfo.dependencies.ContainsKey(assmref.Name))
                     {
                         string refSnippet = $@"
     <Reference Include='{assmref.Name}'>
@@ -111,9 +113,7 @@ namespace stress.codegen
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <CLRTestOwner>sschaab</CLRTestOwner>
-    <CLRTestKind>BuildAndRun</CLRTestKind>
-    <CLRTestSuite>Weekly</CLRTestSuite>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>  
   <!-- Test Properties -->
   <PropertyGroup>{2}

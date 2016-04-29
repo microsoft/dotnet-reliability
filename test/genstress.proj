@@ -11,8 +11,9 @@
   <PropertyGroup>
     <SuiteName Condition="'$(SuiteName)' == ''">$(BuildMoniker)</SuiteName>
     <SuiteConfig Condition="'$(SuiteConfig)' == ''">smoketest.suite.json</SuiteConfig>
-    <SuiteConfigPath Condition="'$(SuiteConfigPath)' == ''">$(MSBuildThisFileDirectory)suiteconfig\$(SuiteConfig)</SuiteConfigPath>
-    <SuitePath Condition="'$(SuitePath)' == ''">$(MSBuildThisFileDirectory)generated\</SuitePath>
+    <SuiteConfigPath Condition="'$(SuiteConfigPath)' == ''">$(MSBuildThisFileDirectory)suiteconfig/$(SuiteConfig)</SuiteConfigPath>
+    <SuitePath Condition="'$(GeneratedRootPath)' == ''">$(MSBuildThisFileDirectory)generated/$(SuiteName)/</SuitePath>
+    <GeneratedRootPath Condition="'$(SuitePath)' == ''">$(MSBuildThisFileDirectory)generated/$(SuiteName)/</GeneratedRootPath>
     <DiscoveryCachePath Condition="'$(DiscoveryCachePath)'==''">$(BaseIntermediateOutputPath)testdiscoverycache.json</DiscoveryCachePath>
   </PropertyGroup>
   
@@ -23,8 +24,8 @@
     for now we will put them at the root in a 'ext' folder
   -->
   <PropertyGroup>
-    <UnitTestFileMask Condition="'$(UnitTestDirectory)' == ''">*.Tests.dll</UnitTestFileMask>
-    <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)unittests\</UnitTestDirectory>
+    <UnitTestFileMask Condition="'$(UnitTestFileMask)' == ''">*.Tests.dll</UnitTestFileMask>
+    <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)../unittests/</UnitTestDirectory>
   </PropertyGroup>
   
   <!-- 
@@ -38,12 +39,14 @@
     <StressExecAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.execution.dll</StressExecAssmPath>
   </PropertyGroup>
   <PropertyGroup>
-    <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli\</UnitTestCLIProjDir>
+    <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
     <UnitTestCLIProjJson>$(UnitTestCLIProjDir)project.json</UnitTestCLIProjJson>
-    <UnitTestPackageDir>$(BaseIntermediateOutputPath)utpackage</UnitTestPackageDir>
-    <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends</UnitTestDependsBin>
+    <UnitTestPackageDir>$(BaseIntermediateOutputPath)packages/</UnitTestPackageDir>
+    <UnitTestExtractDir>$(BaseIntermediateOutputPath)utextracted/</UnitTestExtractDir>
+    <UnitTestExtractedSemaphore>$(UnitTestExtractDir)extraction.complete</UnitTestExtractedSemaphore>
+    <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends/</UnitTestDependsBin>
     <TestDependRestoreCommand>$(DotnetToolCommand) restore --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
-    <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependPublishCommand>
+    <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64</TestDependPublishCommand>
   </PropertyGroup>
   
   <Import Project="..\dir.targets" />
@@ -52,12 +55,35 @@
   
   <UsingTask TaskName="MergeAllProjectJsonsTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
+  <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
-  <Target Name="RestoreTestDependsBin">
+  <ItemGroup>
+    <ZipFile Include="$(UnitTestDirectory)**\*.zip"/>
+  </ItemGroup>
+   
+ <Target Name="UnzipAllTests" 
+    Condition="!Exists('$(UnitTestExtractedSemaphore)')"
+    DependsOnTargets="UnzipTest">
+    <WriteLinesToFile File="$(UnitTestExtractedSemaphore)" Lines="" Overwrite="false" />
+  </Target>
+ 
+ <Target Name="UnzipTest"
+    Inputs="@(ZipFile)"
+    Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))">
+
+    <ZipFileExtractToDirectory Condition="!Exists('%(RootDir)%(Directory)%(ZipFile.FileName)')"
+        SourceArchive="%(ZipFile.FullPath)"
+        DestinationDirectory="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"
+        OverwriteDestination="true" />
+  </Target>
+  
+
+  
+  
+  <Target Name="RestoreTestDependsBin" DependsOnTargets="UnzipAllTests">
     <Message Text="Restoring test dependencies..." />
     
     <RemoveDir Directories="$(UnitTestCLIProjDir)" />
-    <RemoveDir Directories="$(UnitTestPackageDir)" />
     <RemoveDir Directories="$(UnitTestDependsBin)" />
     
     <!-- create a dummy project used to restore test binaries -->
@@ -66,7 +92,18 @@
 
     <!-- delete the dummy project.json and replace with merged project json from the unit test drop -->
     <Delete Files="$(UnitTestCLIProjJson)" />
-    <MergeAllProjectJsonsTask InPath="$(UnitTestDirectory)" OutPath="$(UnitTestCLIProjJson)"/>
+    <MergeAllProjectJsonsTask 
+        InPath="$(UnitTestExtractDir)" 
+        OutPath="$(UnitTestCLIProjJson)"
+        Debug="$(DebugMergeProjectJson)"/>
+    
+    <ItemGroup>
+      <GlobalJsonLines Include="{"/>
+      <GlobalJsonLines Include="&quot;packages&quot;: &quot;packages&quot;"/>
+      <GlobalJsonLines Include="}"/>
+    </ItemGroup>
+   
+    <WriteLinesToFile File="$(BaseIntermediateOutputPath)global.json" Lines="@(GlobalJsonLines)" Overwrite="true" />
     
     <!-- restore and publish the dummy project to get a flat  -->
     <Exec Command="$(TestDependRestoreCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
@@ -74,30 +111,40 @@
   </Target>
 
   
-  <Target Name="Build" DependsOnTargets="RestoreTestDependsBin">
- 
+  <Target Name="GenerateStressSuiteSource" DependsOnTargets="RestoreTestDependsBin">
+
     <Error Condition="!Exists('$(SuiteConfigPath)')" Text="ERROR: File not found. Stress suite config path '$(SuiteConfigPath)' is invalid " />
 
     <MakeDir Directories="$(StressGeneratedRoot)"/>
     
     <Message Text="Generating stress test sources..." Importance="High" />
-    
+       
     <GenerateStressSuiteTask
       SuiteName="$(SuiteName)"
       DebugWaitForInput="$(DebugStress)"
       SuitePath="$(SuitePath)"
       DiscoveryCachePath="$(DiscoveryCachePath)"
       ConfigPath="$(SuiteConfigPath)"
-      TestPaths="$(UnitTestDirectory)"
+      TestPaths="$(UnitTestExtractDir)"
       TestSearchStrings="$(UnitTestFileMask)"
       FrameworkPaths="$(UnitTestDependsBin)"/>
+  </Target>
+ 
+  <Target Name="Build" DependsOnTargets="GenerateStressSuiteSource">
+    <ItemGroup>
+      <GeneratedProjects Include="$(SuitePath)**\*.csproj"/>
+    </ItemGroup>
+    
+    <MSBuild Targets="Build"
+      Projects="@(GeneratedProjects)"
+      BuildInParallel="true" />
   </Target>
 
   <Target Name="Clean">
     
     <Message Text="Cleaning generated source directory..." />
     
-    <RemoveDir Directories="$(SuitePath)" />
+    <RemoveDir Directories="$(GeneratedRootPath)" />
    
     <RemoveDir Directories="$(UnitTestCLIProjDir)" />
   </Target>

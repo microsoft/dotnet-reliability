@@ -60,11 +60,11 @@ namespace stress.codegen
             return this.LoadError == null;
         }
 
-        private static ProjectJsonInfo LoadPackageRefs(string assemblyPath)
+        private static ProjectJsonDependencyInfo LoadPackageRefs(string assemblyPath)
         {
             var projJsonPath = Path.Combine(Path.GetDirectoryName(assemblyPath), "project.json");
 
-            return ProjectJsonInfo.FromFile(projJsonPath);
+            return ProjectJsonDependencyInfo.FromFile(projJsonPath);
         }
 
         public void AddTestReferenceAssembly(AssemblyName refAssm)
@@ -79,7 +79,7 @@ namespace stress.codegen
                 {
                     //if the assembly is available in the packages add to the framework reference list for legacy projects
                     //(in new projects these will be added through project.json refs)
-                    if (_assembly.PackageInfo.dependencies.ContainsKey(refAssm.Name) && _assembly.PackageInfo.dependencies[refAssm.Name].StartsWith(refAssm.Version.ToString()))
+                    if (!assmPath.StartsWith(Path.GetDirectoryName(this.AssemblyPath)) || _assembly.PackageInfo.dependencies.ContainsKey(refAssm.Name))
                     {
                         _assembly.ReferenceInfo.FrameworkReferences.Add(new AssemblyReference() { Path = assmPath, Version = refAssm.Version.ToString() });
                     }
