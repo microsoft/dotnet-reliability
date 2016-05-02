@@ -348,9 +348,16 @@ class DbgThread(object):
         self.Osid = sbThread.id
         self.Index = sbThread.idx
         self.Frames = g_dbg.get_stack(sbThread)
-                                                       
+                  
+    def ToDictionary(self):
+        tmpDict = { }
+        tmpDict["Osid"] = str(self.Osid)
+        tmpDict["Index"] = str(self.Index)
+        tmpDict["Frames"] = [str(f) for f in self.Frames];   
+        return tmpDict;
+                
     def __str__(self):
-        return '#' + str(self.Index) + ' OSID: ' + str(self.Osid) + '\n' + "\n".join([str(f) for f in self.Frames])
+        return json.dumps(self.ToDictionary())
 
 class StackTriageRule(object):
     """description of class"""
@@ -640,4 +647,4 @@ class AllThreadsAnalyzer(AnalysisEngine):
         for i, t in enumerate(proc.threads):
             lstThread.append(DbgThread(t))
 
-        dictProps['ALL_THREADS'] = '\n\n'.join([str(t) for t in lstThread])
+        dictProps['ALL_THREADS'] = json.dumps([t.ToDictionary() for t in lstThread])
