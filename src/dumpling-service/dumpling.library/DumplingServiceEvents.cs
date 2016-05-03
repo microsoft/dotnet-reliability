@@ -15,11 +15,12 @@
     }
 
     #region helix proxy event
-    public class HelixServiceProxyWorkItemsStatus : CommonEvent
+    public class HelixServiceProxyWorkItemsStatusEvent : CommonEvent
     {
-        public HelixServiceProxyWorkItemsStatus() : base("HelixServiceProxy-WorkItems-Status", 0) { }
+        public HelixServiceProxyWorkItemsStatusEvent(string path) : base($"HelixServiceProxy-WorkItems-{path.Replace('.', '-')}", 0) { }
 
     }
+    
     #endregion
 
     #region dumpling web api events

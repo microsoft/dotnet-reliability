@@ -1,4 +1,5 @@
 ﻿using Microsoft.WindowsAzure.Storage.Blob;
+using System;
 
 namespace DumplingLib
 {
@@ -16,6 +17,22 @@ namespace DumplingLib
         {
             return Storage.BlobClient.GetContainerReference(owner);
         }
-        
+
+        // TODO: Cleanup
+        public static string GetContainerSasUri(CloudBlobContainer container)
+        {
+            //Set the expiry time and permissions for the container.
+            //In this case no start time is specified, so the shared access signature becomes valid immediately.
+            SharedAccessBlobPolicy sasConstraints = new SharedAccessBlobPolicy();
+            sasConstraints.SharedAccessExpiryTime = DateTime.UtcNow.AddYears(1);
+            sasConstraints.Permissions = SharedAccessBlobPermissions.Write | SharedAccessBlobPermissions.List;
+
+            //Generate the shared access signature on the container, setting the constraints directly on the signature.
+            string sasContainerToken = container.GetSharedAccessSignature(sasConstraints);
+
+            //Return the URI string for the container, including the SAS token.
+            return container.Uri + sasContainerToken;
+        }
+
     }
 }
