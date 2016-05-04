@@ -40,14 +40,14 @@ class Logging:
             print(str(datetime.now()) + ' INFORMATIVE: ' + value)
 
     @staticmethod
-    def Event(kind, platform = _config.TARGET_OS):
-        message  = '{ "Type": "Dumpling-%sAnalyzer%s" }' % (str(platform), str(kind))
+    def Event(kind, rank, cardinality = 1, category = "bizprofile", platform = _config.TARGET_OS):
+        message  = '{ "Rank": %i, "Type": "DumplingService-%sAnalyzer-%s", "Cardinality": %i, "Category": "%s" }' % (rank, str(platform), str(kind), cardinality, str(category))
         _bus_service.send_event('dumplinghub', message)
         print("FIRED EVENT: " + message)
 
     @staticmethod
     def Failure(value, error_code = 1, exitPython = True):
-        Logging.Event('Failure')
+        Logging.Event('Failure', 11)
 
         print(str(datetime.now()) + ' FAILURE: ' + value)
         if exitPython:

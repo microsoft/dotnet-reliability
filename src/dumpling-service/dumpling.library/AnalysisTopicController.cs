@@ -4,6 +4,7 @@
 
 using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json;
+using System.Configuration;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace DumplingLib
 
         static AnalysisTopicController()
         {
-            Client = TopicClient.CreateFromConnectionString(NearbyConfig.Settings["dumpling-service bus connection string"]);
+            Client = TopicClient.CreateFromConnectionString(NearbyConfig.Settings["dumpling-service bus connection string"], NearbyConfig.Settings["dumpling-service analysis topic path"]);
         }
 
         public static async Task EnqueueAnalysisWork(string owner, string dumpling_id, string target_os, string dump_uri)
@@ -29,7 +30,7 @@ namespace DumplingLib
                 target_os = target_os,
                 dump_uri = dump_uri
             }, Formatting.None));
-
+            
             var ascii_data = Encoding.ASCII.GetBytes(serializedMessage);
             var ascii_data_size = Encoding.ASCII.GetByteCount(serializedMessage);
 
