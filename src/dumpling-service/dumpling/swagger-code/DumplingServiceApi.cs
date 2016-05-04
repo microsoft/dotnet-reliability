@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -24,7 +28,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>string</returns>
-        string DumplingServiceGetDumpUrl (string owner, string dumplingid);
+        string DumplingServiceGetDumpUrl(string owner, string dumplingid);
 
         /// <summary>
         /// 
@@ -36,7 +40,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>ApiResponse of string</returns>
-        ApiResponse<string> DumplingServiceGetDumpUrlWithHttpInfo (string owner, string dumplingid);
+        ApiResponse<string> DumplingServiceGetDumpUrlWithHttpInfo(string owner, string dumplingid);
         /// <summary>
         /// returns the current status of a dumpling.
         /// </summary>
@@ -47,7 +51,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>string</returns>
-        string DumplingServiceGetStatus (string owner, string dumplingid);
+        string DumplingServiceGetStatus(string owner, string dumplingid);
 
         /// <summary>
         /// returns the current status of a dumpling.
@@ -59,7 +63,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>ApiResponse of string</returns>
-        ApiResponse<string> DumplingServiceGetStatusWithHttpInfo (string owner, string dumplingid);
+        ApiResponse<string> DumplingServiceGetStatusWithHttpInfo(string owner, string dumplingid);
         /// <summary>
         /// 
         /// </summary>
@@ -72,7 +76,7 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>string</returns>
-        string DumplingServicePostDumpChunk (string owner, string targetos, int? index, long? filesize);
+        string DumplingServicePostDumpChunk(string owner, string targetos, int? index, long? filesize);
 
         /// <summary>
         /// 
@@ -86,7 +90,7 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>ApiResponse of string</returns>
-        ApiResponse<string> DumplingServicePostDumpChunkWithHttpInfo (string owner, string targetos, int? index, long? filesize);
+        ApiResponse<string> DumplingServicePostDumpChunkWithHttpInfo(string owner, string targetos, int? index, long? filesize);
         /// <summary>
         /// This is just here to test service availability. \r\n            \r\n            \r\n            curl http://[dotnetrp].net/dumpling/test/hi/im/(yourname)
         /// </summary>
@@ -96,7 +100,7 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>string</returns>
-        string DumplingServiceSayHi (string name);
+        string DumplingServiceSayHi(string name);
 
         /// <summary>
         /// This is just here to test service availability. \r\n            \r\n            \r\n            curl http://[dotnetrp].net/dumpling/test/hi/im/(yourname)
@@ -107,7 +111,7 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>ApiResponse of string</returns>
-        ApiResponse<string> DumplingServiceSayHiWithHttpInfo (string name);
+        ApiResponse<string> DumplingServiceSayHiWithHttpInfo(string name);
         #endregion Synchronous Operations
         #region Asynchronous Operations
         /// <summary>
@@ -120,7 +124,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of string</returns>
-        System.Threading.Tasks.Task<string> DumplingServiceGetDumpUrlAsync (string owner, string dumplingid);
+        System.Threading.Tasks.Task<string> DumplingServiceGetDumpUrlAsync(string owner, string dumplingid);
 
         /// <summary>
         /// 
@@ -132,7 +136,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetDumpUrlAsyncWithHttpInfo (string owner, string dumplingid);
+        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetDumpUrlAsyncWithHttpInfo(string owner, string dumplingid);
         /// <summary>
         /// returns the current status of a dumpling.
         /// </summary>
@@ -143,7 +147,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of string</returns>
-        System.Threading.Tasks.Task<string> DumplingServiceGetStatusAsync (string owner, string dumplingid);
+        System.Threading.Tasks.Task<string> DumplingServiceGetStatusAsync(string owner, string dumplingid);
 
         /// <summary>
         /// returns the current status of a dumpling.
@@ -155,7 +159,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetStatusAsyncWithHttpInfo (string owner, string dumplingid);
+        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetStatusAsyncWithHttpInfo(string owner, string dumplingid);
         /// <summary>
         /// 
         /// </summary>
@@ -168,7 +172,7 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>Task of string</returns>
-        System.Threading.Tasks.Task<string> DumplingServicePostDumpChunkAsync (string owner, string targetos, int? index, long? filesize);
+        System.Threading.Tasks.Task<string> DumplingServicePostDumpChunkAsync(string owner, string targetos, int? index, long? filesize);
 
         /// <summary>
         /// 
@@ -182,7 +186,7 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServicePostDumpChunkAsyncWithHttpInfo (string owner, string targetos, int? index, long? filesize);
+        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServicePostDumpChunkAsyncWithHttpInfo(string owner, string targetos, int? index, long? filesize);
         /// <summary>
         /// This is just here to test service availability. \r\n            \r\n            \r\n            curl http://[dotnetrp].net/dumpling/test/hi/im/(yourname)
         /// </summary>
@@ -192,7 +196,7 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>Task of string</returns>
-        System.Threading.Tasks.Task<string> DumplingServiceSayHiAsync (string name);
+        System.Threading.Tasks.Task<string> DumplingServiceSayHiAsync(string name);
 
         /// <summary>
         /// This is just here to test service availability. \r\n            \r\n            \r\n            curl http://[dotnetrp].net/dumpling/test/hi/im/(yourname)
@@ -203,7 +207,7 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceSayHiAsyncWithHttpInfo (string name);
+        System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceSayHiAsyncWithHttpInfo(string name);
         #endregion Asynchronous Operations
     }
 
@@ -270,7 +274,7 @@ namespace IO.Swagger.Api
         /// Gets or sets the configuration object
         /// </summary>
         /// <value>An instance of the Configuration</value>
-        public Configuration Configuration {get; set;}
+        public Configuration Configuration { get; set; }
 
         /// <summary>
         /// Gets the default header.
@@ -301,10 +305,10 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>string</returns>
-        public string DumplingServiceGetDumpUrl (string owner, string dumplingid)
+        public string DumplingServiceGetDumpUrl(string owner, string dumplingid)
         {
-             ApiResponse<string> localVarResponse = DumplingServiceGetDumpUrlWithHttpInfo(owner, dumplingid);
-             return localVarResponse.Data;
+            ApiResponse<string> localVarResponse = DumplingServiceGetDumpUrlWithHttpInfo(owner, dumplingid);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -314,7 +318,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>ApiResponse of string</returns>
-        public ApiResponse< string > DumplingServiceGetDumpUrlWithHttpInfo (string owner, string dumplingid)
+        public ApiResponse<string> DumplingServiceGetDumpUrlWithHttpInfo(string owner, string dumplingid)
         {
             // verify the required parameter 'owner' is set
             if (owner == null)
@@ -338,9 +342,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -355,21 +359,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -379,11 +382,10 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of string</returns>
-        public async System.Threading.Tasks.Task<string> DumplingServiceGetDumpUrlAsync (string owner, string dumplingid)
+        public async System.Threading.Tasks.Task<string> DumplingServiceGetDumpUrlAsync(string owner, string dumplingid)
         {
-             ApiResponse<string> localVarResponse = await DumplingServiceGetDumpUrlAsyncWithHttpInfo(owner, dumplingid);
-             return localVarResponse.Data;
-
+            ApiResponse<string> localVarResponse = await DumplingServiceGetDumpUrlAsyncWithHttpInfo(owner, dumplingid);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -393,7 +395,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetDumpUrlAsyncWithHttpInfo (string owner, string dumplingid)
+        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetDumpUrlAsyncWithHttpInfo(string owner, string dumplingid)
         {
             // verify the required parameter 'owner' is set
             if (owner == null)
@@ -417,9 +419,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -434,21 +436,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetDumpUrl: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -458,10 +459,10 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>string</returns>
-        public string DumplingServiceGetStatus (string owner, string dumplingid)
+        public string DumplingServiceGetStatus(string owner, string dumplingid)
         {
-             ApiResponse<string> localVarResponse = DumplingServiceGetStatusWithHttpInfo(owner, dumplingid);
-             return localVarResponse.Data;
+            ApiResponse<string> localVarResponse = DumplingServiceGetStatusWithHttpInfo(owner, dumplingid);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -471,7 +472,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>ApiResponse of string</returns>
-        public ApiResponse< string > DumplingServiceGetStatusWithHttpInfo (string owner, string dumplingid)
+        public ApiResponse<string> DumplingServiceGetStatusWithHttpInfo(string owner, string dumplingid)
         {
             // verify the required parameter 'owner' is set
             if (owner == null)
@@ -495,9 +496,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -512,21 +513,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -536,11 +536,10 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of string</returns>
-        public async System.Threading.Tasks.Task<string> DumplingServiceGetStatusAsync (string owner, string dumplingid)
+        public async System.Threading.Tasks.Task<string> DumplingServiceGetStatusAsync(string owner, string dumplingid)
         {
-             ApiResponse<string> localVarResponse = await DumplingServiceGetStatusAsyncWithHttpInfo(owner, dumplingid);
-             return localVarResponse.Data;
-
+            ApiResponse<string> localVarResponse = await DumplingServiceGetStatusAsyncWithHttpInfo(owner, dumplingid);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -550,7 +549,7 @@ namespace IO.Swagger.Api
         /// <param name="owner"></param>
         /// <param name="dumplingid"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetStatusAsyncWithHttpInfo (string owner, string dumplingid)
+        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceGetStatusAsyncWithHttpInfo(string owner, string dumplingid)
         {
             // verify the required parameter 'owner' is set
             if (owner == null)
@@ -574,9 +573,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -591,21 +590,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceGetStatus: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -617,10 +615,10 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>string</returns>
-        public string DumplingServicePostDumpChunk (string owner, string targetos, int? index, long? filesize)
+        public string DumplingServicePostDumpChunk(string owner, string targetos, int? index, long? filesize)
         {
-             ApiResponse<string> localVarResponse = DumplingServicePostDumpChunkWithHttpInfo(owner, targetos, index, filesize);
-             return localVarResponse.Data;
+            ApiResponse<string> localVarResponse = DumplingServicePostDumpChunkWithHttpInfo(owner, targetos, index, filesize);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -632,7 +630,7 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>ApiResponse of string</returns>
-        public ApiResponse< string > DumplingServicePostDumpChunkWithHttpInfo (string owner, string targetos, int? index, long? filesize)
+        public ApiResponse<string> DumplingServicePostDumpChunkWithHttpInfo(string owner, string targetos, int? index, long? filesize)
         {
             // verify the required parameter 'owner' is set
             if (owner == null)
@@ -662,9 +660,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -681,21 +679,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)Configuration.ApiClient.CallApi(localVarPath,
                 Method.POST, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -707,11 +704,10 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>Task of string</returns>
-        public async System.Threading.Tasks.Task<string> DumplingServicePostDumpChunkAsync (string owner, string targetos, int? index, long? filesize)
+        public async System.Threading.Tasks.Task<string> DumplingServicePostDumpChunkAsync(string owner, string targetos, int? index, long? filesize)
         {
-             ApiResponse<string> localVarResponse = await DumplingServicePostDumpChunkAsyncWithHttpInfo(owner, targetos, index, filesize);
-             return localVarResponse.Data;
-
+            ApiResponse<string> localVarResponse = await DumplingServicePostDumpChunkAsyncWithHttpInfo(owner, targetos, index, filesize);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -723,7 +719,7 @@ namespace IO.Swagger.Api
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServicePostDumpChunkAsyncWithHttpInfo (string owner, string targetos, int? index, long? filesize)
+        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServicePostDumpChunkAsyncWithHttpInfo(string owner, string targetos, int? index, long? filesize)
         {
             // verify the required parameter 'owner' is set
             if (owner == null)
@@ -753,9 +749,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -772,21 +768,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.POST, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServicePostDumpChunk: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -795,10 +790,10 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>string</returns>
-        public string DumplingServiceSayHi (string name)
+        public string DumplingServiceSayHi(string name)
         {
-             ApiResponse<string> localVarResponse = DumplingServiceSayHiWithHttpInfo(name);
-             return localVarResponse.Data;
+            ApiResponse<string> localVarResponse = DumplingServiceSayHiWithHttpInfo(name);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -807,7 +802,7 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>ApiResponse of string</returns>
-        public ApiResponse< string > DumplingServiceSayHiWithHttpInfo (string name)
+        public ApiResponse<string> DumplingServiceSayHiWithHttpInfo(string name)
         {
             // verify the required parameter 'name' is set
             if (name == null)
@@ -828,9 +823,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -844,21 +839,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) Configuration.ApiClient.CallApi(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)Configuration.ApiClient.CallApi(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
 
         /// <summary>
@@ -867,11 +861,10 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>Task of string</returns>
-        public async System.Threading.Tasks.Task<string> DumplingServiceSayHiAsync (string name)
+        public async System.Threading.Tasks.Task<string> DumplingServiceSayHiAsync(string name)
         {
-             ApiResponse<string> localVarResponse = await DumplingServiceSayHiAsyncWithHttpInfo(name);
-             return localVarResponse.Data;
-
+            ApiResponse<string> localVarResponse = await DumplingServiceSayHiAsyncWithHttpInfo(name);
+            return localVarResponse.Data;
         }
 
         /// <summary>
@@ -880,7 +873,7 @@ namespace IO.Swagger.Api
         /// <exception cref="IO.Swagger.Client.ApiException">Thrown when fails to make API call</exception>
         /// <param name="name"></param>
         /// <returns>Task of ApiResponse (string)</returns>
-        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceSayHiAsyncWithHttpInfo (string name)
+        public async System.Threading.Tasks.Task<ApiResponse<string>> DumplingServiceSayHiAsyncWithHttpInfo(string name)
         {
             // verify the required parameter 'name' is set
             if (name == null)
@@ -901,9 +894,9 @@ namespace IO.Swagger.Api
 
             // to determine the Accept header
             String[] localVarHttpHeaderAccepts = new String[] {
-                "application/json", 
-                "text/json", 
-                "application/xml", 
+                "application/json",
+                "text/json",
+                "application/xml",
                 "text/xml"
             };
             String localVarHttpHeaderAccept = Configuration.ApiClient.SelectHeaderAccept(localVarHttpHeaderAccepts);
@@ -917,22 +910,20 @@ namespace IO.Swagger.Api
 
 
             // make the HTTP request
-            IRestResponse localVarResponse = (IRestResponse) await Configuration.ApiClient.CallApiAsync(localVarPath,
+            IRestResponse localVarResponse = (IRestResponse)await Configuration.ApiClient.CallApiAsync(localVarPath,
                 Method.GET, localVarQueryParams, localVarPostBody, localVarHeaderParams, localVarFormParams, localVarFileParams,
                 localVarPathParams, localVarHttpContentType);
 
-            int localVarStatusCode = (int) localVarResponse.StatusCode;
+            int localVarStatusCode = (int)localVarResponse.StatusCode;
 
             if (localVarStatusCode >= 400)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.Content, localVarResponse.Content);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.Content, localVarResponse.Content);
             else if (localVarStatusCode == 0)
-                throw new ApiException (localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
+                throw new ApiException(localVarStatusCode, "Error calling DumplingServiceSayHi: " + localVarResponse.ErrorMessage, localVarResponse.ErrorMessage);
 
             return new ApiResponse<string>(localVarStatusCode,
                 localVarResponse.Headers.ToDictionary(x => x.Name, x => x.Value.ToString()),
-                (string) Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
-            
+                (string)Configuration.ApiClient.Deserialize(localVarResponse, typeof(string)));
         }
-
     }
 }

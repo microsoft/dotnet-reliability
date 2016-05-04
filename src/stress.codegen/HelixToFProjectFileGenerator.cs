@@ -13,9 +13,9 @@ using System.Threading.Tasks;
 
 namespace stress.codegen
 {
-    public static class HelixProjectFileGenerator
+    public class HelixToFProjectFileGenerator : ISourceFileGenerator
     {
-        public static void GenerateProjectFile(LoadTestInfo loadTest)
+        public void GenerateSourceFile(LoadTestInfo loadTest)
         {
             string refSnippet = GenerateTestReferencesSnippet(loadTest);
 

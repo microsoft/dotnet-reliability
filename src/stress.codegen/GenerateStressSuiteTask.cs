@@ -10,12 +10,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using stress.codegen.utils;
 using System.Diagnostics;
+using System.Windows;
 
 namespace stress.codegen
 {
     public class GenerateStressSuiteTask : Task
     {
         public bool DebugWaitForInput { get; set; }
+
+        public bool UseLegacyProject { get; set; }
 
         public string Seed { get; set; }
 
@@ -57,9 +60,7 @@ namespace stress.codegen
         {
             if (DebugWaitForInput)
             {
-                this.Log.LogMessageFromText($"PID:{Process.GetCurrentProcess().Id} Attach debugger now.", MessageImportance.High);
-
-                while (DebugWaitForInput) ;
+                MessageBox.Show($"PID:{Process.GetCurrentProcess().Id} Attach debugger now.", "Debug GenerateStressSuiteTask", MessageBoxButton.OK);
             }
 
             try
@@ -68,10 +69,9 @@ namespace stress.codegen
 
                 LoadSuiteGenerator suiteGen = new LoadSuiteGenerator();
 
-                suiteGen.GenerateSuite(this.ParseSeed(), this.SuiteName, this.SuitePath, this.ParseTestPaths(), this.ParseSearchStrings(), this.ParseFrameworkPaths(), this.GetSuiteConfig(), this.DiscoveryCachePath);
+                suiteGen.GenerateSuite(this.ParseSeed(), this.SuiteName, this.SuitePath, this.ParseTestPaths(), this.ParseSearchStrings(), this.ParseFrameworkPaths(), this.GetSuiteConfig(), this.DiscoveryCachePath, this.UseLegacyProject);
 
                 return true;
-                //return this.Log.HasLoggedErrors;
             }
             catch (Exception e)
             {

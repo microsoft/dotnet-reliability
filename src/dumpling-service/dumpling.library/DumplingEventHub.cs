@@ -1,4 +1,8 @@
-﻿using Microsoft.ServiceBus.Messaging;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.ServiceBus.Messaging;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
@@ -19,7 +23,6 @@ namespace DumplingLib
         {
             Trace.WriteLine($"event {json_payload}");
 
-            // TODO: Confirm that the string is a json_payload?
             await Client.SendAsync(new EventData(ASCIIEncoding.ASCII.GetBytes(JsonConvert.SerializeObject(json_payload))));
         }
     }

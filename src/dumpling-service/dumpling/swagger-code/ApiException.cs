@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System;
 
 namespace IO.Swagger.Client
@@ -22,7 +26,7 @@ namespace IO.Swagger.Client
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiException"/> class.
         /// </summary>
-        public ApiException() {}
+        public ApiException() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiException"/> class.
@@ -46,5 +50,4 @@ namespace IO.Swagger.Client
             this.ErrorContent = errorContent;
         }
     }
-
 }
