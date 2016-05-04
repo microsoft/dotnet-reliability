@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -49,7 +52,7 @@ namespace triage.database
                 var threadData = triageData["ALL_THREADS"];
 
                 var threads = DeserializeAllThreads(threadData);
-                
+
                 foreach (var t in threads)
                 {
                     this.Threads.Add(t);
@@ -57,7 +60,7 @@ namespace triage.database
 
                 triageData.Remove("ALL_THREADS");
             }
-            
+
             //store the remaining properties
             foreach (var kvp in triageData)
             {

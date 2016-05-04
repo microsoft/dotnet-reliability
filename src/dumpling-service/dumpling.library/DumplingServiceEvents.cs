@@ -1,8 +1,11 @@
-﻿namespace DumplingLib
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace DumplingLib
 {
     public class CommonEvent
     {
-        public string Type { get; set; } 
+        public string Type { get; set; }
         public int Rank { get; private set; }
         public int Cardinality { get; set; } = 1;
         public string Category { get; set; } = "bizprofile";
@@ -18,9 +21,8 @@
     public class HelixServiceProxyWorkItemsStatusEvent : CommonEvent
     {
         public HelixServiceProxyWorkItemsStatusEvent(string path) : base($"HelixServiceProxy-WorkItems-{path.Replace('.', '-')}", 0) { }
-
     }
-    
+
     #endregion
 
     #region dumpling web api events
@@ -37,7 +39,7 @@
     {
         public WebAPIGreetingEvent() : base("DumplingService-WebAPI-Greeting", 3) { }
     }
-    public class WebAPIGetStatusEvent: CommonEvent
+    public class WebAPIGetStatusEvent : CommonEvent
     {
         public WebAPIGetStatusEvent() : base("DumplingService-WebAPI-GetStatus", 4) { }
     }
@@ -81,7 +83,6 @@
     public class DataWorkerCompletedMessageEvent : CommonEvent
     {
         public DataWorkerCompletedMessageEvent() : base("DumplingService-DataWorker-CompletedMessage", 15) { }
-
     };
     #endregion
 }

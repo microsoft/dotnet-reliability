@@ -1,3 +1,6 @@
+// Copyright(c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
@@ -18,7 +21,12 @@ namespace triage.database
     {
         private static string s_connStr;
 
-        public static void Init(string connStr)
+        static TriageDb()
+        {
+            // Init(ConnString)
+        }
+
+        private static void Init(string connStr)
         {
             s_connStr = connStr;
         }
@@ -58,13 +66,13 @@ namespace triage.database
                 //find the dump to update
                 dump = await context.Dumps.FindAsync(dumpId);
 
-                if(dump == null)
+                if (dump == null)
                 {
                     throw new ArgumentException($"Could not update dump.  No dump was found with id {dumpId}", "dumpId");
                 }
 
                 await UpdateUniquelyNamedEntitiesAsync(context, triageData);
-                
+
                 //remove all the dump properties from the context before updating
                 //this is needed because property has a required FK to dumpId so
                 //properties without an associated dump are not allowed
@@ -81,7 +89,7 @@ namespace triage.database
                 await context.Entry<Dump>(dump).ReloadAsync();
 
                 dump.LoadTriageData(triageData);
-            
+
                 await context.SaveChangesAsync();
             }
         }
@@ -92,7 +100,6 @@ namespace triage.database
             if (triageData.Bucket != null && triageData.Bucket.BucketId == 0)
             {
                 triageData.Bucket = await GetUniquelyNamedEntityAsync(context, context.Buckets, triageData.Bucket);
-                
             }
 
             var addedModules = triageData.Threads.Where(t => t.ThreadId == 0).SelectMany(t => t.Frames).Select(f => f.Module).Where(m => m.ModuleId == 0).OrderBy(m => m.Name).ToArray();
@@ -108,7 +115,7 @@ namespace triage.database
                     addedModules[i].ModuleId = (await GetUniquelyNamedEntityAsync(context, context.Modules, addedModules[i])).ModuleId;
                 }
             }
-            
+
             var addedRoutines = triageData.Threads.Where(t => t.ThreadId == 0).SelectMany(t => t.Frames).Select(f => f.Routine).Where(r => r.RoutineId == 0).OrderBy(r => r.Name).ToArray();
 
             for (int i = 0; i < addedRoutines.Length; i++)
@@ -116,16 +123,14 @@ namespace triage.database
                 if (i > 0 && addedRoutines[i].Name == addedRoutines[i - 1].Name)
                 {
                     addedRoutines[i].RoutineId = addedRoutines[i - 1].RoutineId;
-
                 }
                 else
                 {
                     addedRoutines[i].RoutineId = (await GetUniquelyNamedEntityAsync(context, context.Routines, addedRoutines[i])).RoutineId;
                 }
-                
             }
 
-            foreach(var frame in triageData.Threads.SelectMany(t => t.Frames))
+            foreach (var frame in triageData.Threads.SelectMany(t => t.Frames))
             {
                 frame.ModuleId = frame.Module.ModuleId;
 
@@ -139,14 +144,14 @@ namespace triage.database
 
         private static async Task<T> GetUniquelyNamedEntityAsync<T>(TriageDbContext context, IDbSet<T> set, T entity) where T : UniquelyNamedEntity
         {
-            if(entity.Name.Length > 450)
+            if (entity.Name.Length > 450)
             {
                 entity.Name = entity.Name.Substring(0, 450);
             }
 
             T tempEntity = await set.FirstOrDefaultAsync(e => e.Name == entity.Name);
 
-            if(tempEntity != null)
+            if (tempEntity != null)
             {
                 return tempEntity;
             }
@@ -156,7 +161,6 @@ namespace triage.database
             await context.SaveChangesAsync();
 
             return entity;
-
         }
 
         private const string BUCKET_DATA_QUERY = @"
@@ -174,8 +178,8 @@ SELECT [B].[BucketId], [B].[Name], [B].[BugUrl], [H].[HitCount], [H].[StartTime]
 FROM [Buckets] AS [B]
 JOIN [BucketHits] AS [H]
     ON [B].[BucketId] = [H].[BucketId]
+ORDER BY [H].[HitCount] DESC
 ";
-
         public static async Task<IEnumerable<BucketData>> GetBucketDataAsync(DateTime start, DateTime end)
         {
             using (var context = new TriageDbContext(s_connStr))
@@ -192,6 +196,7 @@ FROM [Dumps]
 WHERE [BucketId] = @p0
     AND [DumpTime] >= @p1
     AND [DumpTime] <= @p2
+ORDER BY [Dumps].[DumpId] DESC
 ";
         public static async Task<IEnumerable<Dump>> GetBucketDataDumpsAsync(BucketData bucketData)
         {
@@ -212,15 +217,16 @@ WHERE [DumpId] = @p0
             using (var context = new TriageDbContext(s_connStr))
             {
                 var data = from property in context.Properties.Where(x => x.DumpId == dump.DumpId)
-                        select new
-                        {
-                            DumpId = property.DumpId,
-                            Name = property.Name,
-                            Value = property.Value
-                        };
+                           select new
+                           {
+                               DumpId = property.DumpId,
+                               Name = property.Name,
+                               Value = property.Value
+                           };
 
                 return JsonConvert.SerializeObject(data);
             }
         }
     }
 }
+
