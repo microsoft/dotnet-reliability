@@ -55,6 +55,8 @@ namespace stress.codegen
                 // report the current limits (in theory this should get into the test log)
                 stressScript.WriteLine("echo calling [ulimit -a]");
                 stressScript.WriteLine("ulimit -a");
+                //update the coredump collection filter 
+                stressScript.WriteLine("echo 0x3F > /proc/self/coredump_filter");
                 stressScript.WriteLine();
                 stressScript.WriteLine();
 
