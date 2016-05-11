@@ -85,7 +85,8 @@ namespace stress.codegen
                 .Select(property => property.Value)
                 .SelectMany(o => o.Children<JProperty>())
                 .Where(p => !p.Name.Contains("TargetingPack"))
-                .Select(p => GetDependencyPair(p));
+                .Select(p => GetDependencyPair(p))
+                .Where(p => !string.IsNullOrEmpty(p.Value));
         }
 
         public static KeyValuePair<string, string> GetDependencyPair(JProperty dependProp)

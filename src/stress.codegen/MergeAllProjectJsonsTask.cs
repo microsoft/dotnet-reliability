@@ -7,6 +7,7 @@ using Microsoft.Build.Utilities;
 using Newtonsoft.Json;
 using System.IO;
 using System.Diagnostics;
+using System.Windows;
 
 namespace stress.codegen
 {
@@ -24,9 +25,7 @@ namespace stress.codegen
         {
             if (Debug)
             {
-                this.Log.LogMessageFromText($"PID:{Process.GetCurrentProcess().Id} Attach debugger now.", MessageImportance.High);
-
-                while (Debug) ;
+                MessageBox.Show($"PID:{Process.GetCurrentProcess().Id} Attach debugger now.", "Debug GenerateStressSuiteTask", MessageBoxButton.OK);
             }
 
             Dictionary<string, HashSet<string>> assmVersions = new Dictionary<string, HashSet<string>>();

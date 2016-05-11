@@ -14,8 +14,12 @@ namespace stress.codegen
 {
     public class LoadTestInfo
     {
-        public LoadTestInfo()
+        private string _globalPackageConfigPath = null;
+
+        public LoadTestInfo(string globalPackageConfigPath)
         {
+            _globalPackageConfigPath = globalPackageConfigPath;
+
             this.SourceFiles = new List<SourceFileInfo>();
         }
 
@@ -41,9 +45,16 @@ namespace stress.codegen
         {
             get
             {
-                var jsonRefInfo = this.UnitTests.Select(ut => ut.ReferenceInfo.PackageInfo);
+                if (string.IsNullOrEmpty(_globalPackageConfigPath))
+                {
+                    var jsonRefInfo = this.UnitTests.Select(ut => ut.ReferenceInfo.PackageInfo);
 
-                return ProjectJsonDependencyInfo.MergeToLatest(jsonRefInfo);
+                    return ProjectJsonDependencyInfo.MergeToLatest(jsonRefInfo);
+                }
+                else
+                {
+                    return ProjectJsonDependencyInfo.FromFile(_globalPackageConfigPath);
+                }
             }
         }
 

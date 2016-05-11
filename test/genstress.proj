@@ -41,7 +41,7 @@
   <PropertyGroup>
     <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
     <UnitTestCLIProjJson>$(UnitTestCLIProjDir)project.json</UnitTestCLIProjJson>
-    <UnitTestPackageDir>$(BaseIntermediateOutputPath)packages/</UnitTestPackageDir>
+    <UnitTestPackageDir>$(MSBuildThisFileDirectory)../packages/</UnitTestPackageDir>
     <UnitTestExtractDir>$(BaseIntermediateOutputPath)utextracted/</UnitTestExtractDir>
     <UnitTestExtractedSemaphore>$(UnitTestExtractDir)extraction.complete</UnitTestExtractedSemaphore>
     <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends/</UnitTestDependsBin>
@@ -49,9 +49,19 @@
     <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64</TestDependPublishCommand>
   </PropertyGroup>
   
+  <PropertyGroup>
+    <GeneratedProjectBuildProps>UnitTestDependsBin=$(UnitTestDependsBin)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(TestNugetRuntimeId)' != ''">$(GeneratedProjectBuildProps);TestNugetRuntimeId=$(TestNugetRuntimeId)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(ConfigurationGroup)' != ''">$(GeneratedProjectBuildProps);ConfigurationGroup=$(ConfigurationGroup)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(ArchiveTests)' != ''">$(GeneratedProjectBuildProps);ArchiveTests=$(ArchiveTests)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(BuildMoniker)' != ''">$(GeneratedProjectBuildProps);BuildMoniker=$(BuildMoniker)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(TestDisabled)' != ''">$(GeneratedProjectBuildProps);TestDisabled=$(TestDisabled)</GeneratedProjectBuildProps>
+  </PropertyGroup>
+  
   <Import Project="..\dir.targets" />
 
   <Import Project="..\dir.traversal.targets" />
+  <Import Project="$(ToolsDir)Build.Post.targets" Condition="Exists('$(ToolsDir)Build.Post.targets')" />
   
   <UsingTask TaskName="MergeAllProjectJsonsTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
@@ -59,6 +69,10 @@
 
   <ItemGroup>
     <ZipFile Include="$(UnitTestDirectory)**\*.zip"/>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <JsonFile Include="$(UnitTestDirectory)**\project.json"/>
   </ItemGroup>
    
  <Target Name="UnzipAllTests" 
@@ -71,14 +85,13 @@
     Inputs="@(ZipFile)"
     Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))">
 
+    <Copy SourceFiles="@(JsonFile)" DestinationFiles="@(JsonFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"/>
+    
     <ZipFileExtractToDirectory Condition="!Exists('%(RootDir)%(Directory)%(ZipFile.FileName)')"
         SourceArchive="%(ZipFile.FullPath)"
         DestinationDirectory="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"
         OverwriteDestination="true" />
   </Target>
-  
-
-  
   
   <Target Name="RestoreTestDependsBin" DependsOnTargets="UnzipAllTests">
     <Message Text="Restoring test dependencies..." />
@@ -99,7 +112,7 @@
     
     <ItemGroup>
       <GlobalJsonLines Include="{"/>
-      <GlobalJsonLines Include="&quot;packages&quot;: &quot;packages&quot;"/>
+      <GlobalJsonLines Include="&quot;packages&quot;: &quot;../../packages&quot;"/>
       <GlobalJsonLines Include="}"/>
     </ItemGroup>
    
@@ -110,7 +123,10 @@
     <Exec Command="$(TestDependPublishCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
   </Target>
 
-  
+    <ItemGroup>
+      <GeneratedJsonFiles Include="$(SuitePath)**/project.json"/>
+    </ItemGroup>
+    
   <Target Name="GenerateStressSuiteSource" DependsOnTargets="RestoreTestDependsBin">
 
     <Error Condition="!Exists('$(SuiteConfigPath)')" Text="ERROR: File not found. Stress suite config path '$(SuiteConfigPath)' is invalid " />
@@ -127,9 +143,16 @@
       ConfigPath="$(SuiteConfigPath)"
       TestPaths="$(UnitTestExtractDir)"
       TestSearchStrings="$(UnitTestFileMask)"
-      FrameworkPaths="$(UnitTestDependsBin)"/>
+      FrameworkPaths="$(UnitTestDependsBin)"
+      PackageConfigPath="$(UnitTestCLIProjJson)"/>    
+     
+     <ItemGroup>
+      <GeneratedJsonFiles Include="$(SuitePath)**/project.json">
+        <OverridePath>$(UnitTestCLIProjJson)</OverridePath>
+      </GeneratedJsonFiles>
+    </ItemGroup>
   </Target>
- 
+
   <Target Name="Build" DependsOnTargets="GenerateStressSuiteSource">
     <ItemGroup>
       <GeneratedProjects Include="$(SuitePath)**\*.csproj"/>
@@ -137,7 +160,8 @@
     
     <MSBuild Targets="Build"
       Projects="@(GeneratedProjects)"
-      BuildInParallel="true" />
+      BuildInParallel="true"
+      Properties="$(GeneratedProjectBuildProps)"/>
   </Target>
 
   <Target Name="Clean">
