@@ -52,6 +52,11 @@ namespace stress.codegen
         public string ConfigPath { get; set; }
 
         /// <summary>
+        /// Path to the project.json package config file to be used by all tests
+        /// </summary>
+        public string PackageConfigPath { get; set; }
+
+        /// <summary>
         /// Path to the cache of previously discovered tests
         /// </summary>
         public string DiscoveryCachePath { get; set; }
@@ -69,7 +74,7 @@ namespace stress.codegen
 
                 LoadSuiteGenerator suiteGen = new LoadSuiteGenerator();
 
-                suiteGen.GenerateSuite(this.ParseSeed(), this.SuiteName, this.SuitePath, this.ParseTestPaths(), this.ParseSearchStrings(), this.ParseFrameworkPaths(), this.GetSuiteConfig(), this.DiscoveryCachePath, this.UseLegacyProject);
+                suiteGen.GenerateSuite(this.ParseSeed(), this.SuiteName, this.SuitePath, this.ParseTestPaths(), this.ParseSearchStrings(), this.ParseFrameworkPaths(), this.GetSuiteConfig(), this.DiscoveryCachePath, this.UseLegacyProject, this.PackageConfigPath);
 
                 return true;
             }

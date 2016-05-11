@@ -2,7 +2,11 @@
   <PropertyGroup>
     <ErrorIfBuildToolsRestoredFromIndividualProject Condition="!Exists('$(ToolsDir)')">true</ErrorIfBuildToolsRestoredFromIndividualProject>
   </PropertyGroup>
-
+  
+  <PropertyGroup>
+    <NuGetTargetMoniker>.NETCoreApp,Version=v1.0</NuGetTargetMoniker>
+  </PropertyGroup>
+  
   <Import Project="..\dir.targets" />
 
   <!-- Returns the assembly version of the project for consumption
@@ -23,6 +27,16 @@
     <CoreCleanDependsOn>UpdateImportedProjectRelativePaths;$(CoreCleanDependsOn)</CoreCleanDependsOn>
   </PropertyGroup>
   
+  <Target Name="HackTestTargetFramework" BeforeTargets="CopyTestToTestDirectory">
+   <ItemGroup Condition="'$(TestWithCore)' == 'true'">
+    <TestTargetFramework Remove="DNXCore,Version=v5.0"/>
+    <TestTargetFramework Include=".NETCoreApp,Version=v1.0">
+      <Folder>netcoreapp10</Folder>
+    </TestTargetFramework>
+  </ItemGroup>
+
+  </Target>
+  
   <Target Name="UpdateImportedProjectRelativePaths">
     <ItemGroup>
       <RelCompile Include="@(Compile)" Condition="!$([System.IO.Path]::IsPathRooted('%(Identity)'))" />
@@ -42,6 +56,5 @@
       <EmbeddedResource Include="@(RelEmbeddedResource -> '$(ImportedProjectRelativePath)\%(Identity)')" />
     </ItemGroup>
   </Target>
-  
-
+    
 </Project>

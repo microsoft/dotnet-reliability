@@ -80,7 +80,7 @@
 
   <!-- Common nuget properties -->
   <PropertyGroup>
-    <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$(PackagesDir)NuGet.exe</NuGetToolPath>
+    <NuGetToolPath Condition="'$(NuGetToolPath)'==''">$(ProjectDir)/Tools/NuProj/NuGet.exe</NuGetToolPath>
     <NuGetPackageSource>@(NuGetSourceList -> '-source %(Identity)', ' ')</NuGetPackageSource>
     <NuGetConfigCommandLine>$(NuGetPackageSource)</NuGetConfigCommandLine>
 

@@ -81,7 +81,6 @@ namespace stress.codegen
     <Reference Include='{test.AssemblyName}'>
       <HintPath>$(MSBuildThisFileDirectory)\refs\{test.AssemblyName}</HintPath>
       <Aliases>{UnitTestInfo.GetAssemblyAlias(test.AssemblyName)}</Aliases>
-      <NotForTests>true</NotForTests>
     </Reference>";
 
                     snippet.Append(refSnippet);
@@ -89,19 +88,25 @@ namespace stress.codegen
 
                 foreach (var assmref in test.ReferenceInfo.ReferencedAssemblies)
                 {
-                    if (uniqueAssemblies.Add(assmref.Name) && !packageInfo.dependencies.ContainsKey(assmref.Name))
+                    if (uniqueAssemblies.Add(assmref.Name) && !packageInfo.dependencies.ContainsKey(Path.GetFileNameWithoutExtension(assmref.Name)))
                     {
                         string refSnippet = $@"
     <Reference Include='{assmref.Name}'>
       <HintPath>$(MSBuildThisFileDirectory)\refs\{assmref.Name}</HintPath>
       <Aliases>{UnitTestInfo.GetAssemblyAlias(assmref.Name)}</Aliases>
-      <NotForTests>true</NotForTests>
     </Reference>";
 
                         snippet.Append(refSnippet);
                     }
                 }
             }
+
+            string stressexecutionsnippet = $@"
+    <Reference Include='stress.execution.dll'>
+      <HintPath>{typeof(stress.execution.UnitTest).Assembly.Location}</HintPath>
+    </Reference>";
+
+            snippet.Append(stressexecutionsnippet);
 
             return snippet.ToString();
         }
@@ -111,10 +116,10 @@ namespace stress.codegen
   <Import Project = '$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props' />
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <IsTestProject>true</IsTestProject>
-  </PropertyGroup>  
+    <ValidatePackageVersions>false</ValidatePackageVersions>
+    <XunitTestAssembly>stress.execution.dll</XunitTestAssembly>
+  </PropertyGroup>
   <!-- Test Properties -->
   <PropertyGroup>{2}
   </PropertyGroup>

@@ -17,7 +17,7 @@ namespace stress.codegen
     {
         private UnitTestSelector _unitTestSelector;
 
-        public void GenerateSuite(int seed, string suiteName, string outputPath, string[] testPaths, string[] searchPatterns, string[] hintPaths, LoadSuiteConfig config, string cachePath = null, bool legacyProject = false)
+        public void GenerateSuite(int seed, string suiteName, string outputPath, string[] testPaths, string[] searchPatterns, string[] hintPaths, LoadSuiteConfig config, string cachePath = null, bool legacyProject = false, string globalPackageConfig = null)
         {
             int suiteTestCount = 0;
 
@@ -31,7 +31,7 @@ namespace stress.codegen
 
                 for (int i = 0; i < loadTestConfig.TestCount; i++)
                 {
-                    var loadTestInfo = new LoadTestInfo()
+                    var loadTestInfo = new LoadTestInfo(globalPackageConfig)
                     {
                         TestName = suiteName + "_" + suiteTestCount.ToString("X4"),
                         Duration = loadTestConfig.Duration,
