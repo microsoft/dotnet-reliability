@@ -19,6 +19,8 @@ namespace triage.database
         public Dump()
         {
             this.Threads = new HashSet<Thread>();
+
+            this.Properties = new HashSet<Property>();
         }
 
         public int DumpId { get; set; }
@@ -51,20 +53,41 @@ namespace triage.database
 
             string val = null;
 
-            if(triageData.TryGetValue("FAILURE_HASH", out val))
+            //FAILURE_HASH corresponds to the bucket the dump belongs in
+            if (triageData.TryGetValue("FAILURE_HASH", out val))
             {
                 this.Bucket = new Bucket() { Name = val };
 
                 triageData.Remove("FAILURE_HASH");
             }
-            
-            if(triageData.TryGetValue("ALL_THREADS", out val))
+
+            //ALL_THREADS corresponds to the json searialized thread data in the triage data
+            if (triageData.TryGetValue("ALL_THREADS", out val))
             {
                 var threadData = triageData["ALL_THREADS"];
 
-                DeserializeAllThreads(threadData);
+                var threads = DeserializeAllThreads(threadData);
+                
+                //for now clear all the threads and insert all new ones
+                //might consider changing to do an in place update if turns out to be a perf issue
+                this.Threads.Clear();
+
+                foreach(var t in threads)
+                {
+                    this.Threads.Add(t);
+                }
 
                 triageData.Remove("ALL_THREADS");
+            }
+
+            //for now clear all the properties and insert all new ones
+            //might consider changing to do an in place update if turns out to be a perf issue
+            this.Properties.Clear();
+
+            //store the remaining properties
+            foreach (var kvp in triageData)
+            {
+                this.Properties.Add(new Property() { Name = kvp.Key, Value = kvp.Value });
             }
         }
 
@@ -104,6 +127,7 @@ namespace triage.database
 
             return allThreads;
         }
+
         private class ThreadDeserializerObj
         {
             public string Osid = null;

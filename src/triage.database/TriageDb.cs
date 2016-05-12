@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,11 +22,19 @@ namespace triage.database
             s_connStr = connStr;
         }
 
-        public static async Task<int> AddOrUpdateDumpAsync(Dump dump)
+        public static async Task<Dump> GetDumpAsync(int dumpId)
         {
             using (var context = new TriageDbContext(s_connStr))
             {
-                context.Dumps.Attach(dump);
+                return await context.Dumps.FindAsync(dumpId);
+            }
+        }
+
+        public static async Task<int> AddDumpAsync(Dump dump)
+        {
+            using (var context = new TriageDbContext(s_connStr))
+            {
+                context.Dumps.Add(dump);
 
                 await context.SaveChangesAsync();
             }
@@ -32,6 +42,26 @@ namespace triage.database
             return dump.DumpId;
         }
 
+        public static async Task UpdateDumpTriageInfo(int dumpId, Dictionary<string, string> triageData)
+        {
+            if (triageData == null) throw new ArgumentNullException("triageData");
+
+            using (var context = new TriageDbContext(s_connStr))
+            {
+                //find the dump to update
+                var dump = await context.Dumps.FindAsync(dumpId);
+
+                if(dump == null)
+                {
+                    throw new ArgumentException($"Could not update dump.  No dump was found with id {dumpId}", "dumpId");
+                }
+
+                dump.LoadTriageData(triageData);
+
+                await context.SaveChangesAsync();
+            }
+        }
+        
         private const string BUCKET_DATA_QUERY = @"
 WITH [BucketHits]([BucketId], [HitCount], [StartTime], [EndTime]) AS
 (

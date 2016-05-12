@@ -94,9 +94,9 @@ namespace stress.codegen
 
                 stressScript.WriteLine("  echo zipping work item data for coredump analysis");
 
-                stressScript.WriteLine($"  echo EXEC:  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py $HELIX_WORKITEM_ROOT/../{loadTestInfo.TestName}.zip $HELIX_WORKITEM_ROOT $HELIX_WORKITEM_ROOT/execution $HELIX_WORKITEM_ROOT/core_root");
+                stressScript.WriteLine($"  echo EXEC:  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py $HELIX_WORKITEM_ROOT/../{loadTestInfo.TestName}.zip $HELIX_WORKITEM_ROOT $HELIX_WORKITEM_ROOT/execution");
 
-                stressScript.WriteLine($"  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/../{loadTestInfo.TestName}.zip $HELIX_WORKITEM_ROOT $HELIX_WORKITEM_ROOT/execution $HELIX_WORKITEM_ROOT/core_root");
+                stressScript.WriteLine($"  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/../{loadTestInfo.TestName}.zip $HELIX_WORKITEM_ROOT $HELIX_WORKITEM_ROOT/execution");
 
                 stressScript.WriteLine($"  echo uploading coredump zip to $HELIX_RESULTS_CONTAINER_URI{loadTestInfo.TestName}.zip analysis");
 
