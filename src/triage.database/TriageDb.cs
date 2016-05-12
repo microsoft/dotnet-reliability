@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.Entity;
+
 
 namespace triage.database
 {
@@ -20,11 +22,11 @@ namespace triage.database
             s_connStr = connStr;
         }
 
-        public static async Task<int> AddDumpAsync(Dump dump)
+        public static async Task<int> AddOrUpdateDumpAsync(Dump dump)
         {
             using (var context = new TriageDbContext(s_connStr))
             {
-                context.Dumps.Add(dump);
+                context.Dumps.Attach(dump);
 
                 await context.SaveChangesAsync();
             }
