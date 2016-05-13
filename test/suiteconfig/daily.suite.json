@@ -1,0 +1,197 @@
+{
+  "Host": "./corerun",
+  "LoadTestConfigs": [
+    {
+      "TestCount": 4,
+      "NumTests": 100,
+      "Duration": "16:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 4,
+      "NumTests": 100,
+      "Duration": "16:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_GCStress": "3",
+        "COMPlus_HeapVerify": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 8,
+      "NumTests": 50,
+      "Duration": "08:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 8,
+      "NumTests": 50,
+      "Duration": "08:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_GCStress": "3",
+        "COMPlus_HeapVerify": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 16,
+      "NumTests": 50,
+      "Duration": "04:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 16,
+      "NumTests": 50,
+      "Duration": "04:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_GCStress": "3",
+        "COMPlus_HeapVerify": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 32,
+      "NumTests": 20,
+      "Duration": "02:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },    
+    {
+      "TestCount": 32,
+      "NumTests": 20,
+      "Duration": "02:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_GCStress": "3",
+        "COMPlus_HeapVerify": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },   
+    {
+      "TestCount": 64,
+      "NumTests": 10,
+      "Duration": "01:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 64,
+      "NumTests": 10,
+      "Duration": "01:00:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_GCStress": "3",
+        "COMPlus_HeapVerify": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },   
+    {
+      "TestCount": 128,
+      "NumTests": 10,
+      "Duration": "00:30:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    },
+    {
+      "TestCount": 128,
+      "NumTests": 10,
+      "Duration": "00:30:00",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1",
+        "COMPlus_GCStress": "3",
+        "COMPlus_HeapVerify": "1",
+        "COMPlus_StressLog": "1",
+        "COMPlus_StressLogSize": "2097152"
+      }
+    }
+  ]
+}
