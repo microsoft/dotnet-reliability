@@ -58,6 +58,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -77,6 +78,7 @@
     <Compile Include="AnalysisTopicController.cs" />
     <Compile Include="DumplingDataWorkerQueueController.cs" />
     <Compile Include="DumplingEventHub.cs" />
+    <Compile Include="DumplingServiceEvents.cs" />
     <Compile Include="DumplingStorageAccount.cs" />
     <Compile Include="DumpStorageController.cs" />
     <Compile Include="LogMessage.cs" />

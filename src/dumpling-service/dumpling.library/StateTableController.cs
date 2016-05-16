@@ -61,5 +61,21 @@ namespace DumplingLib
 
             await AddOrUpdateStateEntry(entry);
         }
+
+        public static async Task<string> GetResultsUri(StateTableIdentifier id)
+        {
+            var response = await StateTable.ExecuteAsync(TableOperation.Retrieve<StateTableEntity>(id.Owner, id.DumplingId));
+            var entity = ((StateTableEntity)response.Result);
+
+            return entity.Results_uri;
+        }
+
+        public static async Task<string> GetDumpUri(StateTableIdentifier id)
+        {
+            var response = await StateTable.ExecuteAsync(TableOperation.Retrieve<StateTableEntity>(id.Owner, id.DumplingId));
+            var entity = ((StateTableEntity)response.Result);
+
+            return entity.DumpRelics_uri;
+        }
     }
 }
