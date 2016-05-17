@@ -161,6 +161,7 @@
     <MSBuild Targets="Build"
       Projects="@(GeneratedProjects)"
       BuildInParallel="true"
+      ContinueOnError="true"
       Properties="$(GeneratedProjectBuildProps)"/>
   </Target>
 
