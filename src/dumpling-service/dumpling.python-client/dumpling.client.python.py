@@ -13,7 +13,7 @@ class DumplingService:
     @staticmethod
     def UploadZip(username, origin, filepath):
         upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0'%(username, origin);
-        files = {'file': open(file, 'rb')}
+        files = {'file': open(filepath, 'rb')}
         response = requests.post(upload_url, files = files)
 
         return response.content
