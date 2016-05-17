@@ -27,6 +27,7 @@ namespace stress.codegen
 
             runtimes = new Dictionary<string, Dictionary<string, string>>()
             {
+                { "win", new Dictionary<string, string>() },
                 { "win7-x64", new Dictionary<string, string>() },
                 { "win7-x86", new Dictionary<string, string>() },
                 { "ubuntu.14.04-x64", new Dictionary<string, string>() },
