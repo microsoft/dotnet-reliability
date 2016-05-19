@@ -12,8 +12,8 @@
     <SuiteName Condition="'$(SuiteName)' == ''">$(BuildMoniker)</SuiteName>
     <SuiteConfig Condition="'$(SuiteConfig)' == ''">smoketest.suite.json</SuiteConfig>
     <SuiteConfigPath Condition="'$(SuiteConfigPath)' == ''">$(MSBuildThisFileDirectory)suiteconfig/$(SuiteConfig)</SuiteConfigPath>
-    <SuitePath Condition="'$(GeneratedRootPath)' == ''">$(MSBuildThisFileDirectory)generated/$(SuiteName)/</SuitePath>
-    <GeneratedRootPath Condition="'$(SuitePath)' == ''">$(MSBuildThisFileDirectory)generated/$(SuiteName)/</GeneratedRootPath>
+    <GeneratedRootPath Condition="'$(GeneratedRootPath)' == ''">$(MSBuildThisFileDirectory)generated/</GeneratedRootPath>
+    <SuitePath Condition="'$(SuitePath)' == ''">$(GeneratedRootPath)$(SuiteName)/</SuitePath>
     <DiscoveryCachePath Condition="'$(DiscoveryCachePath)'==''">$(BaseIntermediateOutputPath)testdiscoverycache.json</DiscoveryCachePath>
   </PropertyGroup>
   
@@ -51,6 +51,7 @@
   
   <PropertyGroup>
     <GeneratedProjectBuildProps>UnitTestDependsBin=$(UnitTestDependsBin)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(BaseNuGetRuntimeIdentifier)' != ''">$(GeneratedProjectBuildProps);BaseNuGetRuntimeIdentifier=$(BaseNuGetRuntimeIdentifier)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(TestNugetRuntimeId)' != ''">$(GeneratedProjectBuildProps);TestNugetRuntimeId=$(TestNugetRuntimeId)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ConfigurationGroup)' != ''">$(GeneratedProjectBuildProps);ConfigurationGroup=$(ConfigurationGroup)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ArchiveTests)' != ''">$(GeneratedProjectBuildProps);ArchiveTests=$(ArchiveTests)</GeneratedProjectBuildProps>
@@ -167,7 +168,17 @@
 
   <Target Name="Clean">
     
-    <Message Text="Cleaning generated source directory..." />
+    <Message Text="Cleaning generated projects..." />
+    <ItemGroup>
+      <GeneratedProjects Include="$(GeneratedRootPath)**\*.csproj"/>
+    </ItemGroup>
+    
+    <MSBuild Targets="Clean"
+      Projects="@(GeneratedProjects)"
+      BuildInParallel="true"
+      ContinueOnError="true"/>
+    
+    <Message Text="Deleting generated sources..." />
     
     <RemoveDir Directories="$(GeneratedRootPath)" />
    
