@@ -8,13 +8,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace triage.database
 {
-    public class Routine
+    public class Routine : UniquelyNamedEntity
     {
         public int RoutineId { get; set; }
-
-        [Required]
-        [Index(IsUnique = true)]
-        [StringLength(450)]
-        public string Name { get; set; }
     }
 }

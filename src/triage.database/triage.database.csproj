@@ -70,8 +70,10 @@
     <Compile Include="Routine.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Thread.cs" />
+    <Compile Include="TriageData.cs" />
     <Compile Include="TriageDb.cs" />
     <Compile Include="TriageDbContext.cs" />
+    <Compile Include="UniquelyNamedEntity.cs" />
     <!--Compile Include="Properties\AssemblyInfo.cs" /-->
   </ItemGroup>
   <ItemGroup>
