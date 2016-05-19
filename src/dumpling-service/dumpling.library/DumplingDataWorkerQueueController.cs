@@ -27,9 +27,13 @@ namespace DumplingLib
         /// </summary>
         /// <param name="json_payload"></param>
         /// <returns></returns>
-        public static async Task SendEvent(string json_payload)
+        public static async Task SendWork(string payload_type, string json_payload)
         {
-            await Queue.SendAsync(new BrokeredMessage(json_payload));
+            var msg = new BrokeredMessage(json_payload);
+            msg.Properties.Add("data_type", payload_type);
+            
+
+            await Queue.SendAsync(msg);
         }
     }
 }

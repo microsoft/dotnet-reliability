@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.ServiceBus.Messaging;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,11 +19,11 @@ namespace DumplingLib
             Client = EventHubClient.CreateFromConnectionString(NearbyConfig.Settings["dumpling-service eventhub connection string"], NearbyConfig.Settings["dumpling-service eventhub path"]);
         }
 
-        public static async Task FireEvent(string json_payload)
+        public static async Task FireEvent(CommonEvent json_payload)
         {
             Trace.WriteLine($"event {json_payload}");
-            // TODO: Confirm that the string is a json_payload?
-            await Client.SendAsync(new EventData(ASCIIEncoding.ASCII.GetBytes(json_payload)));
+
+            await Client.SendAsync(new EventData(ASCIIEncoding.ASCII.GetBytes(JsonConvert.SerializeObject(json_payload))));
         }
     }
 }
