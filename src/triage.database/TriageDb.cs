@@ -6,6 +6,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -41,33 +42,130 @@ namespace triage.database
 
             return dump.DumpId;
         }
-
         public static async Task UpdateDumpTriageInfo(int dumpId, Dictionary<string, string> triageData)
         {
+            await UpdateDumpTriageInfo(dumpId, TriageData.FromDictionary(triageData));
+        }
+
+        public static async Task UpdateDumpTriageInfo(int dumpId, TriageData triageData)
+        {
             if (triageData == null) throw new ArgumentNullException("triageData");
+
+            Dump dump = null;
 
             using (var context = new TriageDbContext(s_connStr))
             {
                 //find the dump to update
-                var dump = await context.Dumps.FindAsync(dumpId);
+                dump = await context.Dumps.FindAsync(dumpId);
 
                 if(dump == null)
                 {
                     throw new ArgumentException($"Could not update dump.  No dump was found with id {dumpId}", "dumpId");
                 }
 
-                dump.LoadTriageData(triageData);
+                await UpdateUniquelyNamedEntitiesAsync(context, triageData);
 
+                dump.LoadTriageData(triageData);
+            
                 await context.SaveChangesAsync();
             }
         }
-        
-        private const string BUCKET_DATA = @"SELECT * FROM [Buckets]";
+
+        private static async Task UpdateUniquelyNamedEntitiesAsync(TriageDbContext context, TriageData triageData)
+        {
+            //add or update the bucket if it exists
+            if (triageData.Bucket != null && triageData.Bucket.BucketId == 0)
+            {
+                triageData.Bucket = await GetUniquelyNamedEntityAsync(context, context.Buckets, triageData.Bucket);
+                
+            }
+
+            var addedModules = triageData.Threads.Where(t => t.ThreadId == 0).SelectMany(t => t.Frames).Select(f => f.Module).Where(m => m.ModuleId == 0).OrderBy(m => m.Name).ToArray();
+
+            for (int i = 0; i < addedModules.Length; i++)
+            {
+                if (i > 0 && addedModules[i].Name == addedModules[i - 1].Name)
+                {
+                    addedModules[i].ModuleId = addedModules[i - 1].ModuleId;
+                }
+                else
+                {
+                    addedModules[i].ModuleId = (await GetUniquelyNamedEntityAsync(context, context.Modules, addedModules[i])).ModuleId;
+                }
+            }
+            
+            var addedRoutines = triageData.Threads.Where(t => t.ThreadId == 0).SelectMany(t => t.Frames).Select(f => f.Routine).Where(r => r.RoutineId == 0).OrderBy(r => r.Name).ToArray();
+
+            for (int i = 0; i < addedRoutines.Length; i++)
+            {
+                if (i > 0 && addedRoutines[i].Name == addedRoutines[i - 1].Name)
+                {
+                    addedRoutines[i].RoutineId = addedRoutines[i - 1].RoutineId;
+
+                }
+                else
+                {
+                    addedRoutines[i].RoutineId = (await GetUniquelyNamedEntityAsync(context, context.Routines, addedRoutines[i])).RoutineId;
+                }
+                
+            }
+
+            foreach(var frame in triageData.Threads.SelectMany(t => t.Frames))
+            {
+                frame.ModuleId = frame.Module.ModuleId;
+
+                frame.Module = null;
+
+                frame.RoutineId = frame.Routine.RoutineId;
+
+                frame.Routine = null;
+            }
+        }
+
+        private static async Task<T> GetUniquelyNamedEntityAsync<T>(TriageDbContext context, IDbSet<T> set, T entity) where T : UniquelyNamedEntity
+        {
+            if(entity.Name.Length > 450)
+            {
+                entity.Name = entity.Name.Substring(0, 450);
+            }
+
+            T tempEntity = await set.FirstOrDefaultAsync(e => e.Name == entity.Name);
+
+            if(tempEntity != null)
+            {
+                return tempEntity;
+            }
+
+            set.Add(entity);
+
+            await context.SaveChangesAsync();
+
+            return entity;
+
+        }
+
+        private const string BUCKET_DATA_QUERY = @"
+WITH [BucketHits]([BucketId], [HitCount], [StartTime], [EndTime]) AS
+(
+    SELECT [B].[BucketId] AS [BucketId], COUNT([D].[DumpId]) AS [HitCount], @p0 AS [StartTime], @p1 AS [EndTime]
+    FROM [Dumps] [D]
+    JOIN [Buckets] [B]
+        ON [D].[BucketId] = [B].[BucketId]
+        AND [D].[DumpTime] >= @p0
+        AND [D].[DumpTime] <= @p1
+    GROUP BY [B].[BucketId]
+)
+SELECT [B].[BucketId], [B].[Name], [B].[BugUrl], [H].[HitCount], [H].[StartTime], [H].[EndTime]
+FROM [Buckets] AS [B]
+JOIN [BucketHits] AS [H]
+    ON [B].[BucketId] = [H].[BucketId]
+";
+
         public static async Task<IEnumerable<BucketData>> GetBucketDataAsync(DateTime start, DateTime end)
         {
             using (var context = new TriageDbContext(s_connStr))
             {
-                var data = context.Database.SqlQuery<BucketData>(BUCKET_DATA, start, end);
+                var data = context.Database.SqlQuery<BucketData>(BUCKET_DATA_QUERY, start, end);
                 var returnValue = await data.ToArrayAsync();
                 return returnValue;
             }

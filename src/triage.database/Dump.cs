@@ -44,40 +44,20 @@ namespace triage.database
         [ForeignKey("BucketId")]
         public virtual Bucket Bucket { get; set; }
 
-        public void LoadTriageData(IDictionary<string, string> triageData)
+        public void LoadTriageData(TriageData triageData)
         {
-            if (triageData == null) throw new ArgumentNullException("triageData");
-
-            //copy into new dictionary so that we can modify
-            triageData = new Dictionary<string, string>(triageData);
-
-            string val = null;
-
-            //FAILURE_HASH corresponds to the bucket the dump belongs in
-            if (triageData.TryGetValue("FAILURE_HASH", out val))
+            if (this.BucketId != triageData.BucketId)
             {
-                this.Bucket = new Bucket() { Name = val };
-
-                triageData.Remove("FAILURE_HASH");
+                this.BucketId = triageData.BucketId;
             }
 
-            //ALL_THREADS corresponds to the json searialized thread data in the triage data
-            if (triageData.TryGetValue("ALL_THREADS", out val))
+            //for now clear all the threads and insert all new ones
+            //might consider changing to do an in place update if turns out to be a perf issue
+            this.Threads.Clear();
+
+            foreach(var t in triageData.Threads)
             {
-                var threadData = triageData["ALL_THREADS"];
-
-                var threads = DeserializeAllThreads(threadData);
-                
-                //for now clear all the threads and insert all new ones
-                //might consider changing to do an in place update if turns out to be a perf issue
-                this.Threads.Clear();
-
-                foreach(var t in threads)
-                {
-                    this.Threads.Add(t);
-                }
-
-                triageData.Remove("ALL_THREADS");
+                this.Threads.Add(t);
             }
 
             //for now clear all the properties and insert all new ones
@@ -85,54 +65,10 @@ namespace triage.database
             this.Properties.Clear();
 
             //store the remaining properties
-            foreach (var kvp in triageData)
+            foreach (var p in triageData.Properties)
             {
-                this.Properties.Add(new Property() { Name = kvp.Key, Value = kvp.Value });
+                this.Properties.Add(p);
             }
-        }
-
-        private static List<Thread> DeserializeAllThreads(string allThreadsValue)
-        {
-            List<Thread> allThreads = new List<Thread>();
-
-            var serializer = JsonSerializer.CreateDefault();
-
-            var txtReader = new StringReader(allThreadsValue);
-
-            var jsonReader = new JsonTextReader(txtReader);
-
-            var threadObjs = serializer.Deserialize<List<ThreadDeserializerObj>>(jsonReader);
-
-            for(int i = 0; i < threadObjs.Count; i++)
-            {
-                Thread t = new Thread()
-                {
-                    CurrentThread = (i == 0),
-                    Number = threadObjs[i].Index,
-                    OSId = threadObjs[i].Osid
-                };
-
-                for(int j = 0; j < threadObjs[i].Frames.Count; j++)
-                {
-                    var splitFrame = threadObjs[i].Frames[j].Split(new char[] { '!' }, 2);
-
-                    if (splitFrame.Length == 2)
-                    {
-                        t.Frames.Add(new Frame() { Index = j, Module = new Module() { Name = splitFrame[0] }, Routine = new Routine() { Name = splitFrame[1] } });
-                    }
-                }
-
-                allThreads.Add(t);
-            }
-
-            return allThreads;
-        }
-
-        private class ThreadDeserializerObj
-        {
-            public string Osid = null;
-            public int Index = 0;
-            public List<string> Frames = null;
         }
     }
 }

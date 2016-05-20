@@ -28,16 +28,6 @@ namespace triage.database
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Module>().MapToStoredProcedures(s => 
-                s.Insert(u => u.HasName("Module_Insert")
-                                .Parameter(r => r.Name, "name")));
-            modelBuilder.Entity<Routine>().MapToStoredProcedures(s =>
-                s.Insert(u => u.HasName("Routine_Insert")
-                                .Parameter(r => r.Name, "name")));
-            modelBuilder.Entity<Bucket>().MapToStoredProcedures(s =>
-                s.Insert(u => u.HasName("Bucket_Insert")
-                                .Parameter(r => r.Name, "name")));
         }
     }
 }

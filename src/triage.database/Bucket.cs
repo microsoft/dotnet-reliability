@@ -12,19 +12,14 @@ using System.Threading.Tasks;
 
 namespace triage.database
 {
-    public class Bucket
+    public class Bucket : UniquelyNamedEntity
     {
         public Bucket()
         {
         }
 
         public int BucketId { get; set; }
-
-        [Required]
-        [Index(IsUnique = true)]
-        [StringLength(450)]
-        public string Name { get; set; }
-
+        
         public string BugUrl { get; set; }
     }
 }
