@@ -42,6 +42,10 @@ namespace triage.database
 
             return dump.DumpId;
         }
+        public static async Task UpdateDumpTriageInfo(int dumpId, Dictionary<string, string> triageData)
+        {
+            await UpdateDumpTriageInfo(dumpId, TriageData.FromDictionary(triageData));
+        }
 
         public static async Task UpdateDumpTriageInfo(int dumpId, TriageData triageData)
         {
@@ -151,7 +155,7 @@ WITH [BucketHits]([BucketId], [HitCount], [StartTime], [EndTime]) AS
         AND [D].[DumpTime] <= @p1
     GROUP BY [B].[BucketId]
 )
-SELECT [B].*, [H].[HitCount], [H].[StartTime], [H].[EndTime]
+SELECT [B].[BucketId], [B].[Name], [B].[BugUrl], [H].[HitCount], [H].[StartTime], [H].[EndTime]
 FROM [Buckets] AS [B]
 JOIN [BucketHits] AS [H]
     ON [B].[BucketId] = [H].[BucketId]
