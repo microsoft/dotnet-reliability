@@ -33,6 +33,9 @@
     </Compile>
     <Compile Include="analysis.py" />
     <Compile Include="analysis_worker.py" />
+    <Compile Include="dumpling.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="dumpling_util.py">
       <SubType>Code</SubType>
     </Compile>
