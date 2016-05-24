@@ -64,7 +64,14 @@ namespace triage.database
                 }
 
                 await UpdateUniquelyNamedEntitiesAsync(context, triageData);
+                
+                //remove all the dump properties from the context before updating
+                //this is needed because property has a required FK to dumpId so
+                //properties without an associated dump are not allowed
+                context.Properties.RemoveRange(dump.Properties);
 
+                dump.Properties.Clear();
+                
                 dump.LoadTriageData(triageData);
             
                 await context.SaveChangesAsync();
