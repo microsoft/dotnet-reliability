@@ -70,8 +70,16 @@ namespace triage.database
                 //properties without an associated dump are not allowed
                 context.Properties.RemoveRange(dump.Properties);
 
-                dump.Properties.Clear();
-                
+                var frames = dump.Threads.SelectMany(t => t.Frames).ToArray();
+
+                context.Frames.RemoveRange(frames);
+
+                context.Threads.RemoveRange(dump.Threads);
+
+                await context.SaveChangesAsync();
+
+                await context.Entry<Dump>(dump).ReloadAsync();
+
                 dump.LoadTriageData(triageData);
             
                 await context.SaveChangesAsync();
