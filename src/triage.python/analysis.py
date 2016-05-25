@@ -64,11 +64,13 @@ class DbgEngine(threading.local):
             #if the three strings are in the expected format
             if len(splitline) == 3 and self.__ishexstr(splitline[0]) and self.__ishexstr(splitline[1]) and len(splitline[2]) > 0:
                 strIp = splitline[1]
-                splitFrame = string.split(splitline[2], '!', 1)
+                #remove any offset string from the frame so this doesn't get included in strMod or strMeth
+                strFrame = string.split(splitline[2], ' + ', 1)[0]
+                splitFrame = string.split(strFrame, '!', 1)
                 strMod = splitFrame[0]
                 strMeth = ''
                 if len(splitFrame) > 1:
-                    strMeth = string.split(splitFrame[1], ' + ', 1)[0]
+                    strMeth = splitFrame[1]
                 dbgFrame = DbgFrame.FromStrs(strIp, strMod, strMeth)
                 frames.append(dbgFrame)
         return frames;
