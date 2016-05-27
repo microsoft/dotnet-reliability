@@ -174,6 +174,7 @@ SELECT [B].[BucketId], [B].[Name], [B].[BugUrl], [H].[HitCount], [H].[StartTime]
 FROM [Buckets] AS [B]
 JOIN [BucketHits] AS [H]
     ON [B].[BucketId] = [H].[BucketId]
+ORDER BY [H].[HitCount] DESC
 ";
 
         public static async Task<IEnumerable<BucketData>> GetBucketDataAsync(DateTime start, DateTime end)
@@ -192,6 +193,7 @@ FROM [Dumps]
 WHERE [BucketId] = @p0
     AND [DumpTime] >= @p1
     AND [DumpTime] <= @p2
+ORDER BY [Dumps].[Id] DESC
 ";
         public static async Task<IEnumerable<Dump>> GetBucketDataDumpsAsync(BucketData bucketData)
         {
