@@ -426,7 +426,7 @@ class StackTriageEngine(object):
     def triage_stack(self, lstFrame):
         for frame in lstFrame:
             rule = self.find_matching_rule(frame)
-            if (rule is None or string.strip(rule.strFollowup.lower()) <> 'ignore') and frame.strFullFrame <> 'UNKNOWN!UNKNOWN':
+            if (rule is None or string.strip(rule.strFollowup.lower()) <> 'ignore') and frame.strFullFrame <> 'UNKNOWN!UNKNOWN' and frame.strRoutine <> 'UNKNOWN' and frame.strModule <> 'UNKNOWN':
                 return (frame, rule)
         return None
     
