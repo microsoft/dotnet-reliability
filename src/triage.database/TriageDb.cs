@@ -193,7 +193,7 @@ FROM [Dumps]
 WHERE [BucketId] = @p0
     AND [DumpTime] >= @p1
     AND [DumpTime] <= @p2
-ORDER BY [Dumps].[Id] DESC
+ORDER BY [Dumps].[DumpId] DESC
 ";
         public static async Task<IEnumerable<Dump>> GetBucketDataDumpsAsync(BucketData bucketData)
         {
