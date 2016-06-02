@@ -4,6 +4,7 @@ from datetime import date
 from datetime import timedelta
 
 from azure.storage      import CloudStorageAccount, AccessPolicy, AccountPermissions
+from azure.servicebus   import ServiceBusService, Message
 from dumpling_util      import Logging
 
 import nearby_config
@@ -12,6 +13,11 @@ _config = nearby_config.named('analysis_worker_config.json')
 s_storage_account        = CloudStorageAccount(_config.STORAGE_ACCOUNT_NAME, _config.STORAGE_ACCOUNT_KEY)
 s_blob_service           = s_storage_account.create_block_blob_service()
 s_tableService 	         = s_storage_account.create_table_service();
+
+_bus_service = ServiceBusService(
+    service_namespace= _config.SERVICE_BUS_NAMESPACE,
+    shared_access_key_name= _config.SHARED_ACCESS_KEY_NAME,
+    shared_access_key_value= _config.SERVICE_BUS_KEY)
 
 class DumplingStateContext:    
     def Update(self):
@@ -24,7 +30,7 @@ class DumplingStateContext:
  
     def SaveResult(self, result, testContext):
         Logging.Event('SaveResults', 9)
-        
+        Logging.Verbose("Test Context Length: %i" % (len(testContext)))
         # unpack our tuple
         path = testContext[0]
         correlationId = testContext[1]
@@ -46,7 +52,17 @@ class DumplingStateContext:
         # update the dumpling state table with the results uri
         self.data['Results_uri'] = s_blob_service.make_blob_url(containerName, blobName, sas_token = blob_sas)
         self.Update()
+
+        self.IndexResult(result)
         
+    def IndexResult(self, result):
+        properties = { 'data_type' : 'sql_index_target', 'dumpling_id': self.data['RowKey']}
+
+        msg = Message(result.encode('ascii'))
+        msg.custom_properties = properties;
+
+        _bus_service.send_queue_message("dataworkerqueue", msg) 
+
     def __init__(self, owner, dumpling_id, download_uri):
     
 	    # sanity
