@@ -110,32 +110,87 @@ namespace stress.codegen
             return new KeyValuePair<string, string>(dependProp.Name, dependencyVersion);
         }
 
-        public static ProjectJsonDependencyInfo MergeToLatest(IEnumerable<ProjectJsonDependencyInfo> projectJsons)
+        public static ProjectJsonDependencyInfo MergeToLatest(IEnumerable<ProjectJsonDependencyInfo> projectJsons, string oldprerelease = null, string newprerelease = null)
         {
             var merged = new ProjectJsonDependencyInfo();
 
             merged.dependencies = new Dictionary<string, string>();
-
-            //merged.frameworks = new Dictionary<string, Dictionary<string, string>>();
-            //merged.runtimes = new Dictionary<string, Dictionary<string, string>>();
-
+            
             foreach (var pjson in projectJsons)
             {
                 if (pjson.dependencies != null)
                 {
                     foreach (var depend in pjson.dependencies)
                     {
+                        var depVer = ComplexVersion.Parse(depend.Value);
+                        
+                        if(newprerelease != null && depVer.Prerelease == oldprerelease)
+                        {
+                            depVer.Prerelease = newprerelease;
+                        }
+
                         //if the dependency is not present in the merged dependencies OR the version in the current pjson is a greater than the one in merged 
                         //if string.Compare returns > 0 then depend.Value is greater than the one in merged, this should mean a later version 
-                        if (!merged.dependencies.ContainsKey(depend.Key) || (string.Compare(merged.dependencies[depend.Key], depend.Value, StringComparison.InvariantCultureIgnoreCase) < 0))
+                        if (!merged.dependencies.ContainsKey(depend.Key) || (ComplexVersion.Parse(merged.dependencies[depend.Key]) < depVer))
                         {
-                            merged.dependencies[depend.Key] = depend.Value;
+                            merged.dependencies[depend.Key] = depVer.ToString();
                         }
                     }
                 }
             }
 
             return merged;
+        }
+        
+        private class ComplexVersion
+        {
+            public Version StrongVersion;
+            public string Prerelease;
+
+            public static ComplexVersion Parse(string verStr)
+            {
+                ComplexVersion ver = null;
+
+                if(verStr != null)
+                {
+                    var splitVerStr = verStr.Split(new char[] { '-' }, 2);
+
+                    var strongVerStr = splitVerStr[0];
+
+                    var prerelVerStr = splitVerStr.Length > 1 ? splitVerStr[1] : null;
+
+                    Version strongVer;
+
+                    if(Version.TryParse(strongVerStr, out strongVer))
+                    {
+                        ver = new ComplexVersion() { StrongVersion = strongVer, Prerelease = prerelVerStr };
+                    }
+                }
+
+                return ver;
+            }
+
+            public static bool operator >(ComplexVersion x, ComplexVersion y)
+            {
+                return (x.StrongVersion > y.StrongVersion) || (y.Prerelease == null || ((x.Prerelease != null) && (string.Compare(x.Prerelease, y.Prerelease, StringComparison.InvariantCultureIgnoreCase) > 0)));
+            }
+
+            public static bool operator <(ComplexVersion x, ComplexVersion y)
+            {
+                return (x.StrongVersion < y.StrongVersion) || (x.Prerelease == null && y.Prerelease != null) || ((y.Prerelease != null) && (string.Compare(x.Prerelease, y.Prerelease, StringComparison.InvariantCultureIgnoreCase) < 0));
+            }
+
+            public override string ToString()
+            {
+                string verStr = this.StrongVersion.ToString();
+
+                if (!string.IsNullOrEmpty(this.Prerelease))
+                {
+                    verStr += "-" + this.Prerelease;
+                }
+
+                return verStr;
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\dir.props" />
+
+  <Import Project="$(MSBuildThisFileDirectory)dir.props" />
 
   <PropertyGroup>
     <BuildMoniker Condition="'$(BuildMoniker)' == ''">$(USERNAME)-$([System.DateTime]::Now.ToString(MMdd-hhmmss))</BuildMoniker>
@@ -41,6 +42,7 @@
   <PropertyGroup>
     <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
     <UnitTestCLIProjJson>$(UnitTestCLIProjDir)project.json</UnitTestCLIProjJson>
+    <UnitTestCLIProjLockJson>$(UnitTestCLIProjDir)project.lock.json</UnitTestCLIProjLockJson>
     <UnitTestPackageDir>$(MSBuildThisFileDirectory)../packages/</UnitTestPackageDir>
     <UnitTestExtractDir>$(BaseIntermediateOutputPath)utextracted/</UnitTestExtractDir>
     <UnitTestExtractedSemaphore>$(UnitTestExtractDir)extraction.complete</UnitTestExtractedSemaphore>
@@ -50,24 +52,61 @@
   </PropertyGroup>
   
   <PropertyGroup>
+  <!-- 
+    Generate the list of properties to pass through to child build processes
+    Note: NugetRuntimeIdentifier properties are not set here as they are based off the NugetRuntime ItemGroup below
+  -->
     <GeneratedProjectBuildProps>UnitTestDependsBin=$(UnitTestDependsBin)</GeneratedProjectBuildProps>
-    <GeneratedProjectBuildProps Condition="'$(BaseNuGetRuntimeIdentifier)' != ''">$(GeneratedProjectBuildProps);BaseNuGetRuntimeIdentifier=$(BaseNuGetRuntimeIdentifier)</GeneratedProjectBuildProps>
-    <GeneratedProjectBuildProps Condition="'$(TestNugetRuntimeId)' != ''">$(GeneratedProjectBuildProps);TestNugetRuntimeId=$(TestNugetRuntimeId)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(LocalPackageSource)' != ''">$(GeneratedProjectBuildProps);LocalPackageSource=$(LocalPackageSource)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ConfigurationGroup)' != ''">$(GeneratedProjectBuildProps);ConfigurationGroup=$(ConfigurationGroup)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ArchiveTests)' != ''">$(GeneratedProjectBuildProps);ArchiveTests=$(ArchiveTests)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(BuildMoniker)' != ''">$(GeneratedProjectBuildProps);BuildMoniker=$(BuildMoniker)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(TestDisabled)' != ''">$(GeneratedProjectBuildProps);TestDisabled=$(TestDisabled)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(EnableCloudTest)' != ''">$(GeneratedProjectBuildProps);EnableCloudTest=$(EnableCloudTest)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(Creator)' != ''">$(GeneratedProjectBuildProps);Creator=$(Creator)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(TimeoutInSeconds)' != ''">$(GeneratedProjectBuildProps);TimeoutInSeconds=$(TimeoutInSeconds)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(TestProduct)' != ''">$(GeneratedProjectBuildProps);TestProduct=$(TestProduct)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(Branch)' != ''">$(GeneratedProjectBuildProps);Branch=$(Branch)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(SuitePath)' != ''">$(GeneratedProjectBuildProps);SuitePath=$(SuitePath)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(LocalPackageSource)' != ''">$(GeneratedProjectBuildProps);LocalPackageSource=$(LocalPackageSource)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(CloudDropAccountName)' != ''">$(GeneratedProjectBuildProps);CloudDropAccountName=$(CloudDropAccountName)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(CloudResultsAccountName)' != ''">$(GeneratedProjectBuildProps);CloudResultsAccountName=$(CloudResultsAccountName)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(CloudDropAccessToken)' != ''">$(GeneratedProjectBuildProps);CloudDropAccessToken=$(CloudDropAccessToken)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(CloudResultsAccessToken)' != ''">$(GeneratedProjectBuildProps);CloudResultsAccessToken=$(CloudResultsAccessToken)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(BuildCompleteConnection)' != ''">$(GeneratedProjectBuildProps);BuildCompleteConnection=$(BuildCompleteConnection)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(OverwriteOnUpload)' != ''">$(GeneratedProjectBuildProps);OverwriteOnUpload=$(OverwriteOnUpload)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(EventHubPath)' != ''">$(GeneratedProjectBuildProps);EventHubPath=$(EventHubPath)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(EventHubSharedAccessKey)' != ''">$(GeneratedProjectBuildProps);EventHubSharedAccessKey=$(EventHubSharedAccessKey)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(EventHubSharedAccessKeyName)' != ''">$(GeneratedProjectBuildProps);EventHubSharedAccessKeyName=$(EventHubSharedAccessKeyName)</GeneratedProjectBuildProps>
   </PropertyGroup>
   
   <Import Project="..\dir.targets" />
-
-  <Import Project="..\dir.traversal.targets" />
-  <Import Project="$(ToolsDir)Build.Post.targets" Condition="Exists('$(ToolsDir)Build.Post.targets')" />
   
   <UsingTask TaskName="MergeAllProjectJsonsTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
+  <ItemGroup>
+    <NugetRuntime Include="ubuntu.14.04-x64">
+        <TargetQueue>Ubuntu.1404.Amd64.Stress</TargetQueue>
+        <CloudTestContainerSuffix>-ubuntu$(CloudTestContainerSuffix)</CloudTestContainerSuffix>
+        <TargetOS>Linux</TargetOS>
+        <OSGroup>Linux</OSGroup>
+    </NugetRuntime>
+    <NugetRuntime Include="centos.7-x64">
+        <TargetQueue>Centos.71.Amd64.Stress</TargetQueue>
+        <CloudTestContainerSuffix>-centos$(CloudTestContainerSuffix)</CloudTestContainerSuffix>
+        <TargetOS>Linux</TargetOS>
+        <OSGroup>Linux</OSGroup>
+    </NugetRuntime>
+    <NugetRuntime Include="rhel.7-x64">
+        <TargetQueue>Redhat.72.Amd64.Stress</TargetQueue>
+        <CloudTestContainerSuffix>-rhel$(CloudTestContainerSuffix)</CloudTestContainerSuffix>
+        <TargetOS>Linux</TargetOS>
+        <OSGroup>Linux</OSGroup>
+    </NugetRuntime>
+  </ItemGroup>
+  
   <ItemGroup>
     <ZipFile Include="$(UnitTestDirectory)**\*.zip"/>
   </ItemGroup>
@@ -82,7 +121,7 @@
     <WriteLinesToFile File="$(UnitTestExtractedSemaphore)" Lines="" Overwrite="false" />
   </Target>
  
- <Target Name="UnzipTest"
+  <Target Name="UnzipTest"
     Inputs="@(ZipFile)"
     Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))">
 
@@ -109,6 +148,8 @@
     <MergeAllProjectJsonsTask 
         InPath="$(UnitTestExtractDir)" 
         OutPath="$(UnitTestCLIProjJson)"
+        OldPrerelease="$(UpgradableMoniker)"
+        NewPrerelease="$(BuildMoniker)"
         Debug="$(DebugMergeProjectJson)"/>
     
     <ItemGroup>
@@ -122,6 +163,11 @@
     <!-- restore and publish the dummy project to get a flat  -->
     <Exec Command="$(TestDependRestoreCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
     <Exec Command="$(TestDependPublishCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
+    
+    
+    <MakeDir Directories="$(SuitePath)"/>
+    <Copy SourceFiles="$(UnitTestCLIProjJson)" DestinationFiles="$(SuitePath)project.json"/>
+    
   </Target>
 
     <ItemGroup>
@@ -148,22 +194,26 @@
       PackageConfigPath="$(UnitTestCLIProjJson)"/>    
      
      <ItemGroup>
-      <GeneratedJsonFiles Include="$(SuitePath)**/project.json">
-        <OverridePath>$(UnitTestCLIProjJson)</OverridePath>
-      </GeneratedJsonFiles>
+      <GeneratedJsonFiles Include="$(SuitePath)**/project.json"/>
     </ItemGroup>
   </Target>
 
-  <Target Name="Build" DependsOnTargets="GenerateStressSuiteSource">
+  <Target Name="Build" DependsOnTargets="GenerateStressSuiteSource"
+    Inputs="@(NugetRuntime)"
+    Outputs="%(NugetRuntime.TargetQueue)">
     <ItemGroup>
       <GeneratedProjects Include="$(SuitePath)**\*.csproj"/>
     </ItemGroup>
     
+    <PropertyGroup>
+        <ChildProps>$(GeneratedProjectBuildProps);TargetQueue=%(NugetRuntime.TargetQueue);CloudTestContainerSuffix=%(NugetRuntime.CloudTestContainerSuffix);TargetOS=%(NugetRuntime.TargetOS);OSGroup=%(NugetRuntime.OSGroup);BaseNuGetRuntimeIdentifier=%(NugetRuntime.Identity);TestNugetRuntimeId=%(NugetRuntime.Identity)</ChildProps>
+    </PropertyGroup>
+    
     <MSBuild Targets="Build"
-      Projects="@(GeneratedProjects)"
+      Projects="$(MSBuildThisFileDirectory)buildgen.proj"
       BuildInParallel="true"
       ContinueOnError="true"
-      Properties="$(GeneratedProjectBuildProps)"/>
+      Properties="$(ChildProps)"/>
   </Target>
 
   <Target Name="Clean">
@@ -174,7 +224,7 @@
     </ItemGroup>
     
     <MSBuild Targets="Clean"
-      Projects="@(GeneratedProjects)"
+      Projects="$(MSBuildThisFileDirectory)buildgen.proj"
       BuildInParallel="true"
       ContinueOnError="true"/>
     
