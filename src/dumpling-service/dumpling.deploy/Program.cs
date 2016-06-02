@@ -190,7 +190,7 @@ namespace dumplingService
         {
             using (var writer = Console.Out/*new StreamWriter(@"C:\temp\dumpling_deploy.log")*/)
             {
-                writer.WriteLine("deplying dumpling service");
+                writer.WriteLine("deploying dumpling service");
                 var deployTasks = new[] {
                     DeployStateTable(writer),
                     DeployAnalysisTopic(writer),
