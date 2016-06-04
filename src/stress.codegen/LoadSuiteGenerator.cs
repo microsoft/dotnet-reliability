@@ -58,7 +58,7 @@ namespace stress.codegen
                     //if we want to generate a legacy project file (i.e. ToF project file) use HelixToFProjectFileGenerator otherwise use LoadTestProjectFileGenerator
                     var projectFileGenerator = legacyProject ? (ISourceFileGenerator)new HelixToFProjectFileGenerator() : (ISourceFileGenerator)new LoadTestProjectFileGenerator();
 
-                    if(!legacyProject)
+                    if (!legacyProject)
                     {
                         generators.Add(new LoadTestProjectJsonFileGenerator());
                     }

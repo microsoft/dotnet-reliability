@@ -1,4 +1,7 @@
 ##`dumpling` service
+
+###http://aka.ms/dumpling
+
 #####What is `dumpling` service?
 
 `dumpling` is the name of the DotNet dump analytics cli, and its storage service. Given a dump file, the service extracts information and catalogues it for future review.
@@ -27,18 +30,8 @@ A runtime developer is looking for bugs to fix, and visits the `dumpling` websit
 		- Ubuntu 14.04 VM
 		- CentOS VM
 6. `stable` [**analysis artifacts storage**](state-and-storage.md)
-7. `in-progress` Report Viewing
-   - `in-progress` PowerBI for high-level status
-   - `todo` ASP.Net WebViews for actionable data
+7. `stable` Report Viewing
+   - `cut?` PowerBI for high-level status
+   - `stable` [ASP.Net WebView for actionable data](http://aka.ms/dumpling)
 
-#####The Gap Tasks
-These are the remaining actionable tasks to meet the minimum-viable product of our vision.
-
-1. Bring up SQL Database
-    - `sschaabs` has a code-first Entity Framework base laid out that has withstood the test of time.
-2. Create web view that displays the results of our dumps.
-	- Write SQL queries to be displayed
-	- PowerBI (funnel)
-	- Write HTML/JavaScript to be viewed.
-	- Adjusted/Unadjusted mean time to failure.
  

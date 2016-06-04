@@ -1,0 +1,232 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>dumpling</title>
+    <link href='https://fonts.googleapis.com/css?family=Graduate' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Numans' rel='stylesheet' type='text/css'>
+    <style>
+        a {
+            color:#FF9976;
+        }
+
+        table.buckets {
+            width:100%;
+            border:3px;
+            border-color: white;
+        }
+
+        div.context {
+            width:auto;
+        }
+
+        th.buckets {
+            background-color:white;
+            text-align:right;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        td.buckets {
+            background-color:floralwhite;
+            text-align:right;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        td.hitcount {
+            font-family: 'Numans', sans-serif;
+            font-size:32px;
+            text-align:center;
+            vertical-align:top;
+            background-color:#FFECE5;
+            width:85px;
+            color:#000000;
+            border-top-width:thin;
+            border-top-color:#FFCCC5;
+            border-top-style:solid;
+        }
+
+        table.dumps {
+            width:100%;
+        }
+
+        th.dumps {
+            text-align:right;
+        }
+
+        td.dumps {
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        td.failure_hash
+        {
+            font-family: 'Graduate', sans-serif;
+            font-size:16px;
+            text-align:right;
+            background-color:#FFFAFA;
+            column-span:all;
+            color:#000000;
+            word-wrap:break-word;
+            word-break:break-word;
+        }
+
+        td.dumpname {
+            background-color:lightyellow;
+            width:auto;
+            vertical-align:top;
+            text-align:left;
+        }
+
+        td.dumpname:hover {
+            background-color:yellow;
+        }
+
+        td.dumpid {
+            background-color:lightyellow;
+            vertical-align:top;
+            width:85px;
+            text-align:right;
+        }
+
+        td.dumpid:hover {
+            background-color:yellow;
+        }
+
+        td.dumpuploaded {
+            background-color:mintcream;
+            vertical-align:top;
+            width:165px;
+            text-align:right;
+        }
+
+        td.dumpuploaded:hover {
+            background-color:mediumspringgreen;
+        }
+
+        td.dumpusername {
+            background-color:aliceblue;
+            vertical-align:top;
+            width:85px;
+            text-align:right;
+        }
+        td.dumpusername:hover {
+            background-color:lightblue;
+        }
+
+
+        td.bugurl {
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <script>
+        var data = {};
+
+        // copy our data over to javascript.
+        @foreach(var properties in ViewData.Where(x => x.Key.StartsWith("dumpid.")))
+        {
+            @Html.Raw($"data[\"{properties.Key}\"] = {properties.Value};");
+        }
+        
+
+        function onMouseUp_toggleTable(currentElement)
+        {
+            // get the <td> that we're in and add a table below it.
+            var context = document.getElementById("datarow." + currentElement.id);
+           
+            var current_table = document.getElementById("current_table." + currentElement.id);
+
+            if (current_table != null) {
+                current_table.parentElement.removeChild(current_table);
+            } else {
+                var table = context.appendChild(document.createElement("table"));
+                table.id = "current_table." + currentElement.id;
+                table.border = 1;
+                
+                for (var index in data["dumpid." + currentElement.id]) {
+                    var row = table.appendChild(document.createElement("tr"));
+
+                    // VALUE
+                    var valueChild = document.createElement("td");
+                    valueChild.style.paddingLeft = 2;
+
+                    // We do this because our stacks use \n to separate lines. 
+                    valueChild.style.whiteSpace = 'pre-wrap';
+
+                    row.appendChild(valueChild)
+                        .appendChild(document.createTextNode(data["dumpid." + currentElement.id][index].Value));
+
+                    // KEY
+                    var keyChild = document.createElement("td");
+                    keyChild.style.font = "#333232";
+                    keyChild.style.backgroundColor = "#d1ac87";
+                    keyChild.align = "center";
+                    row.appendChild(keyChild)
+                        .appendChild(document.createTextNode(data["dumpid." + currentElement.id][index].Name));
+                    
+
+                }
+
+                table.appendChild
+
+                context.appendChild(table);
+            }
+        }
+    </script>
+
+    <div>
+        <table class="buckets">            
+            @foreach (triage.database.BucketData bucket in (ViewData["Buckets"] as triage.database.BucketData[]))
+            {
+                <tr style="border-top:thin solid #FFCCC5;">
+                    <td class="failure_hash"><p>@Html.Encode(bucket.Name)</p></td>
+                    <td class="hitcount" rowspan="2" align="center" valign="middle">
+                        <p>@Html.Encode((ViewData[bucket.Name] as triage.database.Dump[]).Count())</p>
+                    </td>
+                </tr>
+                <tr style="border-top:thin solid #FFCCC5;vertical-align:baseline" onmouseover="">
+                    <td align="left">
+                        <table class="dumps">
+                            <tr>
+                                <th class="dumpname">
+                                    display name
+                                </th>
+                                
+                                <th class="dumpid">
+                                    dumpling-id
+                                </th>
+
+                                <th class="dumpuploaded">
+                                    uploaded
+                                </th>
+                                <th class="dumpusername">
+                                    username
+                                </th>
+                            </tr>
+
+                            @foreach (triage.database.Dump dump in (ViewData[bucket.Name] as triage.database.Dump[]))
+                            {            
+                                <tr style="border-top:thin solid #FFCCC5;">
+                                    <td class="dumpname" onmouseup="onMouseUp_toggleTable(this)" id="@(dump.DumpId)">@(dump.DisplayName)</td>
+                                    <td class="dumpid">
+                                        <a href=@dump.DumpPath>@(dump.DumpId)</a>
+                                    </td>
+                                    <td onmouseup="onMouseUp_toggleTable(this)" class="dumpuploaded">@(dump.DumpTime)</td>
+                                    <td onmouseup="onMouseUp_toggleTable(this)" class="dumpusername">@(dump.Origin)</td>
+                                </tr>
+                                <tr>
+                                    <td align="right" id="datarow.@(dump.DumpId)" colspan="4">
+
+                                    </td>
+                                </tr>
+                            }
+                        </table>
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</body>
+</html>

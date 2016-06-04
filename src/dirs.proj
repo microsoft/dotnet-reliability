@@ -11,6 +11,7 @@
     <Project Include="triage.analysis\triage.analysis.csproj" />
     <Project Include="triage.database\triage.database.csproj" />
     <Project Include="triage.storage\triage.storage.csproj" />
+    <Project Include="dumpling-service\dumpling\dumpling.csproj" />
   </ItemGroup>
 
   <Import Project=".\dir.targets" />
