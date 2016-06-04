@@ -55,8 +55,9 @@
   <!-- 
     Generate the list of properties to pass through to child build processes
   -->
-    <GeneratedProjectBuildProps>UnitTestDependsBin=$(UnitTestDependsBin)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps>UnitTestDependsBin=$(UnitTestDependsBin);DisableReferenceCopyLocal=true</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(LocalPackageSource)' != ''">$(GeneratedProjectBuildProps);LocalPackageSource=$(LocalPackageSource)</GeneratedProjectBuildProps>
+    <GeneratedProjectBuildProps Condition="'$(TestWithLocalLibraries)' != ''">$(GeneratedProjectBuildProps);TestWithLocalLibraries=$(TestWithLocalLibraries)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ConfigurationGroup)' != ''">$(GeneratedProjectBuildProps);ConfigurationGroup=$(ConfigurationGroup)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ArchiveTests)' != ''">$(GeneratedProjectBuildProps);ArchiveTests=$(ArchiveTests)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(BuildMoniker)' != ''">$(GeneratedProjectBuildProps);BuildMoniker=$(BuildMoniker)</GeneratedProjectBuildProps>
