@@ -19,6 +19,9 @@ namespace stress.codegen
         [Required]
         public string OutPath { get; set; }
 
+        public string OldPrerelease { get; set; }
+        public string NewPrerelease { get; set; }
+
         public bool Debug { get; set; }
 
         public override bool Execute()
@@ -32,7 +35,7 @@ namespace stress.codegen
 
             var projectJsons = Directory.EnumerateFiles(InPath, "project.json", SearchOption.AllDirectories).Select(p => ProjectJsonDependencyInfo.FromFile(p));
 
-            var merged = ProjectJsonDependencyInfo.MergeToLatest(projectJsons);
+            var merged = ProjectJsonDependencyInfo.MergeToLatest(projectJsons, OldPrerelease, NewPrerelease);
 
             merged.ToFile(OutPath);
 
