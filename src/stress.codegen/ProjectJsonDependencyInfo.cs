@@ -34,7 +34,7 @@ namespace stress.codegen
                 { "osx.10.10-x64", new Dictionary<string, string>() },
                 { "centos.7-x64", new Dictionary<string, string>() },
                 { "rhel.7-x64", new Dictionary<string, string>() },
-                { "debian.8.2-x64", new Dictionary<string, string>() },
+                { "debian.8-x64", new Dictionary<string, string>() },
             };
         }
 

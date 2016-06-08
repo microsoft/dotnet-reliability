@@ -20,13 +20,8 @@ namespace triage.database
     public static class TriageDb
     {
         private static string s_connStr;
-
-        static TriageDb()
-        {
-            // Init(ConnString)
-        }
-
-        private static void Init(string connStr)
+        
+        public static void Init(string connStr)
         {
             s_connStr = connStr;
         }
