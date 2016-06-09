@@ -62,15 +62,25 @@ namespace triage.database
             {
                 this.Threads.Add(t);
             }
+            
+            var existingProps = new Dictionary<string, Property>();
 
-            //for now clear all the properties and insert all new ones
-            //might consider changing to do an in place update if turns out to be a perf issue
-            this.Properties.Clear();
-
-            //store the remaining properties
+            foreach (var prop in this.Properties)
+            {
+                existingProps[prop.Name] = prop;
+            }
+            
             foreach (var p in triageData.Properties)
             {
-                this.Properties.Add(p);
+                //if the property already exists update it, otherwise add it
+                if (existingProps.ContainsKey(p.Name))
+                {
+                    existingProps[p.Name].Value = p.Value;
+                }
+                else
+                {
+                    this.Properties.Add(p);
+                }
             }
         }
     }

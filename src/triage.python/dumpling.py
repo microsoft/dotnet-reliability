@@ -9,11 +9,11 @@ import argparse
 import os
 import zipfile
 import string
-import requests
 import platform
 import getpass     
 import urllib
 import time
+import json
 
 class DumplingService:
     _dumplingUri = 'http://dotnetrp.azurewebsites.net';
@@ -27,6 +27,8 @@ class DumplingService:
 
     @staticmethod
     def UploadZip(filepath):
+        import requests
+        
         upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0'%(getpass.getuser(), platform.dist()[0].lower());
         
         print 'Uploading core zip ' + args.zipfile  + ' to ' + upload_url
@@ -37,6 +39,22 @@ class DumplingService:
 
         return response.content
 
+def triage():
+    triageProps = { }
+    triageProps['CLIENT_ARCHITECTURE'] = platform.machine()
+    triageProps['CLIENT_PROCESSOR'] = platform.processor()
+    triageProps['CLIENT_NAME'] = platform.node()        
+    triageProps['CLIENT_OS'] = platform.system()           
+    triageProps['CLIENT_RELEASE'] = platform.release()     
+    triageProps['CLIENT_VERSION'] = platform.version()
+    if platform.system() == 'Linux':
+        distroTuple = platform.linux_distribution()
+        triageProps['CLIENT_DISTRO'] = distroTuple[0]
+        triageProps['CLIENT_DISTRO_VER'] = distroTuple[1]
+        triageProps['CLIENT_DISTRO_ID'] = distroTuple[2]
+        
+    return json.dumps(triageProps)
+
 def pack(strCorePath, strZipPath, lstAddPaths):
     """creates a zip file containing core dump and all related images"""
 
@@ -45,15 +63,16 @@ def pack(strCorePath, strZipPath, lstAddPaths):
     #add the core dump to the files to pack
     includedFiles[os.path.abspath(strCorePath)] = None
 
+    if lstAddPaths is not None:
+        for addPath in lstAddPaths:
+            absPath = os.path.abspath(addPath)
+            if os.path.isdir(absPath):
+                for dirpath, dirnames, filenames in os.walk(absPath):
+                    for name in filenames:
+                        includedFiles[os.path.join(dirpath, name)] = None
+            else:
+                includedFiles[absPath] = None
 
-    for addPath in lstAddPaths:
-        absPath = os.path.abspath(addPath)
-        if os.path.isdir(absPath):
-            for dirpath, dirnames, filenames in os.walk(absPath):
-                for name in filenames:
-                    includedFiles[os.path.join(dirpath, name)] = None
-        else:
-            includedFiles[absPath] = None
     debuggerLoaded = False
 
     try:
@@ -93,6 +112,10 @@ def pack(strCorePath, strZipPath, lstAddPaths):
     for k in includedFiles.keys():
         if k != os.path.abspath(strZipPath):
             add_to_zip(k, zip)
+                              
+    print 'adding /client.json'
+    
+    zip.writestr('client.json', triage())
 
     zip.close()
 
