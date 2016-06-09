@@ -13,7 +13,7 @@
 from datetime import datetime
 from os import path
 from azure.servicebus   import ServiceBusService, Message
-
+import sets
 import nearby_config
 _config = nearby_config.named('analysis_worker_config.json')
 
@@ -30,6 +30,8 @@ class Logging:
     
     OutStream = 'stdout'
 
+    _firedEvents = set()
+
     @staticmethod
     def Verbose(value):
         if Logging.CONFIG_VERBOSE_OUTPUT:
@@ -41,9 +43,18 @@ class Logging:
 
     @staticmethod
     def Event(kind, rank, cardinality = 1, category = "bizprofile", platform = _config.TARGET_OS):
+        # we will only fire events once until ResetEvents() is called.
+        if kind in Logging._firedEvents:
+            return
+            
         message  = '{ "Rank": %i, "Type": "DumplingService-%sAnalyzer-%s", "Cardinality": %i, "Category": "%s" }' % (rank, str(platform), str(kind), cardinality, str(category))
         _bus_service.send_event('dumplinghub', message)
+        Logging._firedEvents.add(kind)
         print("FIRED EVENT: " + message)
+
+    @staticmethod
+    def ResetEvents():
+        _firedEvents.clear();
 
     @staticmethod
     def Failure(value, error_code = 1, exitPython = True):
