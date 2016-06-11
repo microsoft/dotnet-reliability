@@ -29,7 +29,7 @@ class DumplingService:
     def UploadZip(filepath):
         import requests
         
-        upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0'%(getpass.getuser(), platform.dist()[0].lower());
+        upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0'%(getpass.getuser().lower(), platform.dist()[0].lower());
         
         print 'Uploading core zip ' + args.zipfile  + ' to ' + upload_url
         

@@ -22,17 +22,19 @@ namespace stress.codegen
 
     public class SourceFileInfo
     {
-        public string FileName { get; set; }
+        public string RelativePath { get; set; }
+
         public SourceFileAction SourceFileAction { get; set; }
 
         public SourceFileInfo()
         {
-            FileName = "";
+            RelativePath = "";
             SourceFileAction = SourceFileAction.None;
         }
-        public SourceFileInfo(string fileName, SourceFileAction sourceFileAction)
+
+        public SourceFileInfo(string relativePath, SourceFileAction sourceFileAction)
         {
-            FileName = fileName;
+            RelativePath = relativePath;
             SourceFileAction = sourceFileAction;
         }
     }

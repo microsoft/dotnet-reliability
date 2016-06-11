@@ -106,6 +106,8 @@ namespace stress.codegen
 
         public bool IsVoidReturn { get; set; }
 
+        public bool IsTaskReturn { get; set; }
+
         public bool IsGenericMethodDefinition { get; set; }
 
         public string Name { get; set; }
@@ -177,6 +179,13 @@ namespace stress.codegen
             if ((this.Method == null) || !this.Method.IsPublic || this.Method.IsAbstract || this.Method.IsGenericMethodDefinition)
             {
                 this.SkipReason = "Test method not accessible";
+
+                return false;
+            }
+
+            if(!this.Method.IsVoidReturn && !this.Method.IsTaskReturn)
+            {
+                this.SkipReason = "Test unsupported return type";
 
                 return false;
             }
