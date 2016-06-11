@@ -13,6 +13,7 @@ namespace stress.codegen
 {
     public class ExecutionFileGeneratorLinux : ISourceFileGenerator
     {
+        private const string STRESS_SCRIPT_NAME = "stress.sh";
         /*
          * scriptName - name of the script to be generated, this should include the path
          * testName - the name of the test executable
@@ -22,16 +23,14 @@ namespace stress.codegen
          */
         public void GenerateSourceFile(LoadTestInfo loadTestInfo)
         {
-            string lldbInspectionFileName = "inspectCoreWithLLDB.py";
-
-            string shellScriptPath = Path.Combine(loadTestInfo.SourceDirectory, "stress.sh");
+            string shellScriptPath = Path.Combine(loadTestInfo.SourceDirectory, STRESS_SCRIPT_NAME);
 
             using (TextWriter stressScript = new StreamWriter(shellScriptPath, false))
             {
                 // set the line ending for shell scripts
                 stressScript.NewLine = "\n";
 
-                stressScript.WriteLine("!# /bin/sh");
+                stressScript.WriteLine("#! /bin/sh");
                 stressScript.WriteLine();
                 stressScript.WriteLine();
 
@@ -52,9 +51,15 @@ namespace stress.codegen
                 stressScript.WriteLine("# The default limit for coredumps on Linux and Mac is 0 and this needs to be reset to allow core dumps to be created");
                 stressScript.WriteLine("echo calling [ulimit -c unlimited]");
                 stressScript.WriteLine("ulimit -c unlimited");
+                
                 // report the current limits (in theory this should get into the test log)
                 stressScript.WriteLine("echo calling [ulimit -a]");
                 stressScript.WriteLine("ulimit -a");
+
+                //set the core_pattern to produce the file 'core'
+                stressScript.WriteLine("echo \"sudo bash -c 'echo core > /proc/sys/kernel/core_pattern'\"");
+                stressScript.WriteLine("sudo bash -c 'echo core > /proc/sys/kernel/core_pattern'");
+
                 //update the coredump collection filter 
                 stressScript.WriteLine("echo 0x3F > /proc/self/coredump_filter");
                 stressScript.WriteLine();
@@ -92,130 +97,57 @@ namespace stress.codegen
                 stressScript.WriteLine("  echo Work item failed waiting for coredump...");
                 stressScript.WriteLine("  sleep 2m");
 
+                //test if the core file was created.  The core file should be named simply 'core' 
+                //this is true by default on most distros, but not all so this is depended on setting the core_pattern above
+                stressScript.WriteLine("  if [ -f \"$HELIX_WORKITEM_ROOT/execution/core\" ]");
+                stressScript.WriteLine("  then");
+
+                //if the file core file was produced upload it to the dumpling service 
+                stressScript.WriteLine("    echo zipping and uploading core to dumpling service");
+
+                stressScript.WriteLine($"    echo EXEC:  $HELIX_PYTHONPATH ./dumpling.py upload --corefile $HELIX_WORKITEM_ROOT/execution/core --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
+
+                stressScript.WriteLine($"    $HELIX_PYTHONPATH ./dumpling.py upload --corefile $HELIX_WORKITEM_ROOT/execution/core --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
+
+                stressScript.WriteLine("  else");
+
+                //if the core file was not 
+                stressScript.WriteLine("    echo no coredump file '$HELIX_WORKITEM_ROOT/execution/core' was found");
+
+                stressScript.WriteLine("  fi");
+
+                //the following code zips and uploads the entire execution directory to the helix results store
+                //it is here as a backup source of dump file storage until we are satisfied that the uploading dumps to 
+                //the dumpling service is solid and complete.  After that this can be removed as it is redundant
                 stressScript.WriteLine("  echo zipping work item data for coredump analysis");
-
                 stressScript.WriteLine($"  echo EXEC:  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip $HELIX_WORKITEM_ROOT/execution");
-
                 stressScript.WriteLine($"  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip $HELIX_WORKITEM_ROOT/execution");
-
                 stressScript.WriteLine($"  echo uploading coredump zip to $HELIX_RESULTS_CONTAINER_URI{loadTestInfo.TestName}.zip analysis");
-
                 stressScript.WriteLine($"  echo EXEC: $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip -result_name {loadTestInfo.TestName}.zip -upload_client_type Blob");
-
                 stressScript.WriteLine($"  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip -result_name {loadTestInfo.TestName}.zip -upload_client_type Blob");
 
                 stressScript.WriteLine("fi");
-                ////            stressScript.WriteLine("zip -r {0}.zip .", testName);
-                ////            stressScript.WriteLine("else");
-                ////            stressScript.WriteLine("  echo JRS - Test Passed. Report the pass.");
-                //stressScript.WriteLine("fi");
-                //stressScript.WriteLine();
-                //stressScript.WriteLine();
 
                 // exit the script with the return code
                 stressScript.WriteLine("exit $_EXITCODE");
             }
 
             // Add the shell script to the source files
-            loadTestInfo.SourceFiles.Add(new SourceFileInfo(shellScriptPath, SourceFileAction.Binplace));
+            loadTestInfo.SourceFiles.Add(new SourceFileInfo(STRESS_SCRIPT_NAME, SourceFileAction.Binplace));
 
-
-            var shimAssmPath = Assembly.GetAssembly(typeof(StressTestShim)).Location;
-            var shimAssm = Path.GetFileName(shimAssmPath);
-            string shimRefPath = Path.Combine(loadTestInfo.SourceDirectory, shimAssm);
-
-            File.Copy(shimAssmPath, shimRefPath);
-
-            loadTestInfo.SourceFiles.Add(new SourceFileInfo(shimAssmPath, SourceFileAction.Binplace));
-
-
-            // Generate the python script, figure out if the run script is being generated into
-            // a specific directory, if so then generate the LLDB python script there as well
-            GenerateLLDBPythonScript(lldbInspectionFileName, loadTestInfo);
+            //this script also depends on dumpling.py so add this to the source files
+            loadTestInfo.SourceFiles.Add(new SourceFileInfo(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Build.cmd))\src\triage.python\dumpling.py", SourceFileAction.Binplace));
         }
-
-        // The reason for the spacing and begin/end blocks is that python relies on whitespace instead of things
-        // like being/ends each nested block increases the spaces by 2
-        public void GenerateLLDBPythonScript(string scriptName, LoadTestInfo loadTestInfo)
-        {
-            // If the application is hosted then the debuggee is the host, otherwise it is the test exe
-            string debuggee = String.IsNullOrEmpty(loadTestInfo.SuiteConfig.Host) ? loadTestInfo.TestName + ".exe" : loadTestInfo.SuiteConfig.Host;
-
-            // the name of the core file (should be in the current directory)
-            string coreFileName = "core";
-
-            // LastEvent.txt will contain the ClrStack, native callstack and last exception (if I can get it)
-            string lastEventFile = "LastEvent.txt";
-
-            // LLDBError.txt will contain any error messages from failures to LLDB
-            string lldbErrorFile = "LLDBError.txt";
-
-            // Threads.txt will contain full native callstacks for each threads (equivalent of bt all)
-            string threadsFile = "Threads.txt";
-
-            string scriptNameWithPath = Path.Combine(loadTestInfo.SourceDirectory, scriptName);
-
-            using (TextWriter lldbScript = new StreamWriter(scriptNameWithPath, false))
-            {
-                // set the line ending for linux/mac
-                lldbScript.NewLine = "\n";
-                lldbScript.WriteLine("import lldb");
-                // Create the debugger object
-                lldbScript.WriteLine("debugger = lldb.SBDebugger.Create()");
-
-                // Create the return object. This contains the return informaton (success/failure, output or error text etc) from the debugger call
-                lldbScript.WriteLine("retobj = lldb.SBCommandReturnObject()");
-
-                // Load the SOS plugin
-                lldbScript.WriteLine("debugger.GetCommandInterpreter().HandleCommand(\"plugin load libsosplugin.so\", retobj)");
-
-                // Create the target 
-                lldbScript.WriteLine("target = debugger.CreateTarget('{0}')", debuggee);
-                // If the target was created successfully
-                lldbScript.WriteLine("if target:");
-                {
-                    // Load the core
-                    lldbScript.WriteLine("  process = target.LoadCore('{0}')", coreFileName);
-                    {
-                        // 
-                        lldbScript.WriteLine("  debugger.GetCommandInterpreter().HandleCommand(\"sos ClrStack\", retobj)");
-                        lldbScript.WriteLine("  if retobj.Succeeded():");
-                        {
-                            lldbScript.WriteLine("    LastEventFile = open('{0}', 'w')", lastEventFile);
-                            lldbScript.WriteLine("    LastEventFile.write(retobj.GetOutput())");
-                            lldbScript.WriteLine("    thread = process.GetSelectedThread()");
-                            lldbScript.WriteLine(@"    LastEventFile.write('\n'.join(str(frame) for frame in thread))");
-                            lldbScript.WriteLine("    LastEventFile.close()");
-                        }
-                        lldbScript.WriteLine("  else:");
-                        {
-                            lldbScript.WriteLine("    LLDBErrorFile = open('{0}', 'w')", lldbErrorFile);
-                            lldbScript.WriteLine("    LLDBErrorFile.write(retobj.GetError())");
-                            lldbScript.WriteLine("    LLDBErrorFile.close()");
-                        }
-                        lldbScript.WriteLine("  ThreadsFile = open('{0}', 'w')", threadsFile);
-                        lldbScript.WriteLine("  for thread in process:");
-                        {
-                            lldbScript.WriteLine(@"    ThreadsFile.write('Thread %s:\n' % str(thread.GetThreadID()))");
-                            lldbScript.WriteLine("    for frame in thread:");
-                            {
-                                lldbScript.WriteLine(@"      ThreadsFile.write(str(frame)+'\n')");
-                            }
-                        }
-                        lldbScript.WriteLine("  ThreadsFile.close()");
-                    }
-                }
-            }
-
-            // Add the python script to the source files
-            loadTestInfo.SourceFiles.Add(new SourceFileInfo(scriptNameWithPath, SourceFileAction.Binplace));
-        }
+        
     }
+
     public class ExecutionFileGeneratorWindows : ISourceFileGenerator
     {
+        private const string STRESS_SCRIPT_NAME = "stress.bat";
         public void GenerateSourceFile(LoadTestInfo loadTestInfo)// (string scriptName, string testName, Dictionary<string, string> envVars, string host = null)
         {
-            string batchScriptPath = Path.Combine(loadTestInfo.SourceDirectory, "stress.bat");
+            string batchScriptPath = Path.Combine(loadTestInfo.SourceDirectory, STRESS_SCRIPT_NAME);
+
             using (TextWriter stressScript = new StreamWriter(batchScriptPath, false))
             {
                 stressScript.WriteLine("@echo off");
@@ -268,7 +200,7 @@ namespace stress.codegen
             }
 
             // Add the batch script to the source files
-            loadTestInfo.SourceFiles.Add(new SourceFileInfo(batchScriptPath, SourceFileAction.Binplace));
+            loadTestInfo.SourceFiles.Add(new SourceFileInfo(STRESS_SCRIPT_NAME, SourceFileAction.Binplace));
         }
     }
 }

@@ -59,7 +59,7 @@ namespace stress.generated
 
             File.WriteAllText(srcFilePath, source);
 
-            testInfo.SourceFiles.Add(new SourceFileInfo(srcFilePath, SourceFileAction.Compile));
+            testInfo.SourceFiles.Add(new SourceFileInfo("LoadTest.cs", SourceFileAction.Compile));
         }
 
         private string BuildExternAliasSnippet()
@@ -126,7 +126,14 @@ namespace stress.generated
 
         private string BuildUnitTestMethodContentSnippet(UnitTestInfo uTest)
         {
-            string contentSnippet = uTest.Method.IsStatic ? $"{uTest.QualifiedMethodStr}();" : $"new { uTest.QualifiedTypeStr }().{ uTest.QualifiedMethodStr}();";
+            string contentSnippet = uTest.Method.IsStatic ? $"{uTest.QualifiedMethodStr}()" : $"new { uTest.QualifiedTypeStr }().{ uTest.QualifiedMethodStr}()";
+
+            if(uTest.Method.IsTaskReturn)
+            {
+                contentSnippet += ".GetAwaiter().GetResult()";
+            }
+
+            contentSnippet += ";";
 
             return contentSnippet;
         }

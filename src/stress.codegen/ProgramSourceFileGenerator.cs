@@ -36,12 +36,11 @@ namespace stress.generated
     }}
 }}
     ";
-
             string srcFilePath = Path.Combine(loadTest.SourceDirectory, "Program.cs");
 
             File.WriteAllText(srcFilePath, sourceCode);
 
-            loadTest.SourceFiles.Add(new SourceFileInfo(srcFilePath, SourceFileAction.Compile));
+            loadTest.SourceFiles.Add(new SourceFileInfo("Program.cs", SourceFileAction.Compile));
         }
     }
 }

@@ -41,7 +41,7 @@ namespace stress.codegen
                                 AssemblyLastModified = File.GetLastWriteTime(assemblyInfo.Assembly.Location),
                                 ReferenceInfo = assemblyInfo.ReferenceInfo,
                                 Class = new TestClassInfo { FullName = assmClass.FullName, IsAbstract = assmClass.IsAbstract, IsGenericType = assmClass.IsGenericType || assmClass.IsGenericTypeDefinition, IsPublic = assmClass.IsPublic, HasDefaultCtor = assmClass.GetConstructor(Type.EmptyTypes) != null },
-                                Method = new TestMethodInfo { Name = method.Name, IsAbstract = method.IsAbstract, IsGenericMethodDefinition = method.IsGenericMethodDefinition, IsPublic = method.IsPublic, IsStatic = method.IsStatic, IsVoidReturn = method.ReturnType.Name.ToLowerInvariant() == "void" },
+                                Method = new TestMethodInfo { Name = method.Name, IsAbstract = method.IsAbstract, IsGenericMethodDefinition = method.IsGenericMethodDefinition, IsPublic = method.IsPublic, IsStatic = method.IsStatic, IsVoidReturn = method.ReturnType.Name.ToLowerInvariant() == "void", IsTaskReturn = method.ReturnType.Name == "Task" },
                             };
 
                             tests.Add(test);

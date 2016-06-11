@@ -17,7 +17,7 @@ namespace stress.codegen
 
             loadTestRefInfo.ToFile(srcFilePath);
 
-            loadTest.SourceFiles.Add(new SourceFileInfo(srcFilePath, SourceFileAction.None));
+            loadTest.SourceFiles.Add(new SourceFileInfo("project.json", SourceFileAction.None));
         }
     }
 }

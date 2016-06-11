@@ -50,12 +50,12 @@ namespace stress.codegen
                 if (file.SourceFileAction == SourceFileAction.Compile)
                 {
                     itemSnippet = $@"
-    <Compile Include='{Path.GetFileName(file.FileName)}'/>";
+    <Compile Include='{file.RelativePath}'/>";
                 }
                 else if (file.SourceFileAction == SourceFileAction.Binplace)
                 {
                     itemSnippet = $@"
-    <None Include='{Path.GetFileName(file.FileName)}'>
+    <None Include='{file.RelativePath}'>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None> ";
                 }
