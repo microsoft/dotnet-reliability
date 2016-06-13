@@ -55,11 +55,7 @@ namespace stress.codegen
                 // report the current limits (in theory this should get into the test log)
                 stressScript.WriteLine("echo calling [ulimit -a]");
                 stressScript.WriteLine("ulimit -a");
-
-                //set the core_pattern to produce the file 'core'
-                stressScript.WriteLine("echo \"sudo bash -c 'echo core > /proc/sys/kernel/core_pattern'\"");
-                stressScript.WriteLine("sudo bash -c 'echo core > /proc/sys/kernel/core_pattern'");
-
+                
                 //update the coredump collection filter 
                 stressScript.WriteLine("echo 0x3F > /proc/self/coredump_filter");
                 stressScript.WriteLine();
@@ -97,9 +93,12 @@ namespace stress.codegen
                 stressScript.WriteLine("  echo Work item failed waiting for coredump...");
                 stressScript.WriteLine("  sleep 2m");
 
-                //test if the core file was created.  The core file should be named simply 'core' 
-                //this is true by default on most distros, but not all so this is depended on setting the core_pattern above
-                stressScript.WriteLine("  if [ -f \"$HELIX_WORKITEM_ROOT/execution/core\" ]");
+                //test if the core file was created.  
+                //this condition makes the assumption that the file will be name either 'core' or 'core.*' which is true all the distros tested so far
+                //ideally this would be constrained more by setting /proc/sys/kernel/core_pattern to a specific file to look for
+                //however we don't have root permissions from this script when executing in helix so this would have to depend on machine setup
+                stressScript.WriteLine(@"  _corefile=$HELIX_WORKITEM_ROOT/execution/$(ls $HELIX_WORKITEM_ROOT/execution | grep -E --max-count=1 '^core(\..*)?$')");
+                stressScript.WriteLine("  if [ -n '$_corefile' ]");
                 stressScript.WriteLine("  then");
 
                 //if the file core file was produced upload it to the dumpling service 
@@ -107,7 +106,7 @@ namespace stress.codegen
 
                 stressScript.WriteLine($"    echo EXEC:  $HELIX_PYTHONPATH ./dumpling.py upload --corefile $HELIX_WORKITEM_ROOT/execution/core --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
 
-                stressScript.WriteLine($"    $HELIX_PYTHONPATH ./dumpling.py upload --corefile $HELIX_WORKITEM_ROOT/execution/core --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
+                stressScript.WriteLine($"    $HELIX_PYTHONPATH ./dumpling.py upload --corefile $_corefile --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
 
                 stressScript.WriteLine("  else");
 
