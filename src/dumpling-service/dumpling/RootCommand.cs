@@ -56,7 +56,7 @@ namespace dumpling
             {
                 var multipart = new MultipartFormDataContent();
                 multipart.Add(new StreamContent(new FileStream(file, FileMode.Open)));
-                var response = new HttpClient().PostAsync($"{BASE_URL}/dumpling/store/chunk/{@as}/{targetos}/{index}/{filesize}", multipart);
+                var response = new HttpClient().PostAsync($"{BASE_URL}/dumpling/store/chunk/{@as}/{targetos}/{index}/{filesize}/{Path.GetFileNameWithoutExtension(file)}", multipart);
 
                 Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result.Trim(new[] { '"' }));
             }

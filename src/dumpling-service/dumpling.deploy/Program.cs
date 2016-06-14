@@ -26,12 +26,12 @@ namespace dumplingService
         /// This topic is used to route messages to the correct analysis machine for analytics.
         /// </summary>
         /// <returns></returns>
-        private static async Task DeployAnalysisTopic(TextWriter writer, bool recreate = false)
+        private static async Task DeployAnalysisTopic(TextWriter writer, bool recreate = true)
         {
             var SubscriptionsAndConditions = new Dictionary<string, SqlFilter>()
             {
                 { "ubuntu", new SqlFilter("target_os = 'ubuntu'") },
-                { "centos", new SqlFilter("target_os = 'centos'") },
+                { "centos", new SqlFilter("target_os = 'centos' OR target_os = 'rhel' OR target_os = 'redhat'") },
                 { "windows", new SqlFilter("target_os = 'windows'") }
             };
             // check if the topic exists, then create it.

@@ -133,6 +133,7 @@ namespace dumplingWeb.Controllers
         /// <param name="filesize"></param>
         /// <returns></returns>
         [Route("dumpling/store/chunk/{owner}/{targetos}/{index}/{filesize}")]
+        [Route("dumpling/store/chunk/{owner}/{targetos}/{index}/{filesize}/{displayName}")]
         [HttpPost]
         public async Task<string> PostDumpChunk(string owner, string targetos, int index, ulong filesize, string displayName = "")
         {
@@ -146,6 +147,8 @@ namespace dumplingWeb.Controllers
                 throw new HttpResponseException(HttpStatusCode.UnsupportedMediaType);
             }
 
+            owner = owner.ToLowerInvariant();
+            targetos = targetos.ToLowerInvariant();
 
             await DumplingEventHub.FireEvent(new WebAPIStartUploadChunkEvent());
 
@@ -178,6 +181,7 @@ namespace dumplingWeb.Controllers
                 Origin = owner
             });
 
+
             StateTableIdentifier id = new StateTableIdentifier()
             {
                 Owner = owner,
@@ -190,13 +194,10 @@ namespace dumplingWeb.Controllers
             await StateTableController.AddOrUpdateStateEntry(new StateTableEntity(id)
             {
                 DumpRelics_uri = dump_uri,
-                OriginatingOS = targetos
+                OriginatingOS = targetos,
+                State = "enqueued"
             });
-
-            await StateTableController.SetState(id, "enqueued");
-
-            await DumplingDataWorkerQueueController.SendWork("check_if_helix_worker", $"{{ \"owner\": \"{owner}\" }}");
-
+            
             // Return result from storing content in the blob container
             return dumplingid.ToString();
         }
