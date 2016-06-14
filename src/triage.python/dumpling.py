@@ -38,6 +38,14 @@ class DumplingService:
         response = requests.post(upload_url, files = files)
 
         return response.content
+    
+    @staticmethod
+    def DownloadZip(dumplingId, zipPath):
+        download_url = DumplingService._dumplingUri + '/dumpling/download/%s'%(dumplingId)
+        
+        download(download_url, zipPath)
+    
+    
 
 def triage():
     triageProps = { }
@@ -172,6 +180,7 @@ if __name__ == '__main__':
                       type=str,
                       help='path to unpack the core dump zip file')
     parser.add_argument('--url', '-u', type=str, help='url of dumpling dump to download and unwrap')
+    parser.add_argument('--dumpid', 'd', type=int, help='the id of the dumpling dump to download and unwrap')
     parser.add_argument('--addpaths', nargs='*', type=str, help='path to additional files to be included in the packaged coredump')
     args = parser.parse_args()
 
@@ -191,7 +200,13 @@ if __name__ == '__main__':
             args.unpackdir = os.path.join(os.getcwd(), 'dumpling.%.7f'%time.time())
         if args.zipfile == None:
             args.zipfile = args.unpackdir + '.zip'
-        download(args.url, args.zipfile)
+        if args.dumpid is not None:
+            DumplingService.DownloadZip(args.dumpid)
+        elif args.url is not None:
+            download(args.url, args.zipfile)
+        else:
+            parser.print_help()
+            print 'either dumpid or url must be specified for the download command'
         if ~os.path.isdir(args.unpackdir):
             os.mkdir(args.unpackdir)
         unpack(args.zipfile, args.unpackdir)

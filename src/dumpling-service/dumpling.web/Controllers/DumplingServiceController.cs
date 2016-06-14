@@ -93,6 +93,20 @@ namespace dumplingWeb.Controllers
         }
 
         /// <summary>
+        /// Redirects to the dump url for downloading
+        /// </summary>
+        /// <param name="dumplingid">the dumpling id that was returned from /dumpling/storage/(owner)/(targetos)</param>
+        /// <returns></returns>
+        [Route("dumpling/download/{dumplingid:int}")]
+        [HttpGet]
+        public async Task<IHttpActionResult> Download(int dumplingid)
+        {
+            var dump = await TriageDb.GetDumpAsync(dumplingid);
+
+            return (!string.IsNullOrEmpty(dump?.DumpPath)) ? (IHttpActionResult)this.Redirect(dump.DumpPath) : ResponseMessage(Request.CreateResponse(HttpStatusCode.NotFound));    
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="owner">user identifier</param>
@@ -110,7 +124,7 @@ namespace dumplingWeb.Controllers
         }
 
         /// <summary>
-        /// index must be == 0 and filesize must be <= int.MaxValue
+        /// index must be == 0 and filesize must be &gt;= int.MaxValue
         /// At the moment a user will need to upload a single chunk, and then after that they can proceed to upload additional chunks to 
         /// </summary>
         /// <param name="owner"></param>
