@@ -15,6 +15,8 @@ namespace dumplingWeb.Controllers
     {
         public async Task<ActionResult> Index(DateTime start, DateTime end)
         {
+            end += TimeSpan.FromDays(1);
+
             var buckets = await TriageDb.GetBucketDataAsync(start, end);
 
             foreach (var bucket in buckets)

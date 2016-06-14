@@ -118,6 +118,7 @@ namespace dumplingWeb.Controllers
         /// <param name="index"></param>
         /// <param name="filesize"></param>
         /// <returns></returns>
+        [Route("dumpling/store/chunk/{owner}/{targetos}/{index}/{filesize}")]
         [Route("dumpling/store/chunk/{owner}/{targetos}/{index}/{filesize}/{displayName}")]
         [HttpPost]
         public async Task<string> PostDumpChunk(string owner, string targetos, int index, ulong filesize, string displayName = "")

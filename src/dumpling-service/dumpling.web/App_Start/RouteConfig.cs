@@ -19,7 +19,7 @@ namespace dumplingWeb
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{start}/{end}",
-                defaults: new { controller = "Home", action = "Index" , start = DateTime.UtcNow.Subtract(TimeSpan.FromDays(10)), end = DateTime.UtcNow }
+                defaults: new { controller = "Home", action = "Index" , start = DateTime.UtcNow.Subtract(TimeSpan.FromDays(10)), end = DateTime.Today }
             );
         }
     }
