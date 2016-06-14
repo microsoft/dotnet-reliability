@@ -97,14 +97,14 @@ namespace stress.codegen
                 //this condition makes the assumption that the file will be name either 'core' or 'core.*' which is true all the distros tested so far
                 //ideally this would be constrained more by setting /proc/sys/kernel/core_pattern to a specific file to look for
                 //however we don't have root permissions from this script when executing in helix so this would have to depend on machine setup
-                stressScript.WriteLine(@"  _corefile=$HELIX_WORKITEM_ROOT/execution/$(ls $HELIX_WORKITEM_ROOT/execution | grep -E --max-count=1 '^core(\..*)?$')");
+                stressScript.WriteLine(@"  _corefile=$(ls $HELIX_WORKITEM_ROOT/execution | grep -E --max-count=1 '^core(\..*)?$')");
                 stressScript.WriteLine("  if [ -n '$_corefile' ]");
                 stressScript.WriteLine("  then");
 
                 //if the file core file was produced upload it to the dumpling service 
                 stressScript.WriteLine("    echo zipping and uploading core to dumpling service");
 
-                stressScript.WriteLine($"    echo EXEC:  $HELIX_PYTHONPATH ./dumpling.py upload --corefile $HELIX_WORKITEM_ROOT/execution/core --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
+                stressScript.WriteLine($"    echo EXEC:  $HELIX_PYTHONPATH ./dumpling.py upload --corefile $HELIX_WORKITEM_ROOT/execution/$_corefile --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
 
                 stressScript.WriteLine($"    $HELIX_PYTHONPATH ./dumpling.py upload --corefile $_corefile --zipfile $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip --addpaths $HELIX_WORKITEM_ROOT/execution");
 

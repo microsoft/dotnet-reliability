@@ -149,7 +149,7 @@ def download(url, zipPath):
     try:
         f = urllib2.urlopen(url)               
         print 'DOWNLOADING ', url
-        with os.open(zipPath, 'wb') as localfile:
+        with open(zipPath, 'wb') as localfile:
             localfile.write(f.read())
     except urllib2.HTTPError, e:
         print 'HTTP Error:', e.code, url
@@ -186,7 +186,7 @@ if __name__ == '__main__':
                       type=str,
                       help='path to unpack the core dump zip file')
     parser.add_argument('--url', '-u', type=str, help='url of dumpling dump to download and unwrap')
-    parser.add_argument('--dumpid', 'd', type=int, help='the id of the dumpling dump to download and unwrap')
+    parser.add_argument('--dumpid', '-i', type=int, help='the id of the dumpling dump to download and unwrap')
     parser.add_argument('--addpaths', nargs='*', type=str, help='path to additional files to be included in the packaged coredump')
     args = parser.parse_args()
 
