@@ -13,9 +13,11 @@ namespace dumplingWeb.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(DateTime start, DateTime end)
         {
-            var buckets = await TriageDb.GetBucketDataAsync(DateTime.Today.Subtract(TimeSpan.FromDays(30)), DateTime.Now + TimeSpan.FromDays(1));
+            end += TimeSpan.FromDays(1);
+
+            var buckets = await TriageDb.GetBucketDataAsync(start, end);
 
             foreach (var bucket in buckets)
             {
