@@ -11,7 +11,7 @@ import zipfile
 import string
 import platform
 import getpass     
-import urllib
+import urllib2
 import time
 import json
 
@@ -146,9 +146,15 @@ def unpack(strZipPath, unpackdir):
     print '\nall files extracted\n'
 
 def download(url, zipPath):
-    print("DOWNLOADING " + zipPath + " FROM " + url)
-
-    urllib.urlretrieve(url, filename = zipPath)
+    try:
+        f = urllib2.urlopen(url)               
+        print 'DOWNLOADING ', url
+        with os.open(zipPath, 'wb') as localfile:
+            localfile.write(f.read())
+    except urllib2.HTTPError, e:
+        print 'HTTP Error:', e.code, url
+    except urllib2.URLError, e:
+        print 'URL Error:', e.reason, url
 
 def run_command(strCmd, interpreter):
     strOut = ""
