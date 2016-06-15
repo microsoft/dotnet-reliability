@@ -193,9 +193,11 @@ if __name__ == '__main__':
     if args.command == 'wrap':
         pack(args.corefile, args.zipfile, args.addpaths)
     elif args.command == 'upload':
+        if args.zipfile == None:
+            args.zipfile = os.path.join(os.getcwd(), '%s.%.7f.zip'%(getpass.getuser().lower(), time.time()))
         if args.corefile != None:
             pack(args.corefile, args.zipfile, args.addpaths)
-        print DumplingService.UploadZip(os.path.abspath(args.zipfile));
+        print DumplingService.UploadZip(os.path.abspath(args.zipfile))
     elif args.command == 'unwrap':
         if args.unpackdir == None:
             args.unpackdir = os.path.join(os.getcwd(), os.path.basename(args.zipfile).replace('.zip', '')) + os.path.sep
