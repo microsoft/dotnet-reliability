@@ -207,7 +207,7 @@ if __name__ == '__main__':
         if args.zipfile == None:
             args.zipfile = args.unpackdir + '.zip'
         if args.dumpid is not None:
-            DumplingService.DownloadZip(args.dumpid)
+            DumplingService.DownloadZip(args.dumpid, args.zipfile)
         elif args.url is not None:
             download(args.url, args.zipfile)
         else:
