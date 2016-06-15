@@ -15,6 +15,9 @@
 #include <set>
 #include <string>
 
+// elf.h defines ELF_NOTE_GNU but not a length for it
+#define ELF_NOTE_GNU_LEN 4
+
 // build ids are actually 20 bytes, but we will allow a slightly larger buffer in case this grows in the future
 #define BUILD_ID_BYTE_MAX 64
 
@@ -24,8 +27,8 @@ int read_elf_header(FILE *fp, uint64_t offset, Elf64_Ehdr *elf_header);
 // Gets the file offset of a given virtual memory address.
 long get_file_offset(const Elf64_Ehdr &elf_header, Elf64_Phdr *program_headers, long vmaddr);
 
-// Walks all program headers in a given elf header.
-int walk_program_headers(FILE *file, const Elf64_Ehdr &elf_hdr, long nestedOffset = 0, const char *filename = NULL);
+// Walks all program headers in an elf file.
+int walk_program_headers(FILE *file, const Elf64_Ehdr &elf_hdr, const char *filename = NULL, long nestedOffset = 0);
 
 // Walks all notes in a memory range (specified by a program/section header).
 int walk_notes(FILE *file, const Elf64_Ehdr &elf_hdr, Elf64_Phdr *program_headers, const char *filename, long notesBegin, long notesEnd);
@@ -51,43 +54,50 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    const char *core_file = argv[1];
+    const char *filename = argv[1];
 
-    FILE *file = fopen(core_file, "rb");
+    FILE *file = fopen(filename, "rb");
     if (file == NULL)
     {
         int error = errno;
-        printf("Error loading file '%s': %x\n", core_file, error);
+        printf("Error loading file '%s': %x\n", filename, error);
         return error;
     }
 
     Elf64_Ehdr elf_header;
     if (read_elf_header(file, 0, &elf_header))
     {
-        printf("'%s' is not an elf binary.\n", core_file);
-        fclose(file);
-        return 1;
-    }
-
-    if (elf_header.e_type != ET_CORE)
-    {
-        printf("'%s' is not a core dump.\n", core_file);
+        printf("'%s' is not an elf binary.\n", filename);
         fclose(file);
         return 1;
     }
 
     if (elf_header.e_machine != EM_X86_64)
     {
-        printf("'%s' is not an x86_x64 core dump.\n", core_file);
+        printf("Error loading '%s': currently only x86_x64 is supported.\n", filename);
         fclose(file);
         return 1;
     }
 
-    walk_program_headers(file, elf_header);
-    fclose(file);
+    int returnCode = 0;
+    if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_CORE)
+    {
+        walk_program_headers(file, elf_header);
+        print_missing_table();
+    }
+    else if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_DYN)
+    {
+        walk_program_headers(file, elf_header, filename);
+    }
+    else
+    {
+        printf("Unknown ELF file '%s'.\n", filename);
+        returnCode = -1;
+    }
 
-    print_missing_table();
-    return 0;
+
+    fclose(file);
+    return returnCode;
 }
 
 inline int note_align(int value)
@@ -134,7 +144,7 @@ long get_file_offset(const Elf64_Ehdr &elf_header, Elf64_Phdr *program_headers, 
     return 0;
 }
 
-int walk_program_headers(FILE *file, const Elf64_Ehdr &elf_hdr, long nested_offset, const char *filename)
+int walk_program_headers(FILE *file, const Elf64_Ehdr &elf_hdr, const char *filename, long nested_offset)
 {
     // Walks the p-headers of either the core dump itself or of a nested module in the core dump
     // filename is null when we are walking the core dump itself, and nestedOffset == 0
@@ -149,7 +159,7 @@ int walk_program_headers(FILE *file, const Elf64_Ehdr &elf_hdr, long nested_offs
             fprintf(stderr, "Failed to walk program headers in core dump.\n");
         else
             fprintf(stderr, "Failed to read core dump headers for inner file '%s', skipping...\n", filename);
-        
+
         delete[] program_hdrs;
         return 1;
     }
@@ -208,7 +218,7 @@ int walk_file_table(FILE *file, const Elf64_Ehdr &elf_hdr, Elf64_Phdr *program_h
         Elf64_Ehdr inner_header;
         long image_offset = get_file_offset(elf_hdr, program_headers, (long)start);
         if (image_offset != 0 && read_elf_header(file, image_offset, &inner_header) == 0)
-            walk_program_headers(file, inner_header, image_offset, full_path);
+            walk_program_headers(file, inner_header, full_path, image_offset);
     }
 
     return 0;
@@ -290,9 +300,9 @@ int next_note(FILE *file, long offset, bool *is_build_id, bool *is_file_list, lo
     // build ids are NT_PRPSINFO sections with a name of "GNU".
     if (is_build_id)
     {
-        char name[4];
-        if (header.n_type == NT_PRPSINFO && header.n_namesz == 4)
-            *is_build_id = fread(name, sizeof(char), 4, file) == 4 && memcmp(name, "GNU", 4) == 0;
+        char name[ELF_NOTE_GNU_LEN];
+        if (header.n_type == NT_PRPSINFO && header.n_namesz == ELF_NOTE_GNU_LEN)
+            *is_build_id = fread(name, sizeof(char), ELF_NOTE_GNU_LEN, file) == ELF_NOTE_GNU_LEN && memcmp(name, ELF_NOTE_GNU, ELF_NOTE_GNU_LEN) == 0;
         else
             *is_build_id = false;
     }
