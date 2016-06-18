@@ -19,6 +19,8 @@ namespace stress.codegen
 
         public void GenerateSuite(int seed, string suiteName, string outputPath, string[] testPaths, string[] searchPatterns, string[] hintPaths, LoadSuiteConfig config, string cachePath = null, bool legacyProject = false, string globalPackageConfig = null)
         {
+            Random rand = new Random(seed);
+
             int suiteTestCount = 0;
 
             _unitTestSelector = new UnitTestSelector();
@@ -41,6 +43,7 @@ namespace stress.codegen
                         WorkerCount = loadTestConfig.NumWorkers,
                         EnvironmentVariables = loadTestConfig.EnvironmentVariables,
                         SuiteConfig = config,
+                        Seed = rand.Next(),
                     };
 
                     loadTestInfo.SourceDirectory = Path.Combine(outputPath, iConfig.ToString("00") + "_" + loadTestInfo.Duration.TotalHours.ToString("00.##") + "hr", loadTestInfo.TestName);

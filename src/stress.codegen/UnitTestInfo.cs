@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
@@ -57,9 +58,7 @@ namespace stress.codegen
         public AssemblyReferenceSet(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
-
-        //private static RefComparer s_Comparer = new RefComparer();
-
+        
         [Serializable]
         private class RefComparer : IEqualityComparer<AssemblyReference>
         {
@@ -104,8 +103,6 @@ namespace stress.codegen
 
         public bool IsAbstract { get; set; }
 
-        public bool IsVoidReturn { get; set; }
-
         public bool IsTaskReturn { get; set; }
 
         public bool IsGenericMethodDefinition { get; set; }
@@ -114,19 +111,27 @@ namespace stress.codegen
     }
 
     [Serializable]
+    public class TestArgumentInfo
+    {
+        public string[] ArgumentTypes { get; set; }
+
+        public string[] DataSources { get; set; }
+    }
+
+    [Serializable]
     public class UnitTestInfo
     {
         private static int s_aliasIdx = 0;
         private static object s_aliasLock = new object();
         private static Dictionary<string, string> s_aliasTable = new Dictionary<string, string>();
-
-        //public Assembly TestAssembly { get; set; }
-
+        
         public TestClassInfo Class { get; set; }
 
         public TestMethodInfo Method { get; set; }
 
         public TestReferenceInfo ReferenceInfo { get; set; }
+
+        public TestArgumentInfo ArgumentInfo { get; set; }
 
         public string AssemblyPath { get; set; }
 
@@ -160,6 +165,25 @@ namespace stress.codegen
             }
         }
 
+        public bool IsParameterized
+        {
+            get
+            {
+                return this.ParameterCount != 0;
+            }
+        }
+
+        public int ParameterCount
+        {
+            get
+            {
+                int? argCount = this.ArgumentInfo?.ArgumentTypes?.Length;
+
+                return argCount ?? 0;
+            }
+        }
+
+
         public string SkipReason { get; set; }
 
         public bool IsLoadTestCandidate()
@@ -182,12 +206,17 @@ namespace stress.codegen
 
                 return false;
             }
+            
+            int? dataSourceCount = this.ArgumentInfo?.DataSources?.Length;
 
-            if(!this.Method.IsVoidReturn && !this.Method.IsTaskReturn)
+            if (this.IsParameterized)
             {
-                this.SkipReason = "Test unsupported return type";
+                if (dataSourceCount == null || dataSourceCount == 0)
+                {
+                    this.SkipReason = "No datasources available for parameterized test";
 
-                return false;
+                    return false;
+                }
             }
 
             return true;
