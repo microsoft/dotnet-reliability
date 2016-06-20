@@ -26,7 +26,7 @@ namespace dumplingService
         /// This topic is used to route messages to the correct analysis machine for analytics.
         /// </summary>
         /// <returns></returns>
-        private static async Task DeployAnalysisTopic(TextWriter writer, bool recreate = true)
+        private static async Task DeployAnalysisTopic(TextWriter writer, bool recreate = false)
         {
             var SubscriptionsAndConditions = new Dictionary<string, SqlFilter>()
             {

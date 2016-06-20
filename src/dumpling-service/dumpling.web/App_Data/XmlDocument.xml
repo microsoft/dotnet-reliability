@@ -35,6 +35,13 @@
             <param name="dumplingid">the dumpling id that was returned from /dumpling/storage/(owner)/(targetos)</param>
             <returns></returns>
         </member>
+        <member name="M:dumplingWeb.Controllers.DumplingServiceController.Download(System.Int32)">
+            <summary>
+            Redirects to the dump url for downloading
+            </summary>
+            <param name="dumplingid">the dumpling id that was returned from /dumpling/storage/(owner)/(targetos)</param>
+            <returns></returns>
+        </member>
         <member name="M:dumplingWeb.Controllers.DumplingServiceController.GetResultsUrl(System.String,System.String)">
             <summary>
             
@@ -43,7 +50,17 @@
             <param name="dumplingid">the dumpling id that was returned from /dumpling/storage/(owner)/(targetos)</param>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:dumplingWeb.Controllers.DumplingServiceController.PostDumpChunk(System.String,System.String,System.Int32,System.UInt64,System.String)" -->
+        <member name="M:dumplingWeb.Controllers.DumplingServiceController.PostDumpChunk(System.String,System.String,System.Int32,System.UInt64,System.String)">
+            <summary>
+            index must be == 0 and filesize must be &gt;= int.MaxValue
+            At the moment a user will need to upload a single chunk, and then after that they can proceed to upload additional chunks to 
+            </summary>
+            <param name="owner"></param>
+            <param name="targetos"></param>
+            <param name="index"></param>
+            <param name="filesize"></param>
+            <returns></returns>
+        </member>
         <member name="T:AzureBlobsFileUpload.AzureBlobInfo">
             <summary>
             The <see cref="T:AzureBlobsFileUpload.AzureBlobInfo"/> class contains information about the blobs found in
