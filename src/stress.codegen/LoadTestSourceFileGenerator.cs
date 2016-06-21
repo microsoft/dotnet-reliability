@@ -35,6 +35,8 @@ namespace stress.codegen
 {externAliasSnippet}
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using stress.execution;
 using Xunit;
@@ -44,6 +46,10 @@ namespace stress.generated
     public static class UnitTests
     {{
         {unitTestsClassContentSnippet}
+
+        private static object s_lock = new object();
+
+        private static Random s_rand = new Random({testInfo.Seed});
     }}             
 
     public static class LoadTestClass
@@ -82,7 +88,7 @@ namespace stress.generated
         {{
             {this.LoadTest.TestPatternType.Name} testPattern = new {this.LoadTest.TestPatternType.Name}();
 
-            testPattern.Initialize(0, g_unitTests);             
+            testPattern.Initialize({this.LoadTest.Seed}, g_unitTests);             
 
             {this.LoadTest.WorkerStrategyType.Name} workerStrategy = new {this.LoadTest.WorkerStrategyType.Name}();
 
@@ -104,38 +110,159 @@ namespace stress.generated
 
             foreach (var uTest in this.LoadTest.UnitTests)
             {
-                string testName = $"UT{i++.ToString("X")}";
-
-                _testNames.Add(testName);
-
                 _includedAliases.Add(uTest.AssemblyAlias);
+                
+                string test = BuildUnitTestMethodSnippet(i++, uTest);
 
-
-                string testWrapper = $@" 
-        [Fact]
-        public static void {testName}()
-        {{
-            {BuildUnitTestMethodContentSnippet(uTest)}
-        }}
-";
-                classContentSnippet.Append(testWrapper);
+                classContentSnippet.Append(test);
             }
 
             return classContentSnippet.ToString();
         }
 
-        private string BuildUnitTestMethodContentSnippet(UnitTestInfo uTest)
+        private string BuildUnitTestMethodSnippet(int index, UnitTestInfo uTest)
         {
-            string contentSnippet = uTest.Method.IsStatic ? $"{uTest.QualifiedMethodStr}()" : $"new { uTest.QualifiedTypeStr }().{ uTest.QualifiedMethodStr}()";
+            string testName = $"UT{index.ToString("X")}";
+
+            string datasourceName = uTest.IsParameterized ? $"{testName}_DataSource" : null;
+
+            _testNames.Add(testName);
+
+            StringBuilder snippet = new StringBuilder();
+
+            snippet.Append(BuildDataSourceSnippet(datasourceName, uTest));
+
+            snippet.Append($@" 
+        [Fact]
+        public static void {testName}()
+        {{
+            {BuildArgLookupSnippet(datasourceName)}{BuildUnitTestMethodCallSnippet(uTest)}
+        }}
+");
+            return snippet.ToString();
+        }
+
+        private string BuildDataSourceSnippet(string datasourceName, UnitTestInfo uTest)
+        {
+            StringBuilder snippet = new StringBuilder();
+
+            if (datasourceName != null)
+            { 
+                string datafieldName = $"s_{datasourceName.ToLower()}";
+                
+                snippet.Append($@"
+        private static object[][] {datafieldName} = null;
+
+        public static object[][] {datasourceName}
+        {{
+            get
+            {{
+                if({datafieldName} == null)
+                {{
+                    lock(s_lock)
+                    {{        
+                        if({datafieldName} == null)
+                        {{
+                            {ReplaceMangledAssembliesWithAliases(BuildDataFieldInitSnippet(datafieldName, uTest))}
+                        }}
+                    }}
+                }}
+                
+                return {datafieldName};
+            }}
+        }}
+");
+            }
+
+            return snippet.ToString();
+        }
+
+        private string BuildDataFieldInitSnippet(string datafieldName, UnitTestInfo uTest)
+        {
+            StringBuilder snippet = new StringBuilder($"{datafieldName} = ((IEnumerable<object[]>)");
+
+            snippet.Append(uTest.ArgumentInfo.DataSources[0]);
+
+            snippet.Append(")");
+
+            for(int i = 1; i< uTest.ArgumentInfo.DataSources.Length; i++)
+            {
+                snippet.Append(".Concat((IEnumberable<object[]>)");
+
+                snippet.Append(uTest.ArgumentInfo.DataSources[i]);
+
+                snippet.Append(")");
+            }
+
+            snippet.Append(".ToArray();");
+
+            return snippet.ToString();
+        }
+
+        private string ReplaceMangledAssembliesWithAliases(string str)
+        {
+            var remaining = str;
+
+            string[] split; 
+
+            HashSet<string> mangledAssemblies = new HashSet<string>();
+
+            while((split = remaining.Split(new string[] { "```[", "]~~~" }, 3, StringSplitOptions.None)).Length == 3)
+            {
+                mangledAssemblies.Add(split[1]);
+
+                remaining = split[2];
+            }
+
+            foreach(var assm in mangledAssemblies)
+            {
+                str = str.Replace("```[" + assm + "]~~~", UnitTestInfo.GetAssemblyAlias(assm));
+            }
+
+            return str;
+        }
+
+        private string BuildArgLookupSnippet(string datasourceName)
+        {
+            StringBuilder snippet = new StringBuilder();
+
+            if(datasourceName != null)
+            {
+                snippet.Append($"object[] args = {datasourceName}[s_rand.Next({datasourceName}.Length)];");
+                snippet.Append(Environment.NewLine);
+                snippet.Append(Environment.NewLine);
+                snippet.Append("            ");
+            }
+
+            return snippet.ToString();
+        }
+
+        private string BuildUnitTestMethodCallSnippet(UnitTestInfo uTest)
+        {
+            StringBuilder snippet = new StringBuilder();
+            
+            snippet.Append(uTest.Method.IsStatic ? $"{uTest.QualifiedMethodStr}(" : $"new { uTest.QualifiedTypeStr }().{ uTest.QualifiedMethodStr}(");
+
+            for(int i = 0; i < uTest.ParameterCount; i++)
+            {
+                if(i > 0)
+                {
+                    snippet.Append(", ");
+                }
+
+                snippet.Append($"({ReplaceMangledAssembliesWithAliases(uTest.ArgumentInfo.ArgumentTypes[i])})args[{i}]");
+            }
+
+            snippet.Append(")");
 
             if(uTest.Method.IsTaskReturn)
             {
-                contentSnippet += ".GetAwaiter().GetResult()";
+                snippet.Append(".GetAwaiter().GetResult()");
             }
 
-            contentSnippet += ";";
+            snippet.Append(";");
 
-            return contentSnippet;
+            return snippet.ToString();
         }
 
         private string BuildUnitTestInitSnippet()

@@ -23,6 +23,8 @@ namespace stress.codegen
             this.SourceFiles = new List<SourceFileInfo>();
         }
 
+        public int Seed { get; set; }
+
         public string TestName { get; set; }
 
         public Type TestPatternType { get; set; }
@@ -36,7 +38,7 @@ namespace stress.codegen
         public int WorkerCount { get; set; }
 
         public string SourceDirectory { get; set; }
-
+        
         public IEnumerable<UnitTestInfo> UnitTests { get; set; }
 
         public IList<SourceFileInfo> SourceFiles { get; private set; }
