@@ -111,7 +111,6 @@
             background-color:lightblue;
         }
 
-
         td.bugurl {
         }
 
@@ -210,7 +209,7 @@
                                 <tr style="border-top:thin solid #FFCCC5;">
                                     <td class="dumpname" onmouseup="onMouseUp_toggleTable(this)" id="@(dump.DumpId)">@(dump.DisplayName)</td>
                                     <td class="dumpid">
-                                        <a href=@dump.DumpPath>@(dump.DumpId)</a>
+                                        <a href="/dumpling/download/@(dump.DumpId)"><img src="~/Content/images/dload.png" onmouseout="this.src='@Url.Content("~/Content/images/dload.png")'" onmouseover="this.src='@Url.Content("~/Content/images/dload_hover.png")'" /></a> @(dump.DumpId)
                                     </td>
                                     <td class="dumpuploaded">@(dump.DumpTime)</td>
                                     <td class="dumpusername">@(dump.Origin)</td>
