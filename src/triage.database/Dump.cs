@@ -47,41 +47,5 @@ namespace triage.database
         [ForeignKey("BucketId")]
         public virtual Bucket Bucket { get; set; }
 
-        public void LoadTriageData(TriageData triageData)
-        {
-            if (this.BucketId != triageData.BucketId)
-            {
-                this.BucketId = triageData.BucketId;
-            }
-
-            //for now clear all the threads and insert all new ones
-            //might consider changing to do an in place update if turns out to be a perf issue
-            this.Threads.Clear();
-
-            foreach (var t in triageData.Threads)
-            {
-                this.Threads.Add(t);
-            }
-            
-            var existingProps = new Dictionary<string, Property>();
-
-            foreach (var prop in this.Properties)
-            {
-                existingProps[prop.Name] = prop;
-            }
-            
-            foreach (var p in triageData.Properties)
-            {
-                //if the property already exists update it, otherwise add it
-                if (existingProps.ContainsKey(p.Name))
-                {
-                    existingProps[p.Name].Value = p.Value;
-                }
-                else
-                {
-                    this.Properties.Add(p);
-                }
-            }
-        }
     }
 }

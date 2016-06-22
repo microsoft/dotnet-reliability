@@ -68,21 +68,60 @@ namespace triage.database
 
                 await UpdateUniquelyNamedEntitiesAsync(context, triageData);
                 
-                //remove all the dump frames from the context before updating
-                //this is needed because frame has a required FK to dumpId so
-                //frames without an associated dump are not allowed
-                var frames = dump.Threads.SelectMany(t => t.Frames).ToArray();
+                //if the bucket id is set on the triage data and it is different than the dump id
+                //update the bucket of the dump with the new triage data bucket
+                if (triageData.BucketId.HasValue && dump.BucketId != triageData.BucketId)
+                {
+                    dump.Bucket = null;
 
-                context.Frames.RemoveRange(frames);
+                    dump.BucketId = triageData.BucketId;
+                }
 
-                context.Threads.RemoveRange(dump.Threads);
+                //if the triage info contains the thread information delete the previous threads and frames
+                if (triageData.Threads.Count > 0)
+                {
+                    //remove all the dump frames from the context before updating
+                    //this is needed because frame has a required FK to dumpId so
+                    //frames without an associated dump are not allowed
+                    var frames = dump.Threads.SelectMany(t => t.Frames).ToArray();
 
-                await context.SaveChangesAsync();
+                    context.Frames.RemoveRange(frames);
 
-                await context.Entry<Dump>(dump).ReloadAsync();
+                    context.Threads.RemoveRange(dump.Threads);
 
-                dump.LoadTriageData(triageData);
+                    dump.Threads.Clear();
+                    
+                    //add the new threads to the dump
+                    foreach(var t in triageData.Threads)
+                    {
+                        dump.Threads.Add(t);
+                    }
+                }
 
+                //if there are more properties specified in the triage data
+                if(triageData.Properties.Count > 0)
+                {
+                    //load the existing properties into a dictionary keyed by property name
+                    var existingProps = dump.Properties.ToDictionary(p => p.Name);
+                    
+                    //add or update the properties of the dump
+                    foreach (var p in triageData.Properties)
+                    {
+                        //if a property with the same name already exists update it, otherwise add it
+                        //NOTE: currently this only supports adding or updating properties.  It's possible we will
+                        //      want to update this later on to support removing properties by passing null or empty
+                        //      string as the value
+                        if (existingProps.ContainsKey(p.Name))
+                        {
+                            existingProps[p.Name].Value = p.Value;
+                        }
+                        else
+                        {
+                            dump.Properties.Add(p);
+                        }
+                    }
+                }
+                
                 await context.SaveChangesAsync();
             }
         }

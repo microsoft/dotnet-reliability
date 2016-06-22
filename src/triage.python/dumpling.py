@@ -26,10 +26,10 @@ class DumplingService:
         return response.content
 
     @staticmethod
-    def UploadZip(filepath):
+    def UploadZip(filepath, strUser, strDistro, strDisplayName):
         import requests
         
-        upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0/%s'%(getpass.getuser().lower(), platform.dist()[0].lower(), os.path.basename(filepath));
+        upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0/%s'%(strUser, strDistro, strDisplayName);
         
         print 'Uploading core zip ' + args.zipfile  + ' to ' + upload_url
         
@@ -185,6 +185,13 @@ if __name__ == '__main__':
     parser.add_argument('--unpackdir', '-d', 
                       type=str,
                       help='path to unpack the core dump zip file')
+    parser.add_argument('--user', type=str, help='username to pass to the dumpling service')
+    parser.add_argument('--distro',
+                      choices = ['redhat', 'centos', 'ubuntu', 'windows' ], 
+                      help = 'specifies the distro of the dump file to be uploaded.  Note, this should only be used to override when uploading from a different machine then the dump was collected on.')
+    parser.add_argument('--displayname',
+                      type=str,
+                      help='the name to be displayed in reports for the uploaded dump')
     parser.add_argument('--url', '-u', type=str, help='url of dumpling dump to download and unwrap')
     parser.add_argument('--dumpid', '-i', type=int, help='the id of the dumpling dump to download and unwrap')
     parser.add_argument('--addpaths', nargs='*', type=str, help='path to additional files to be included in the packaged coredump')
@@ -193,11 +200,19 @@ if __name__ == '__main__':
     if args.command == 'wrap':
         pack(args.corefile, args.zipfile, args.addpaths)
     elif args.command == 'upload':
+        if args.user == None:
+            args.user = getpass.getuser()
+        args.user = args.user.lower()
+        if args.distro == None:
+            args.distro = platform.dist()[0].lower()
         if args.zipfile == None:
-            args.zipfile = os.path.join(os.getcwd(), '%s.%.7f.zip'%(getpass.getuser().lower(), time.time()))
+            args.zipfile = os.path.join(os.getcwd(), '%s.%.7f.zip'%(args.user, time.time()))
         if args.corefile != None:
             pack(args.corefile, args.zipfile, args.addpaths)
-        print DumplingService.UploadZip(os.path.abspath(args.zipfile))
+        if args.displayname == None:
+            filename = os.path.basename(os.path.abspath(args.zipfile))
+            args.displayname = os.path.splitext(filename)[0]
+        print DumplingService.UploadZip(os.path.abspath(args.zipfile), args.user, args.distro, args.displayname)
     elif args.command == 'unwrap':
         if args.unpackdir == None:
             args.unpackdir = os.path.join(os.getcwd(), os.path.basename(args.zipfile).replace('.zip', '')) + os.path.sep
