@@ -14,6 +14,8 @@ import getpass
 import urllib2
 import time
 import json
+import requests
+        
 
 class DumplingService:
     _dumplingUri = 'http://dotnetrp.azurewebsites.net';
@@ -27,8 +29,7 @@ class DumplingService:
 
     @staticmethod
     def UploadZip(filepath, strUser, strDistro, strDisplayName):
-        import requests
-        
+
         upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0/%s'%(strUser, strDistro, strDisplayName);
         
         print 'Uploading core zip ' + args.zipfile  + ' to ' + upload_url
@@ -37,8 +38,26 @@ class DumplingService:
     
         response = requests.post(upload_url, files = files)
 
-        return response.content
-    
+        response.raise_for_status()
+
+        idstr = response.content.strip('"')
+        
+        print 'dumpling upload succeeded. dumplingid: %s'%(idstr)
+        
+        return int(idstr)
+
+    @staticmethod
+    def UploadTriageInfo(dumplingid, dictData):
+        upload_url = DumplingService._dumplingUri + '/dumpling/triageinfo/add/%s'%(dumplingid)
+        
+        triageinfo = json.dumps(dictData)
+
+        response = requests.put(upload_url, data=dictData)
+
+        response.raise_for_status()
+
+        print 'dumplingid %s client triage information uploaded'%(dumplingid)
+
     @staticmethod
     def DownloadZip(dumplingId, zipPath):
         download_url = DumplingService._dumplingUri + '/dumpling/download/%s'%(dumplingId)
@@ -47,7 +66,7 @@ class DumplingService:
     
     
 
-def triage():
+def get_client_triage_data():
     triageProps = { }
     triageProps['CLIENT_ARCHITECTURE'] = platform.machine()
     triageProps['CLIENT_PROCESSOR'] = platform.processor()
@@ -61,7 +80,7 @@ def triage():
         triageProps['CLIENT_DISTRO_VER'] = distroTuple[1]
         triageProps['CLIENT_DISTRO_ID'] = distroTuple[2]
         
-    return json.dumps(triageProps)
+    return triageProps
 
 def pack(strCorePath, strZipPath, lstAddPaths):
     """creates a zip file containing core dump and all related images"""
@@ -120,10 +139,6 @@ def pack(strCorePath, strZipPath, lstAddPaths):
     for k in includedFiles.keys():
         if k != os.path.abspath(strZipPath):
             add_to_zip(k, zip)
-                              
-    print 'adding /client.json'
-    
-    zip.writestr('client.json', triage())
 
     zip.close()
 
@@ -173,7 +188,7 @@ def run_command(strCmd, interpreter):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='dumpling client for managing core files and interacting with the dumpling service')
     parser.add_argument('command',
-                      choices = [ 'wrap', 'unwrap', 'upload', 'download' ],
+                      choices = [ 'wrap', 'unwrap', 'upload', 'download', 'update' ],
                       help='The dumpling command to be run')
     parser.add_argument('--zipfile', '-z', 
                       type=str,
@@ -189,11 +204,13 @@ if __name__ == '__main__':
     parser.add_argument('--distro',
                       choices = ['redhat', 'centos', 'ubuntu', 'windows' ], 
                       help = 'specifies the distro of the dump file to be uploaded.  Note, this should only be used to override when uploading from a different machine then the dump was collected on.')
+    parser.add_argument('--suppresstriage', help='supresses client side triage information from being uploadeded with the dump')
     parser.add_argument('--displayname',
                       type=str,
                       help='the name to be displayed in reports for the uploaded dump')
     parser.add_argument('--url', '-u', type=str, help='url of dumpling dump to download and unwrap')
     parser.add_argument('--dumpid', '-i', type=int, help='the id of the dumpling dump to download and unwrap')
+    parser.add_argument('--triagefile', type=str, help='path to the file containing json triage data')
     parser.add_argument('--addpaths', nargs='*', type=str, help='path to additional files to be included in the packaged coredump')
     args = parser.parse_args()
 
@@ -212,7 +229,9 @@ if __name__ == '__main__':
         if args.displayname == None:
             filename = os.path.basename(os.path.abspath(args.zipfile))
             args.displayname = os.path.splitext(filename)[0]
-        print DumplingService.UploadZip(os.path.abspath(args.zipfile), args.user, args.distro, args.displayname)
+        dumplingid = DumplingService.UploadZip(os.path.abspath(args.zipfile), args.user, args.distro, args.displayname)
+        if not args.suppresstriage:
+            DumplingService.UploadTriageInfo(dumplingid, get_client_triage_data())
     elif args.command == 'unwrap':
         if args.unpackdir == None:
             args.unpackdir = os.path.join(os.getcwd(), os.path.basename(args.zipfile).replace('.zip', '')) + os.path.sep
@@ -234,6 +253,15 @@ if __name__ == '__main__':
             os.mkdir(args.unpackdir)
         unpack(args.zipfile, args.unpackdir)
         os.remove(args.zipfile)
+    elif args.command == 'update':
+        if args.dumpid == None or args.triagefile == None:
+            print '--dumpid and --triagefile are required arguments to the update command'
+        if not os.path.exists(args.triagefile):
+            print 'FILE NOT FOUND: \'%s\''%(args.triagefile) 
+        with open(args.triagefile, 'rb') as tfile:
+            triagedata = json.load(tfile)
+        DumplingService.UploadTriageInfo(args.dumpid, triagedata)     
+            
             
         
 
