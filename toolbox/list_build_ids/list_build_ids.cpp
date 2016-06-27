@@ -59,59 +59,59 @@ int main(int argc, char ** argv)
     }
 
     const char *filename = argv[1];
-	int result = walk_core_dump(filename);
-	if (result == 0)
-		print_table();
+    int result = walk_core_dump(filename);
+    if (result == 0)
+        print_table();
 
-	return result;
+    return result;
 }
 
 
 int walk_core_dump(const char *filename)
 {
-	encountered_modules.clear();
-	module_build_ids.clear();
+    encountered_modules.clear();
+    module_build_ids.clear();
 
-	FILE *file = fopen(filename, "rb");
-	if (file == NULL)
-	{
-		int error = errno;
-		printf("Error loading file '%s': %x\n", filename, error);
-		return error;
-	}
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL)
+    {
+        int error = errno;
+        printf("Error loading file '%s': %x\n", filename, error);
+        return error;
+    }
 
-	Elf64_Ehdr elf_header;
-	if (read_elf_header(file, 0, &elf_header))
-	{
-		printf("'%s' is not an elf binary.\n", filename);
-		fclose(file);
-		return 1;
-	}
+    Elf64_Ehdr elf_header;
+    if (read_elf_header(file, 0, &elf_header))
+    {
+        printf("'%s' is not an elf binary.\n", filename);
+        fclose(file);
+        return 1;
+    }
 
-	if (elf_header.e_machine != EM_X86_64)
-	{
-		printf("Error loading '%s': currently only x86_x64 is supported.\n", filename);
-		fclose(file);
-		return 1;
-	}
+    if (elf_header.e_machine != EM_X86_64)
+    {
+        printf("Error loading '%s': currently only x86_x64 is supported.\n", filename);
+        fclose(file);
+        return 1;
+    }
 
-	int returnCode = 0;
-	if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_CORE)
-	{
-		walk_program_headers(file, elf_header);
-	}
-	else if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_DYN)
-	{
-		walk_program_headers(file, elf_header, filename);
-	}
-	else
-	{
-		printf("Unknown ELF file '%s'.\n", filename);
-		returnCode = -1;
-	}
+    int returnCode = 0;
+    if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_CORE)
+    {
+        walk_program_headers(file, elf_header);
+    }
+    else if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_DYN)
+    {
+        walk_program_headers(file, elf_header, filename);
+    }
+    else
+    {
+        printf("Unknown ELF file '%s'.\n", filename);
+        returnCode = -1;
+    }
 
-	fclose(file);
-	return returnCode;
+    fclose(file);
+    return returnCode;
 }
 
 
@@ -264,17 +264,17 @@ int walk_notes(FILE *file, const Elf64_Ehdr &elf_hdr, Elf64_Phdr *program_header
             if (data_len <= BUILD_ID_BYTE_MAX)
             {
                 unsigned char build_id[BUILD_ID_BYTE_MAX];
-				char hex_build_id[BUILD_ID_BYTE_MAX * 2 + 1];
+                char hex_build_id[BUILD_ID_BYTE_MAX * 2 + 1];
                 if (fseek(file, data_offset, SEEK_SET) == 0 && fread(build_id, 1, data_len, file) == data_len)
                 {
-					for (int i = 0; i < data_len; i++)
-					{
-						hex_build_id[i * 2] = get_hex(build_id[i] >> 4);
-						hex_build_id[i * 2 + 1] = get_hex(build_id[i] & 0xf);
-						hex_build_id[i * 2 + 2] = 0;
-					}
+                    for (int i = 0; i < data_len; i++)
+                    {
+                        hex_build_id[i * 2] = get_hex(build_id[i] >> 4);
+                        hex_build_id[i * 2 + 1] = get_hex(build_id[i] & 0xf);
+                        hex_build_id[i * 2 + 2] = 0;
+                    }
 
-					module_build_ids[filename] = hex_build_id;
+                    module_build_ids[filename] = hex_build_id;
                 }
 
                 // We are enumerating an embedded module in the core.  Once we find the build id we can stop looking.
@@ -343,10 +343,10 @@ int next_note(FILE *file, long offset, bool *is_build_id, bool *is_file_list, lo
 
 void print_table()
 {
-	for (std::map<std::string, std::string>::iterator itr = module_build_ids.begin(); itr != module_build_ids.end(); ++itr)
-		printf("%s %s\n", itr->second.c_str(), itr->first.c_str());
+    for (std::map<std::string, std::string>::iterator itr = module_build_ids.begin(); itr != module_build_ids.end(); ++itr)
+        printf("%s %s\n", itr->second.c_str(), itr->first.c_str());
 
-	printf("\n");
+    printf("\n");
 
     bool first = true;
     for (std::set<std::string>::iterator itr = encountered_modules.begin(); itr != encountered_modules.end(); ++itr)
