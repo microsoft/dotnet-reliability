@@ -1,9 +1,9 @@
 {
 
   "dependencies": {
-    "System.Diagnostics.Process": "4.1.0-rc2-23923",
+    "System.Diagnostics.Process": "4.1.0",
     "xunit.core": "2.1.0",
-    "Microsoft.NETCore": "5.0.1-rc2-23923",
+    "NETStandard.Library": "1.6.0",
   },
   "frameworks": {
     "netstandard1.3": {
