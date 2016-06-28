@@ -229,6 +229,10 @@ if __name__ == '__main__':
         if args.displayname == None:
             filename = os.path.basename(os.path.abspath(args.zipfile))
             args.displayname = os.path.splitext(filename)[0]
+            args.displayname = args.displayname.replace('.', '_')
+        if '.' in args.displayname:
+            print 'WARNING: the character \'.\' is not allowed in the display name replacing with \'_\''
+            args.displayname = args.displayname.replace('.', '_')
         dumplingid = DumplingService.UploadZip(os.path.abspath(args.zipfile), args.user, args.distro, args.displayname)
         if not args.suppresstriage:
             DumplingService.UploadTriageInfo(dumplingid, get_client_triage_data())
@@ -238,8 +242,12 @@ if __name__ == '__main__':
         print 'unpacking core dump zip to: ' + args.unpackdir
         unpack(args.zipfile, args.unpackdir)
     elif args.command == 'download':
-        if args.unpackdir == None:
-            args.unpackdir = os.path.join(os.getcwd(), 'dumpling.%.7f'%time.time())
+        if args.unpackdir == None:                                                    
+            if args.dumpid is not None:
+                args.unpackdir = os.path.join(os.getcwd(), 'dumpling.%s'%args.dumpid)
+            else:
+                args.unpackdir = os.path.join(os.getcwd(), 'dumpling.%.7f'%time.time())
+        args.unpackdir = args.unpackdir.replace('.', '_')
         if args.zipfile == None:
             args.zipfile = args.unpackdir + '.zip'
         if args.dumpid is not None:
