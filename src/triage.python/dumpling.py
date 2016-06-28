@@ -233,10 +233,6 @@ if __name__ == '__main__':
         if args.displayname == None:
             filename = os.path.basename(os.path.abspath(args.zipfile))
             args.displayname = os.path.splitext(filename)[0]
-        #    args.displayname = args.displayname.replace('.', '_')
-        #if '.' in args.displayname:
-        #    print 'WARNING: the character \'.\' is not allowed in the display name replacing with \'_\''
-        #    args.displayname = args.displayname.replace('.', '_')
         dumplingid = DumplingService.UploadZip(os.path.abspath(args.zipfile), args.user, args.distro, args.displayname)
         if not args.suppresstriage:
             DumplingService.UploadTriageInfo(dumplingid, get_client_triage_data())
