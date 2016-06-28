@@ -10,7 +10,8 @@ import os
 import zipfile
 import string
 import platform
-import getpass     
+import getpass 
+import urllib    
 import urllib2
 import time
 import json
@@ -29,8 +30,8 @@ class DumplingService:
 
     @staticmethod
     def UploadZip(filepath, strUser, strDistro, strDisplayName):
-
-        upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0/%s'%(strUser, strDistro, strDisplayName);
+        query = { 'displayname' : strDisplayName }
+        upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0/?%s'%(strUser, strDistro, urllib.urlencode(query))
         
         print 'Uploading core zip ' + args.zipfile  + ' to ' + upload_url
         
@@ -221,7 +222,10 @@ if __name__ == '__main__':
             args.user = getpass.getuser()
         args.user = args.user.lower()
         if args.distro == None:
-            args.distro = platform.dist()[0].lower()
+            if platform.platform().lower() == 'linux':
+                args.distro = platform.dist()[0].lower()
+            else:
+                args.distro = 'win'
         if args.zipfile == None:
             args.zipfile = os.path.join(os.getcwd(), '%s.%.7f.zip'%(args.user, time.time()))
         if args.corefile != None:
@@ -229,10 +233,10 @@ if __name__ == '__main__':
         if args.displayname == None:
             filename = os.path.basename(os.path.abspath(args.zipfile))
             args.displayname = os.path.splitext(filename)[0]
-            args.displayname = args.displayname.replace('.', '_')
-        if '.' in args.displayname:
-            print 'WARNING: the character \'.\' is not allowed in the display name replacing with \'_\''
-            args.displayname = args.displayname.replace('.', '_')
+        #    args.displayname = args.displayname.replace('.', '_')
+        #if '.' in args.displayname:
+        #    print 'WARNING: the character \'.\' is not allowed in the display name replacing with \'_\''
+        #    args.displayname = args.displayname.replace('.', '_')
         dumplingid = DumplingService.UploadZip(os.path.abspath(args.zipfile), args.user, args.distro, args.displayname)
         if not args.suppresstriage:
             DumplingService.UploadTriageInfo(dumplingid, get_client_triage_data())
