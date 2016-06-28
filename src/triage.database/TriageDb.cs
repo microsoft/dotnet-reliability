@@ -198,17 +198,15 @@ namespace triage.database
         private const string BUCKET_DATA_QUERY = @"
 WITH [BucketHits]([BucketId], [HitCount], [StartTime], [EndTime]) AS
 (
-    SELECT [B].[BucketId] AS [BucketId], COUNT([D].[DumpId]) AS [HitCount], @p0 AS [StartTime], @p1 AS [EndTime]
+    SELECT [D].[BucketId] AS [BucketId], COUNT([D].[DumpId]) AS [HitCount], @p0 AS [StartTime], @p1 AS [EndTime]
     FROM [Dumps] [D]
-    JOIN [Buckets] [B]
-        ON [D].[BucketId] = [B].[BucketId]
-        AND [D].[DumpTime] >= @p0
+	WHERE [D].[DumpTime] >= @p0
         AND [D].[DumpTime] <= @p1
-    GROUP BY [B].[BucketId]
+    GROUP BY [D].[BucketId]
 )
 SELECT [B].[BucketId], [B].[Name], [B].[BugUrl], [H].[HitCount], [H].[StartTime], [H].[EndTime]
 FROM [Buckets] AS [B]
-JOIN [BucketHits] AS [H]
+RIGHT OUTER JOIN [BucketHits] AS [H]
     ON [B].[BucketId] = [H].[BucketId]
 ORDER BY [H].[HitCount] DESC
 ";
