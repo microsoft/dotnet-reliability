@@ -49,7 +49,7 @@
   <Import Project="$(ToolsDir)BuildVersion.targets" Condition="Exists('$(ToolsDir)BuildVersion.targets')"/>
 
   <!-- Import Build tools common props file where repo-independent properties are found -->
-  <Import Project="$(ToolsDir)Build.Common.props" />
+  <Import Project="$(ToolsDir)Build.Common.props" Condition="Exists('$(ToolsDir)Build.Common.props')" />
 
   <!-- Test runtime -->
   <PropertyGroup>
