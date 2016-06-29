@@ -1,4 +1,9 @@
 <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <TestTFM Condition="'$(TestTFM)'==''">netcoreapp1.0</TestTFM>
+  </PropertyGroup>
+  
   <!-- 
         If LocalPackageSource is set we need to add it to DnuSourceList before importing ..\dir.props so that 
         it will be the first restore source in the restore command 
@@ -6,6 +11,7 @@
   <ItemGroup Condition="'$(LocalPackageSource)' != '' and Exists('$(LocalPackageSource)')">
     <DnuSourceList Include="$(LocalPackageSource)" />
   </ItemGroup>
-  
+ 
   <Import Project="..\dir.props" />
+  
 </Project>
