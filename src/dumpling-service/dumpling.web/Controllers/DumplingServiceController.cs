@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using triage.database;
 using DumplingLib;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
 
 namespace dumplingWeb.Controllers
 {
@@ -36,6 +39,15 @@ namespace dumplingWeb.Controllers
             await DumplingEventHub.FireEvent(new WebAPIGetStatusEvent());
 
             return await StateTableController.GetState(new StateTableIdentifier() { Owner = owner, DumplingId = dumplingid });
+        }
+
+        [Route("dumpling/triageinfo/add/{dumplingid}")]
+        [HttpPut]
+        public async Task AddTriageInfo(int dumplingid, [FromBody]JToken jsonTriageInfo)
+        {
+            var kvData = JsonConvert.DeserializeObject<Dictionary<string, string>>(jsonTriageInfo.ToString());
+
+            await TriageDb.UpdateDumpTriageInfo(dumplingid, kvData);
         }
 
         [Route("dumpling/redumpling/{owner}/{dumplingid}/{os}")]
