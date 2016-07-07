@@ -33,7 +33,6 @@
     <StorageAccount></StorageAccount>
   </PublicConfig>
   <PrivateConfig>
-    <StorageAccount name="" key="" endpoint="" />
   </PrivateConfig>
   <IsEnabled>true</IsEnabled>
 </DiagnosticsConfiguration>

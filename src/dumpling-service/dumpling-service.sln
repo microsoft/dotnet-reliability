@@ -17,6 +17,8 @@ Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "dotnetRpAzure", "dumpling.a
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "triage.database", "..\triage.database\triage.database.csproj", "{FC9C2BBA-10FF-4CC0-A4C5-9D5AC5CC033B}"
 EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "CertificateGeneration", "CertificateGeneration\CertificateGeneration.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{FC9C2BBA-10FF-4CC0-A4C5-9D5AC5CC033B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC9C2BBA-10FF-4CC0-A4C5-9D5AC5CC033B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC9C2BBA-10FF-4CC0-A4C5-9D5AC5CC033B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

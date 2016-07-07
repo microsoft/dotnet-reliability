@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Configuration;
 
 namespace dumplingDataWorker
 {
@@ -30,10 +30,6 @@ namespace dumplingDataWorker
         {
             DumplingEventHub.FireEvent(new DataWorkerRunEvent()).Wait();
             Trace.WriteLine("Starting processing of messages");
-
-
-            // start a background task that queries Helix for data.
-            Task.Run(HelixEventProxy.PollTrackedHelixWorkItems);
 
             // initiates the message pump and callback is invoked for each message that is received, calling close on the client will stop the pump.
             DumplingDataWorkerQueueController.Queue.OnMessageAsync(async (receivedMessage) =>
@@ -79,6 +75,8 @@ namespace dumplingDataWorker
 
         public override bool OnStart()
         {
+            // Before events or anything else can happen, we have to do this.
+            NearbyConfig.RetrieveSecretsAsync(ConfigurationManager.AppSettings["dumpling_ad_client_id"], ConfigurationManager.AppSettings["thumbprint"]).Wait();
             DumplingEventHub.FireEvent(new DataWorkerStartEvent()).Wait();
             // Set the maximum number of concurrent connections 
             ServicePointManager.DefaultConnectionLimit = 12;
