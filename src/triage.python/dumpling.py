@@ -222,7 +222,7 @@ if __name__ == '__main__':
             args.user = getpass.getuser()
         args.user = args.user.lower()
         if args.distro == None:
-            if platform.platform().lower() == 'linux':
+            if platform.system().lower() == 'linux':
                 args.distro = platform.dist()[0].lower()
             else:
                 args.distro = 'win'
