@@ -1,9 +1,8 @@
 ﻿# To create a certificate, navigate to our internal site //ssladmin/
-$globalVar_resourceGroupName = "dumpling"
+$globalVar_resourceGroupName = "dumpling_rg"
 $globalVar_USLocation = "West US"
 $globalVar_keyVaultName = "dumplingVault"
-$globalVar_tags = "dumpling"
-$globalVar_dumplingDisplayName = "Dumpling"
+$globalVar_dumplingDisplayName = "dotnetdumpling"
 
 # note that if the resources exist, the user that runs this function will be prompted so there is nothing to worry about
 # with regards to running this function multiple times.
@@ -13,10 +12,10 @@ function Create-DumplingKeyVault
     Login-AzureRmAccount
 
 	#create the dumpling resource group if it doesn't exist.
-	New-AzureRmResourceGroup –Name $globalVar_resourceGroupName –Location $globalVar_USLocation -Tag $globalVar_tags
+	New-AzureRmResourceGroup –Name $globalVar_resourceGroupName –Location $globalVar_USLocation
 	
 	# now that we certainly have our resource group, we will create the key vault within.
-	New-AzureRmKeyVault -VaultName $globalVar_keyVaultName -ResourceGroupName 'dumpling' -Location $globalVar_USLocation -Tag $globalVar_tags
+	New-AzureRmKeyVault -VaultName $globalVar_keyVaultName -ResourceGroupName $globalVar_resourceGroupName -Location $globalVar_USLocation
 }
 
 # To create a securePassword, use this:
@@ -35,11 +34,11 @@ function Register-DumplingWithAzureAD
 
 	$x509 = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2
 
-	$x509.Import("E:\Secrets\dumpling.cer")
+	$x509.Import("E:\Secrets\dotnetrp.azurewebsites.net.cer")
 
 	$credValue = [System.Convert]::ToBase64String($x509.GetRawCertData())
-	$startDate = [System.DateTime]::Parse("2016-07-05");
-	$endDate = [System.DateTime]::Parse("2017-07-05");
+	$startDate = [System.DateTime]::Parse("2016-07-08"); # use the day you authored the private cert, not the day the cert was created.
+	$endDate = [System.DateTime]::Parse("2018-04-07");
 
 	echo "$startDate and $endDate"
 
@@ -66,3 +65,43 @@ function Register-DumplingWithAzureAD
 	# get the thumbprint to use in your app settings
 	$x509.Thumbprint
 }
+
+function Deploy-StorageAccountConnectionString
+{
+    Login-AzureRmAccount
+
+    $keyName = "dumplingstorage"
+    $expires = (Get-Date).AddYears(2).ToUniversalTime() 
+    $notbefore = (Get-Date).ToUniversalTime() 
+
+    $securepwd = ConvertTo-SecureString –String "" –AsPlainText –Force
+    
+    Set-AzureKeyVaultSecret -VaultName $globalVar_keyVaultName -Name $keyName -SecretValue $securepwd -Expires $expires -NotBefore $notbefore
+}
+
+function Deploy-EventHubConnectionString
+{
+    Login-AzureRmAccount
+
+    $keyName = "dumplingeventhub"
+    $expires = (Get-Date).AddYears(2).ToUniversalTime() 
+    $notbefore = (Get-Date).ToUniversalTime() 
+
+    $securepwd = ConvertTo-SecureString –String "" –AsPlainText –Force
+    
+    Set-AzureKeyVaultSecret -VaultName $globalVar_keyVaultName -Name $keyName -SecretValue $securepwd -Expires $expires -NotBefore $notbefore
+}
+
+function Deploy-ServiceBusConnectionString
+{
+    Login-AzureRmAccount
+
+    $keyName = "dumplingservicebus"
+    $expires = (Get-Date).AddYears(2).ToUniversalTime() 
+    $notbefore = (Get-Date).ToUniversalTime() 
+
+    $securepwd = ConvertTo-SecureString –String "" –AsPlainText –Force
+    
+    Set-AzureKeyVaultSecret -VaultName $globalVar_keyVaultName -Name $keyName -SecretValue $securepwd -Expires $expires -NotBefore $notbefore
+}
+
