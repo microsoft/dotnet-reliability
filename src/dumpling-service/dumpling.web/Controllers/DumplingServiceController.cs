@@ -193,7 +193,6 @@ namespace dumplingWeb.Controllers
                 Origin = owner
             });
 
-
             StateTableIdentifier id = new StateTableIdentifier()
             {
                 Owner = owner,
