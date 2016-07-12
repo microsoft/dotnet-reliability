@@ -1,5 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ServiceDefinition name="dumplingWebAzure" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceDefinition" schemaVersion="2015-04.2.6">
   <WorkerRole name="dumplingDataWorker" vmsize="Small">
+    <ConfigurationSettings>
+      <Setting name="dumpling_ad_client_id" />
+      <Setting name="thumbprint" />
+    </ConfigurationSettings>
   </WorkerRole>
+  <WebRole name="dumplingWeb" vmsize="Small">
+    <Sites>
+      <Site name="Web">
+        <Bindings>
+          <Binding name="Endpoint1" endpointName="Endpoint1" />
+        </Bindings>
+      </Site>
+    </Sites>
+    <ConfigurationSettings>
+      <Setting name="thumbprint" />
+      <Setting name="dumpling_ad_client_id" />
+    </ConfigurationSettings>
+    <Endpoints>
+      <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+    </Endpoints>
+  </WebRole>
 </ServiceDefinition>

@@ -3,6 +3,15 @@
   <Role name="dumplingDataWorker">
     <Instances count="1" />
     <ConfigurationSettings>
+      <Setting name="dumpling_ad_client_id" value="810a53c1-4fef-4703-a9d4-837f99e0523b" />
+      <Setting name="thumbprint" value="AD2613E84DC2D70F81C087D39ABABAC18206D86A" />
+    </ConfigurationSettings>
+  </Role>
+  <Role name="dumplingWeb">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="thumbprint" value="AD2613E84DC2D70F81C087D39ABABAC18206D86A" />
+      <Setting name="dumpling_ad_client_id" value="810a53c1-4fef-4703-a9d4-837f99e0523b" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

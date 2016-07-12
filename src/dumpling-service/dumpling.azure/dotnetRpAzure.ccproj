@@ -39,11 +39,13 @@
   <ItemGroup>
     <Folder Include="dotnetRPContent" />
     <Folder Include="dumplingDataWorkerContent\" />
+    <Folder Include="dumplingWebContent\" />
     <Folder Include="Profiles" />
   </ItemGroup>
   <ItemGroup>
     <DiagnosticsConfiguration Include="dotnetRPContent\diagnostics.wadcfgx" />
     <DiagnosticsConfiguration Include="dumplingDataWorkerContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="dumplingWebContent\diagnostics.wadcfgx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dumpling.dataworker\dumplingDataWorker.csproj">
@@ -52,6 +54,14 @@
       <Private>True</Private>
       <RoleType>Worker</RoleType>
       <RoleName>dumplingDataWorker</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
+    <ProjectReference Include="..\dumpling.web\dumplingWeb.csproj">
+      <Name>dumplingWeb</Name>
+      <Project>{0840b99f-2f4a-495a-b636-38ba87aa1c13}</Project>
+      <Private>True</Private>
+      <RoleType>Web</RoleType>
+      <RoleName>dumplingWeb</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
   </ItemGroup>

@@ -79,6 +79,8 @@ namespace dumplingDataWorker
 
         public override bool OnStart()
         {
+            // Before events or anything else can happen, we have to do this.
+            NearbyConfig.RetrieveSecrets().Wait();
             DumplingEventHub.FireEvent(new DataWorkerStartEvent()).Wait();
             // Set the maximum number of concurrent connections 
             ServicePointManager.DefaultConnectionLimit = 12;

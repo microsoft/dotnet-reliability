@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using System.Web.Configuration;
 
 
@@ -25,6 +26,11 @@ namespace DumplingLib
             // Paste JSON config object here.
             var names =   "{ \"state table name\": \"dumplingstates\", \"analysis topic path\": \"dumplingtopic\", \"dumpling-service data-worker queue path\": \"dataworkerqueue\", \"dumpling-service eventhub path\": \"dumplinghub\"  }";
             Settings    = JsonConvert.DeserializeObject<Dictionary<string, string>>(names);
+        }
+
+        public static async Task RetrieveSecrets()
+        {
+            await DumplingKeyVaultAuthConfig.RegisterAsync();
         }
     }
 }
