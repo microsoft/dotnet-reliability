@@ -202,6 +202,7 @@ WITH [BucketHits]([BucketId], [HitCount], [StartTime], [EndTime]) AS
     FROM [Dumps] [D]
 	WHERE [D].[DumpTime] >= @p0
         AND [D].[DumpTime] <= @p1
+        AND [D].BucketId IS NOT NULL
     GROUP BY [D].[BucketId]
 )
 SELECT [B].[BucketId], [B].[Name], [B].[BugUrl], [H].[HitCount], [H].[StartTime], [H].[EndTime]

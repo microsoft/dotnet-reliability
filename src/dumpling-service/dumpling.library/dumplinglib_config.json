@@ -1,8 +1,0 @@
-﻿{
-  "dumpling-service storage account connection string": "",
-  "dumpling-service state table name": "",
-  "dumpling-service bus connection string": "",
-  "dumpling-service analysis topic path": "",
-  "dumpling-service data-worker queue path": "",
-  "dumpling-service eventhub path":  "",
-}
