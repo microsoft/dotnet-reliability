@@ -9,5 +9,8 @@
       <Import moduleName="RemoteAccess" />
       <Import moduleName="RemoteForwarder" />
     </Imports>
+    <Certificates>
+      <Certificate name="DumplingCert" storeLocation="CurrentUser" storeName="My" />
+    </Certificates>
   </WorkerRole>
 </ServiceDefinition>

@@ -13,6 +13,7 @@
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="0EFE957C6436F35AE2E97351FCC65684B9D177B0" thumbprintAlgorithm="sha1" />
+      <Certificate name="DumplingCert" thumbprint="AD2613E84DC2D70F81C087D39ABABAC18206D86A" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
 </ServiceConfiguration>

@@ -20,12 +20,10 @@ namespace DumplingLib
     public class DumplingKeyVaultAuthConfig
     {
         private static X509Certificate2 FindCertificateByThumbprint(string thumbprint)
-        {
-            X509Store store;
-            
+        {           
             // https://azure.microsoft.com/en-us/blog/using-certificates-in-azure-websites-applications/
             // we look to where Azure places certificates.
-            store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            var store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
         
             try
             {
@@ -44,7 +42,6 @@ namespace DumplingLib
             }
         }
         
-
         private static AuthenticationContext _context;
         
         private static async Task<string> GetAccessToken(string authority, string resource, string scope)
