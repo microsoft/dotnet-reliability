@@ -24,7 +24,7 @@ namespace DumplingLib
         static NearbyConfig()
         {
             // Paste JSON config object here.
-            var names =   "{ \"state table name\": \"dumplingstates\", \"analysis topic path\": \"dumplingtopic\", \"dumpling-service data-worker queue path\": \"dataworkerqueue\", \"dumpling-service eventhub path\": \"dumplinghub\"  }";
+            var names = "{ \"dumpling-service state table name\": \"dumplingstates\", \"dumpling-service analysis topic path\": \"dumplingtopic\", \"dumpling-service data-worker queue path\": \"dataworkerqueue\", \"dumpling-service eventhub path\": \"dumplinghub\"  }";
             Settings    = JsonConvert.DeserializeObject<Dictionary<string, string>>(names);
         }
 
