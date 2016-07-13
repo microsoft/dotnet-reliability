@@ -4,8 +4,10 @@
 using DumplingLib;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -17,7 +19,7 @@ namespace dumplingWeb
     {
         protected void Application_Start()
         {
-            NearbyConfig.RetrieveSecrets().Wait();
+            NearbyConfig.RetrieveSecretsAsync(WebConfigurationManager.AppSettings["dumpling_ad_client_id"], WebConfigurationManager.AppSettings["thumbprint"]).Wait();
             AreaRegistration.RegisterAllAreas();
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);

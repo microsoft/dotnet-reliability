@@ -21,8 +21,12 @@ namespace DumplingLib
     {
         private static X509Certificate2 FindCertificateByThumbprint(string thumbprint)
         {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-
+            X509Store store;
+            
+            // https://azure.microsoft.com/en-us/blog/using-certificates-in-azure-websites-applications/
+            // we look to where Azure places certificates.
+            store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+        
             try
             {
                 store.Open(OpenFlags.ReadOnly);
@@ -43,36 +47,23 @@ namespace DumplingLib
 
         private static AuthenticationContext _context;
         
-        public static async Task<string> GetAccessToken(string authority, string resource, string scope)
+        private static async Task<string> GetAccessToken(string authority, string resource, string scope)
         {
             _context = new AuthenticationContext(authority, TokenCache.DefaultShared);
             
-            var result = await _context.AcquireTokenAsync(resource, AssertionCert);
+            var result = await _context.AcquireTokenAsync(resource, _cert);
 
             return result.AccessToken;
         }
 
         private static ClientAssertionCertificate _cert;
-        public static ClientAssertionCertificate AssertionCert
-        {
-            get
-            {
-                if (_cert == null)
-                {
-                    var clientAssertionCertPfx = FindCertificateByThumbprint(CloudConfigurationManager.GetSetting("thumbprint"));
-                    AssertionCert = new ClientAssertionCertificate(CloudConfigurationManager.GetSetting("dumpling_ad_client_id"), clientAssertionCertPfx);
-                }
 
-                return _cert;
-            }
-            private set
-            {
-                _cert = value;
-            }
-        }
 
-        public static async Task RegisterAsync()
+        public static async Task RegisterAsync(string clientid, string thumbprint)
         {
+            var clientAssertionCertPfx = FindCertificateByThumbprint(thumbprint);
+            _cert = new ClientAssertionCertificate(clientid, clientAssertionCertPfx);
+
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(DumplingKeyVaultAuthConfig.GetAccessToken));
 
             var storage = (await kv.GetSecretAsync("https://dumplingvault.vault.azure.net:443/secrets/dumplingstorage")).Value;

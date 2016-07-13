@@ -28,9 +28,9 @@ namespace DumplingLib
             Settings    = JsonConvert.DeserializeObject<Dictionary<string, string>>(names);
         }
 
-        public static async Task RetrieveSecrets()
+        public static async Task RetrieveSecretsAsync(string clientid, string certThumbprint)
         {
-            await DumplingKeyVaultAuthConfig.RegisterAsync();
+            await DumplingKeyVaultAuthConfig.RegisterAsync(clientid, certThumbprint);
         }
     }
 }

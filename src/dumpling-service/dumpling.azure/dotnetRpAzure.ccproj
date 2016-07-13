@@ -56,17 +56,10 @@
       <RoleName>dumplingDataWorker</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
-    <ProjectReference Include="..\dumpling.web\dumplingWeb.csproj">
-      <Name>dumplingWeb</Name>
-      <Project>{0840b99f-2f4a-495a-b636-38ba87aa1c13}</Project>
-      <Private>True</Private>
-      <RoleType>Web</RoleType>
-      <RoleName>dumplingWeb</RoleName>
-      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <PublishProfile Include="Profiles\dotnetrpProduction.azurePubxml" />
+    <PublishProfile Include="Profiles\dotnetrpProduction2.azurePubxml" />
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>

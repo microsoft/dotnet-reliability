@@ -5,21 +5,9 @@
       <Setting name="dumpling_ad_client_id" />
       <Setting name="thumbprint" />
     </ConfigurationSettings>
+    <Imports>
+      <Import moduleName="RemoteAccess" />
+      <Import moduleName="RemoteForwarder" />
+    </Imports>
   </WorkerRole>
-  <WebRole name="dumplingWeb" vmsize="Small">
-    <Sites>
-      <Site name="Web">
-        <Bindings>
-          <Binding name="Endpoint1" endpointName="Endpoint1" />
-        </Bindings>
-      </Site>
-    </Sites>
-    <ConfigurationSettings>
-      <Setting name="thumbprint" />
-      <Setting name="dumpling_ad_client_id" />
-    </ConfigurationSettings>
-    <Endpoints>
-      <InputEndpoint name="Endpoint1" protocol="http" port="80" />
-    </Endpoints>
-  </WebRole>
 </ServiceDefinition>

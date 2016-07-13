@@ -34,7 +34,6 @@
     <StorageAccount />
   </PublicConfig>
   <PrivateConfig xmlns="http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration">
-
   </PrivateConfig>
   <IsEnabled>false</IsEnabled>
 </DiagnosticsConfiguration>
