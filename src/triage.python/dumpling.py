@@ -251,7 +251,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     OutputController.s_squelch=bool(args.squelch)
-    OutputController.s_logPath=str(args.amendEssentialToLogpath);
+    OutputController.s_logPath=str(args.logpath);
 
     if args.command == 'wrap':
         pack(args.corefile, args.zipfile, args.addpaths)
@@ -306,10 +306,4 @@ if __name__ == '__main__':
             OutputController.Print('FILE NOT FOUND: \'%s\''%(args.triagefile))
         with open(args.triagefile, 'rb') as tfile:
             triagedata = json.load(tfile)
-        DumplingService.UploadTriageInfo(args.dumpid, triagedata)     
-            
-            
-        
-
-
-  
+        DumplingService.UploadTriageInfo(args.dumpid, triagedata)
