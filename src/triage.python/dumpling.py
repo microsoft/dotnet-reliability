@@ -277,7 +277,7 @@ if __name__ == '__main__':
     elif args.command == 'unwrap':
         if args.unpackdir == None:
             args.unpackdir = os.path.join(os.getcwd(), os.path.basename(args.zipfile).replace('.zip', '')) + os.path.sep
-        OutputController.+('unpacking core dump zip to: ' + str(args.unpackdir))
+        OutputController.('unpacking core dump zip to: ' + str(args.unpackdir))
         unpack(args.zipfile, args.unpackdir)
     elif args.command == 'download':
         if args.unpackdir == None:                                                    
