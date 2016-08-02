@@ -1,97 +1,61 @@
-﻿
-$toolsdir="C:\work\stress_runs\tools"
+﻿$workingDirectory=$env:TEMP
+$productArchitecture="TBD - passed in by VSTS likely."
+$productConfiguration="chk/ret: TBD - passed in by VSTS likely."
 
-# TODO: Retrieve tests appropriately. At the moment they're just placed on the developer box and fixed there.
-#$testdir = "C:\temp\workdir\test"
-$productdir = "E:\stress_work\working_directories\product";
-$chkwrkdir="E:\stress_work\working_directories\chk"
-$retwrkdir="E:\stress_work\working_directories\ret"
+$productDirectory="$workingDirectory/product/$productArchitecture/$productConfiguration"
+$testsDirectory="$workingDirectory/tests/"
 
-#Set environment variables for Visual Studio Command Prompt
-pushd "$env:VS140COMNTOOLS"
-cmd /c "vsvars32.bat&set" |
-foreach {
-  if ($_ -match "=") {
-    $v = $_.split("="); set-item -force -path "ENV:\$($v[0])"  -value "$($v[1])"
-  }
+# filled in by GET-DropExe
+$dropExe = ""; 
+
+# NOT TESTED
+#TODO: Naming
+# We use https://1eswiki.com/wiki/VSTS_Drop to retrieve our artifacts from storage.
+function Get-DropExe
+{
+    # Download the client from your VSTS account to TEMP/Drop.App/lib/net45/drop.exe
+    $account = "devdiv" # Your VSTS account name is the first component of your custom visualstudio.com URL
+    $sourceUrl = "https://$account.artifacts.visualstudio.com/DefaultCollection/_apis/drop/client/exe"
+    $destinationZip = [System.IO.Path]::Combine($workingDirectory, "Drop.App.zip")
+    $destinationDir = [System.IO.Path]::Combine($workingDirectory, "Drop.App")
+    $dropExe = [System.IO.Path]::Combine($destinationDir, "lib", "net45", "drop.exe")
+    $webClient = New-Object "System.Net.WebClient"
+    $webClient.Downloadfile($sourceUrl, $destinationZip)
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($destinationZip, $destinationDir)
+    Write-Host $dropExe
 }
-popd
-write-host "`nVisual Studio 2015 Command Prompt variables set." -ForegroundColor Yellow
 
-## NOT TESTED
+# NOT TESTED
 function Get-ProductBinaries
 {
-    # Copy the build binaries to some staging location.
-    start-process $toolsdir\getbuild.bat \\cpvsbuild\drops\dev14\ProjectK\raw\24306.00 $productdir
+    if(!(Test-Path $productDirectory))
+    {
+        mkdir $productDirectory
+    }
+    # use $dropexe to copy binaries to staging directory
+
+    # TODO:
 }
 
-## TESTED - WORKS WELL
-function Remove-Packages([string]$wrkdir)
+function Get-TestBinaries
 {
-    pushd
-
-    if(-not (Test-Path $wrkdir))
+    if(!(Test-Path $testsDirectory))
     {
-        popd # if cd is going to fail because it doesnt exist, it's better to just get out of here now before rmdir gets a chance to do anything.
+        mkdir $testsDirectory
     }
 
-    cd $wrkdir
-
-    # reset packages
-    rmdir packages -Recurse
-
-    popd
+# use $dropexe to copy binaries to staging directory
+ #TODO:
 }
 
-## TESTED - WORKS NICELY
-function Create-StressRepository([string]$wrkdir)
-{
-    echo "spawning git repository at $wrkdir"
 
-    if(-not (Test-Path $wrkdir))
-    {
-        echo "creating directory $wrkdir"
-        mkdir $wrkdir
-    }
+# This script is executed by VSTS.
+#retrieve the drop tool - we use this to pull the rest of our binaries
+Get-DropExe
+Get-ProductBinaries
+Get-TestBinaries
 
-    pushd $wrkdir
+# MS Build will now be executed by VSTS.
 
-    #clone the repo and proceed to it.
-    git clone http://www.github.com/Microsoft/dotnet-reliability
-    cd dotnet-reliability
 
-    # build stress tools
-    .\build.cmd /t:rebuild
-
-    popd
-}
-
-# TESTED - WORK WELL
-function Start-StressChk
-{
-    echo "initializing working directory $chkwrkdir"
-    Create-StressRepository $chkwrkdir
-
-    Remove-Packages $chkwrkdir
-    
-    [System.IO.Path]::Combine($chkwrkdir, "dotnet-reliability", "test") | pushd
-
-    msbuild genstress.proj @$toolsdir\buildcentoschk.rsp /m:4
-    msbuild genstress.proj @$toolsdir\buildrhelchk.rsp /m:4
-    msbuild genstress.proj @$toolsdir\buildubuntuchk.rsp /m:4
-}
-
-# TESTED - WORK WELL
-function Start-StressRet
-{
-    echo "initializing working directory $retwrkdir"
-    Create-StressRepository $retwrkdir
-
-    Remove-Packages $retwrkdir
-    
-    [System.IO.Path]::Combine($retwrkdir, "dotnet-reliability", "test") | pushd
-
-    msbuild genstress.proj @$toolsdir\buildcentosret.rsp /m:4
-    msbuild genstress.proj @$toolsdir\buildrhelret.rsp /m:4
-    msbuild genstress.proj @$toolsdir\buildubunturet.rsp /m:4
-}
