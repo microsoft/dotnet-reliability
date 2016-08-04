@@ -20,7 +20,6 @@ $VSTSDefaultCollection = "https://devdiv.artifacts.visualstudio.com/DefaultColle
 $workingDirectory=$env:TEMP
 
 $FetchedDataDirectory="$workingDirectory/FetchedData/"
-$ProductPackagesDirectory="$workingDirectory/ProductPackages/"
 
 # filled in by GET-DropExe
 $DropExe = ""; 
@@ -83,9 +82,9 @@ function Convert-BuildMonikerToBuildVersion([string]$moniker)
 function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
                                 [string]$CoreFXBuildMoniker)
 {
-    if(!(Test-Path $ProductPackagesDirectory))
+    if(!(Test-Path $ProductDirectory))
     {
-        mkdir $ProductPackagesDirectory
+        mkdir $ProductDirectory
     }
 
     # Product binaries are laid out like this: 
@@ -111,11 +110,11 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
     & $DropExe $CoreFXArguments
 
     # TODO:
-    # Copy from $CoreCLRDump/pkg to $ProductPackagesDirectory
+    # Copy from $CoreCLRDump/pkg to $ProductDirectory
     echo "copying CoreCLR Packages to $ProductDirectory"
     Get-ChildItem -Path $CoreCLRDump/pkg -Recurse -ErrorAction SilentlyContinue -Filter *.nupkg | Copy-Item -Destination $ProductDirectory
     
-    # Copy from $CoreFXDump/pkg to $ProductPackagesDirectory
+    # Copy from $CoreFXDump/pkg to $ProductDirectory
     echo "copying CoreFX Packages to $ProductDirectory"
     Get-ChildItem -Path $CoreFXDump/pkg -Recurse -ErrorAction SilentlyContinue -Filter *.nupkg | Copy-Item -Destination $ProductDirectory
     
