@@ -46,7 +46,10 @@ set BUILDERRORLEVEL=%ERRORLEVEL%
 goto :eof
 
 :AfterBuild
+
 call msbuild test/genstress.proj /verbosity:diagnostic
+set BUILDERRORLEVEL=%ERRORLEVEL%
+goto :eof
 
 echo.
 :: Pull the build summary from the log file
