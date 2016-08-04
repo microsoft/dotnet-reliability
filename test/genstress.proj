@@ -36,8 +36,8 @@
     without affecting runs
   -->
   <PropertyGroup>
-    <StressCodegenAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
-    <StressExecAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.execution.dll</StressExecAssmPath>
+    <StressCodegenAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
+    <StressExecAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.execution.dll</StressExecAssmPath>
   </PropertyGroup>
   <PropertyGroup>
     <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
