@@ -103,11 +103,11 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
     echo "Converting Moniker To Version: $CoreFXBuildMoniker => $LatestCoreFXVersion"
 
     echo "Attempting to download latest CoreCLR : dotnet/coreclr/master/$LatestCoreCLRVersion/packages"
-    $CoreCLRDropArguments = @('get', '--patAuth', $DropPat, '-s', $VSTSDefaultCollection, '-n', "dotnet/coreclr/master/$LatestCoreCLRVersion/packages", '-d', $CoreCLRDump)
+    $CoreCLRDropArguments = @('get', '--patAuth', $DropPat, '-s', $VSTSDefaultCollection, '-n', "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/release", '-d', $CoreCLRDump)
     & $DropExe $CoreCLRDropArguments
 
     echo "Attempting to download latest CoreFX : dotnet/coreclr/master/$LatestCoreFXVersion/packages"
-    $CoreFXArguments = @('get', '-s', '--patAuth', $DropPat, $VSTSDefaultCollection, '-n', "dotnet/corefx/master/$LatestCoreFXVersion/packages", '-d', $CoreFXDump)
+    $CoreFXArguments = @('get', '-s', '--patAuth', $DropPat, $VSTSDefaultCollection, '-n', "dotnet/corefx/master/$LatestCoreFXVersion/packages/release", '-d', $CoreFXDump)
     & $DropExe $CoreFXArguments
 
     # TODO:
