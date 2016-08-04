@@ -42,6 +42,7 @@ goto :AfterBuild
 
 :build
 %_buildprefix% msbuild "%_buildproj%" /nologo /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=normal;LogFile="%_buildlog%";Append %* %_buildpostfix%
+msbuild test/genstress.proj /verbosity:diagnostic
 set BUILDERRORLEVEL=%ERRORLEVEL%
 goto :eof
 
