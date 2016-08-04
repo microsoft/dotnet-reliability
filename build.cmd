@@ -41,12 +41,12 @@ call :build %*
 goto :AfterBuild
 
 :build
-%_buildprefix% call msbuild "%_buildproj%" /nologo /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=normal;LogFile="%_buildlog%";Append %* %_buildpostfix%
-call msbuild test/genstress.proj /verbosity:diagnostic
+%_buildprefix% msbuild "%_buildproj%" /nologo /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=normal;LogFile="%_buildlog%";Append %* %_buildpostfix%
 set BUILDERRORLEVEL=%ERRORLEVEL%
 goto :eof
 
 :AfterBuild
+call msbuild test/genstress.proj /verbosity:diagnostic
 
 echo.
 :: Pull the build summary from the log file
