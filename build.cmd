@@ -47,7 +47,7 @@ goto :eof
 
 :AfterBuild
 
-call msbuild test/genstress.proj /verbosity:diagnostic
+call msbuild test/genstress.proj /verbosity:diagnostic /maxcpucount /p:BuildInParallel=true
 set BUILDERRORLEVEL=%ERRORLEVEL%
 goto :eof
 
