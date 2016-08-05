@@ -24,7 +24,7 @@ if not defined VisualStudioVersion (
 
 :EnvSet
 
-call msbuild test/genstress.proj /verbosity:diagnostic /maxcpucount /p:BuildInParallel=true /p:CloudDropAccessToken="%1" /p:CloudResultsAccessToken="%2" /p:BuildCompleteConnection="%3" /p:EventHubSharedAccessKey="%4"
+call msbuild test/genstress.proj /verbosity:diagnostic /maxcpucount /p:BuildInParallel=true /p:CloudDropAccessToken="%1" /p:CloudResultsAccessToken="%2" /p:BuildCompleteConnection="%3" /p:EventHubSharedAccessKey="%4" /p:FilterToTestTFM=netcoreapp1.0
 set BUILDERRORLEVEL=%ERRORLEVEL%
 
 echo.
