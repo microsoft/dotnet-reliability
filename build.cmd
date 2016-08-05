@@ -43,13 +43,13 @@ goto :AfterBuild
 :build
 %_buildprefix% msbuild "%_buildproj%" /nologo /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=normal;LogFile="%_buildlog%";Append %* %_buildpostfix%
 set BUILDERRORLEVEL=%ERRORLEVEL%
-goto :eof
 
-:AfterBuild
+REM TODO: Check error level, if it is ==0 then continue, otherwise fail with error.
 
 call msbuild test/genstress.proj /verbosity:diagnostic /maxcpucount /p:BuildInParallel=true /p:CloudDropAccessToken="%1" /p:CloudResultsAccessToken="%2" /p:BuildCompleteConnection="%3" /p:EventHubSharedAccessKey="%4"
 set BUILDERRORLEVEL=%ERRORLEVEL%
-goto :eof
+
+:AfterBuild
 
 echo.
 :: Pull the build summary from the log file
