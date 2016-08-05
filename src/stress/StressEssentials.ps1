@@ -1,4 +1,4 @@
-﻿# Ideally, we should use the current logged in user but this appears to require domain joining. 
+# Ideally, we should use the current logged in user but this appears to require domain joining. 
 
 param([String]$DropPat, [String]$ProductDirectory, [String]$TestDirectory)
 $ProductDirectory = [System.Environment]::ExpandEnvironmentVariables($ProductDirectory)
@@ -21,6 +21,7 @@ $workingDirectory=$env:TEMP
 
 $FetchedDataDirectory="$workingDirectory/FetchedData/"
 $ProductPackagesDirectory="$workingDirectory/ProductPackages/"
+
 
 # filled in by GET-DropExe
 $DropExe = ""; 
@@ -103,6 +104,7 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
     echo "Converting Moniker To Version: $CoreFXBuildMoniker => $LatestCoreFXVersion"
 
     echo "Attempting to download latest CoreCLR : dotnet/coreclr/master/$LatestCoreCLRVersion/packages"
+
     $CoreCLRDropArguments = @('get', '--patAuth', $DropPat, '-s', $VSTSDefaultCollection, '-n', "dotnet/coreclr/master/$LatestCoreCLRVersion/packages", '-d', $CoreCLRDump)
     & $DropExe $CoreCLRDropArguments
 
@@ -118,7 +120,6 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
     # Copy from $CoreFXDump/pkg to $ProductPackagesDirectory
     echo "copying CoreFX Packages to $ProductDirectory"
     Get-ChildItem -Path $CoreFXDump/pkg -Recurse -ErrorAction SilentlyContinue -Filter *.nupkg | Copy-Item -Destination $ProductDirectory
-    
 }
 
 
@@ -140,11 +141,19 @@ function Get-TestBinaries
 }
 
 
-# This script is executed by VSTS.
-
 # Fetch CoreCLR/CoreFX Build Monikers: 
 $CoreCLRBuildMoniker = Get-BuildMoniker "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/master/Latest.txt"
 echo "Using CoreCLR Version: $CoreCLRBuildMoniker"
+
+$CoreFXBuildMoniker = Get-BuildMoniker "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/master/Latest.txt"
+echo "Using CoreFX Version: $CoreFXBuildMoniker"
+
+#retrieve the drop tool - we use this to pull the rest of our binaries
+$DropExe = Get-DropExe
+echo "Using $DropExe"
+Get-ProductBinaries $CoreCLRBuildMoniker $CoreFXBuildMoniker
+
+# MS Build will then be executed by VSTS.
 
 $CoreFXBuildMoniker = Get-BuildMoniker "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/master/Latest.txt"
 echo "Using CoreFX Version: $CoreFXBuildMoniker"
