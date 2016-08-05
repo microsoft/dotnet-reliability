@@ -20,7 +20,6 @@ $VSTSDefaultCollection = "https://devdiv.artifacts.visualstudio.com/DefaultColle
 $workingDirectory=$env:TEMP
 
 $FetchedDataDirectory="$workingDirectory/FetchedData/"
-$ProductPackagesDirectory="$workingDirectory/ProductPackages/"
 
 
 # filled in by GET-DropExe
@@ -84,9 +83,9 @@ function Convert-BuildMonikerToBuildVersion([string]$moniker)
 function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
                                 [string]$CoreFXBuildMoniker)
 {
-    if(!(Test-Path $ProductPackagesDirectory))
+    if(!(Test-Path $ProductDirectory))
     {
-        mkdir $ProductPackagesDirectory
+        mkdir $ProductDirectory
     }
 
     # Product binaries are laid out like this: 
@@ -105,19 +104,20 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
 
     echo "Attempting to download latest CoreCLR : dotnet/coreclr/master/$LatestCoreCLRVersion/packages"
 
-    $CoreCLRDropArguments = @('get', '--patAuth', $DropPat, '-s', $VSTSDefaultCollection, '-n', "dotnet/coreclr/master/$LatestCoreCLRVersion/packages", '-d', $CoreCLRDump)
+    $CoreCLRDropArguments = @('get', '--patAuth', $DropPat, '-s', $VSTSDefaultCollection, '-n', "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/release", '-d', $CoreCLRDump)
+
     & $DropExe $CoreCLRDropArguments
 
     echo "Attempting to download latest CoreFX : dotnet/coreclr/master/$LatestCoreFXVersion/packages"
-    $CoreFXArguments = @('get', '-s', '--patAuth', $DropPat, $VSTSDefaultCollection, '-n', "dotnet/corefx/master/$LatestCoreFXVersion/packages", '-d', $CoreFXDump)
+    $CoreFXArguments = @('get', '-s', '--patAuth', $DropPat, $VSTSDefaultCollection, '-n', "dotnet/corefx/master/$LatestCoreFXVersion/packages/release", '-d', $CoreFXDump)
     & $DropExe $CoreFXArguments
 
     # TODO:
-    # Copy from $CoreCLRDump/pkg to $ProductPackagesDirectory
+    # Copy from $CoreCLRDump/pkg to $ProductDirectory
     echo "copying CoreCLR Packages to $ProductDirectory"
     Get-ChildItem -Path $CoreCLRDump/pkg -Recurse -ErrorAction SilentlyContinue -Filter *.nupkg | Copy-Item -Destination $ProductDirectory
     
-    # Copy from $CoreFXDump/pkg to $ProductPackagesDirectory
+    # Copy from $CoreFXDump/pkg to $ProductDirectory
     echo "copying CoreFX Packages to $ProductDirectory"
     Get-ChildItem -Path $CoreFXDump/pkg -Recurse -ErrorAction SilentlyContinue -Filter *.nupkg | Copy-Item -Destination $ProductDirectory
 }
