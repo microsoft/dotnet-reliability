@@ -7,6 +7,6 @@ cd /d %CloudFileDrive%
 
 mkdir %BUILD_BUILDNUMBER%
 
-robocopy %BUILD_BUILDSOURCE% %CloudFileDrive%\%BUILD_BUILDNUMBER% /MIR
+robocopy %BUILD_SOURCESDIRECTORY% %CloudFileDrive%\%BUILD_BUILDNUMBER% /MIR
 
 call %CloudFileDrive%\%BUILD_BUILDNUMBER%\build.cmd
