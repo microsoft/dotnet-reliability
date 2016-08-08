@@ -10,11 +10,6 @@ cd /d %CloudFileDrive%
 
 mkdir %BUILD_BUILDNUMBER%
 
-cd %BUILD_BUILDNUMBER%
-
-call .\build.cmd
-
 set GeneratedRootPath=%CloudFileDrive%\%BUILD_BUILDNUMBER%\test\
 set BaseIntermediateOutputPath=%CloudFileDrive%\%BUILD_BUILDNUMBER%
-call .\build_test.cmd
 
