@@ -1,6 +1,3 @@
-:: Need a build-from commandlet
-:: navigate to our directory
-
 :: TODO:
 ::    -- Error Handling
 ::    -- Limit number of builds we keep around. When we reach max: as we create a build, we should remove a build.
@@ -10,6 +7,6 @@ cd /d %CloudFileDrive%
 
 mkdir %BUILD_BUILDNUMBER%
 
-set GeneratedRootPath=%CloudFileDrive%\%BUILD_BUILDNUMBER%\test\
-set BaseIntermediateOutputPath=%CloudFileDrive%\%BUILD_BUILDNUMBER%
+robocopy %BUILD_BUILDSOURCE% %CloudFileDrive%\%BUILD_BUILDNUMBER% /MIR
 
+call %CloudFileDrive%\%BUILD_BUILDNUMBER%\build.cmd
