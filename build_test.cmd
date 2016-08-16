@@ -25,7 +25,7 @@ if not defined VisualStudioVersion (
 :EnvSet
 
 :: The property FilterToTestTFM is temporarily required because of  https://github.com/dotnet/buildtools/commit/e9007c16b1832dbd0ea9669fa578b61900b7f724 
-call msbuild test/genstress.proj /verbosity:%msbuildverbosity% /maxcpucount /p:BuildInParallel=true /p:CloudDropAccessToken=%1 /p:CloudResultsAccessToken=%2 /p:BuildCompleteConnection=%3 /p:HelixApiAccessKey=%4 /p:FilterToTestTFM=netcoreapp1.0
+call msbuild test/genstress.proj /verbosity:%msbuildverbosity% /maxcpucount /p:BuildInParallel=true /p:CloudDropAccessToken=%1 /p:CloudResultsAccessToken=%2 /p:BuildCompleteConnection=%3 /p:HelixApiAccessKey=%4 /p:HelixApiEndPoint=%5 /p:FilterToTestTFM=netcoreapp1.0
 set BUILDERRORLEVEL=%ERRORLEVEL%
 
 
