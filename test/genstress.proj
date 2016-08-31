@@ -1,6 +1,10 @@
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup> 
+    <TestCommandLine Condition="'$(TargetOS)'!='Windows_NT'" Include="chmod +x corerun" /> 
+  </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)dir.props" />
+
 
   <PropertyGroup>
     <BuildMoniker Condition="'$(BuildMoniker)' == ''">$(USERNAME)-$([System.DateTime]::Now.ToString(MMdd-hhmmss))</BuildMoniker>
