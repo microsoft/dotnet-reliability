@@ -1,6 +1,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Occasionally our corerun loses its execute bit. This command line gets executed by our helix build tools to reset that. -->
   <ItemGroup> 
-    <TestCommandLine Condition="'$(TargetOS)'!='Windows_NT'" Include="chmod +x corerun" /> 
+    <TestCommandLine Condition="'$(TargetOS)' != 'Windows_NT'" Include="chmod +x corerun" /> 
   </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)dir.props" />
@@ -40,8 +41,8 @@
     without affecting runs
   -->
   <PropertyGroup>
-    <StressCodegenAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
-    <StressExecAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.execution.dll</StressExecAssmPath>
+    <StressCodegenAssmPath>AnyOS.AnyCPU.Debug\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
+    <StressExecAssmPath>AnyOS.AnyCPU.Debug\stress.codegen\stress.execution.dll</StressExecAssmPath>
   </PropertyGroup>
   <PropertyGroup>
     <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
