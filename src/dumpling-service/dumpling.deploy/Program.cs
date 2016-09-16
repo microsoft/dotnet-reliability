@@ -199,7 +199,6 @@ namespace dumplingService
                     // StreamAnalytics is deployed via the Azure UI.
                     // classic webrole - deployed by an azure build process
                     // classic worker role - deployed by an azure build process
-                    // todo: add storage deployment.
                 };
 
                 Task.WaitAll(deployTasks);

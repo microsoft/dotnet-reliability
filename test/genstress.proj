@@ -1,4 +1,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup> 
+     <TestCommandLine Condition="'$(TargetOS)'!='Windows_NT'" Include="chmod +x corerun" /> 
+  </ItemGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)dir.props" />
 
@@ -26,7 +29,7 @@
   -->
   <PropertyGroup>
     <UnitTestFileMask Condition="'$(UnitTestFileMask)' == ''">*.Tests.dll</UnitTestFileMask>
-    <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)../unittests/</UnitTestDirectory>
+    <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)../bin/obj/TestArchives/</UnitTestDirectory>
   </PropertyGroup>
   
   <!-- 
@@ -36,8 +39,8 @@
     without affecting runs
   -->
   <PropertyGroup>
-    <StressCodegenAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
-    <StressExecAssmPath>$(BinDir)AnyOS.AnyCPU.Debug\stress.codegen\stress.execution.dll</StressExecAssmPath>
+    <StressCodegenAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
+    <StressExecAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.execution.dll</StressExecAssmPath>
   </PropertyGroup>
   <PropertyGroup>
     <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
@@ -47,8 +50,8 @@
     <UnitTestExtractDir>$(BaseIntermediateOutputPath)utextracted/</UnitTestExtractDir>
     <UnitTestExtractedSemaphore>$(UnitTestExtractDir)extraction.complete</UnitTestExtractedSemaphore>
     <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends/</UnitTestDependsBin>
-    <TestDependRestoreCommand>$(DotnetToolCommand) restore --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
-    <TestDependPublishCommand>$(DotnetToolCommand) publish --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64</TestDependPublishCommand>
+    <TestDependRestoreCommand>$(DotnetToolCommand) restore $(UnitTestCLIProjJson) --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
+    <TestDependPublishCommand>$(DotnetToolCommand) publish $(UnitTestCLIProjJson) --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64 --framework $(TargetFramework)</TestDependPublishCommand>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -75,33 +78,46 @@
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
-  
-  <ItemGroup>
-    <ZipFile Include="$(UnitTestDirectory)**\*.zip"/>
-  </ItemGroup>
-  
   <ItemGroup>
     <JsonFile Include="$(UnitTestDirectory)**\project.json"/>
   </ItemGroup>
    
+<ItemGroup>
+    <ZipFile Include="$(UnitTestDirectory)**\*.zip"/>
+  </ItemGroup>
+
  <Target Name="UnzipAllTests" 
     Condition="!Exists('$(UnitTestExtractedSemaphore)')"
     DependsOnTargets="UnzipTest">
     <WriteLinesToFile File="$(UnitTestExtractedSemaphore)" Lines="" Overwrite="false" />
   </Target>
  
-  <Target Name="UnzipTest"
+    <Target Name="UnzipTest"
     Inputs="@(ZipFile)"
-    Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))">
-
-    <Copy SourceFiles="@(JsonFile)" DestinationFiles="@(JsonFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"/>
-    
-    <ZipFileExtractToDirectory Condition="!Exists('%(RootDir)%(Directory)%(ZipFile.FileName)')"
-        SourceArchive="%(ZipFile.FullPath)"
-        DestinationDirectory="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"
-        OverwriteDestination="true" />
-  </Target>
+    Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"
+    DependsOnTargets="SelectTestZips">
+        <Message Text="Unzipping tests: @(ZipFile)" Importance="Low" />
+        
+        <ZipFileExtractToDirectory Condition="Exists('%(RootDir)%(Directory)%(ZipFile.FileName)%(ZipFile.Extension)')"
+            SourceArchive="%(ZipFile.FullPath)"
+            DestinationDirectory="$(UnitTestExtractDir)\%(filename)%(extension)"
+            OverwriteDestination="true" />
+        
+        <Copy SourceFiles="@(JsonFile)" DestinationFiles="@(JsonFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))" />
+    </Target>
   
+    <Target Name="SelectTestZips">
+        <Error Condition="!Exists('$(MSBuildThisFileDirectory)\..\AnyOS.AnyCPU.Debug-Test-Archive-List.txt')" Text="Can't find AnyOS Test List.'" />
+      
+        <ReadLinesFromFile File="$(MSBuildThisFileDirectory)\..\AnyOS.AnyCPU.Debug-Test-Archive-List.txt">
+            <Output TaskParameter="Lines" ItemName="ItemsFromFile" />
+        </ReadLinesFromFile>
+
+        <ItemGroup>
+            <ZipFile Include="@(ItemsFromFile->'$(UnitTestDirectory)\%(filename)%(extension)')" />
+        </ItemGroup>
+    </Target>
+
   <Target Name="RestoreTestDependsBin" DependsOnTargets="UnzipAllTests">
     <Message Text="Restoring test dependencies..." />
     
@@ -136,7 +152,6 @@
     
     <MakeDir Directories="$(SuitePath)"/>
     <Copy SourceFiles="$(UnitTestCLIProjJson)" DestinationFiles="$(SuitePath)project.json"/>
-    
   </Target>
 
     <ItemGroup>
@@ -171,7 +186,7 @@
     <ItemGroup>
       <GeneratedProjects Include="$(SuitePath)**\*.csproj"/>
     </ItemGroup>
-    
+
     <MSBuild Targets="Build"
       Projects="@(GeneratedProjects)"
       BuildInParallel="true"

@@ -254,3 +254,8 @@ Session.vim
 .netrwhist
 *~
 
+local_run.rsp
+local_run_win10.rsp
+out.txt
+usedvalues.txt
+.vscode/

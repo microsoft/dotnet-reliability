@@ -9,129 +9,79 @@ using System.Threading.Tasks;
 
 namespace stress.codegen
 {
-    [Serializable]
     public class ProjectJsonDependencyInfo
     {
-        public Dictionary<string, string> dependencies;
+        public JObject dependencies;
 
-        public Dictionary<string, Dictionary<string, string[]>> frameworks;
+        public JObject frameworks;
 
-        public Dictionary<string, Dictionary<string, string>> runtimes;
+        public JObject runtimes;
+
+        public JObject supports;
 
         public ProjectJsonDependencyInfo()
         {
-            dependencies = new Dictionary<string, string>();
+            dependencies = new JObject();
 
-            frameworks = new Dictionary<string, Dictionary<string, string[]>>();
-            frameworks["netcoreapp1.0"] = new Dictionary<string, string[]>() { { "imports", new string[] { "dnxcore50", "portable-net45+win8" }  } };
+            frameworks = new JObject();
 
-            runtimes = new Dictionary<string, Dictionary<string, string>>()
-            {
-                { "win", new Dictionary<string, string>() },
-                { "win7-x64", new Dictionary<string, string>() },
-                { "win7-x86", new Dictionary<string, string>() },
-                { "ubuntu.14.04-x64", new Dictionary<string, string>() },
-                { "osx.10.10-x64", new Dictionary<string, string>() },
-                { "centos.7-x64", new Dictionary<string, string>() },
-                { "rhel.7-x64", new Dictionary<string, string>() },
-                { "debian.8-x64", new Dictionary<string, string>() },
-            };
+            runtimes = new JObject();
+
+            supports = new JObject();
+
+            supports.Add("coreFx.Test.netcoreapp1.0", new JObject());
         }
 
         public void ToFile(string path)
         {
-            // Serialize the RunConfiguration
-            JsonSerializer serializer = JsonSerializer.CreateDefault();
-
-            using (FileStream fs = new FileStream(path, FileMode.Create))
-            {
-                using (StreamWriter writer = new StreamWriter(fs))
-                {
-                    serializer.Serialize(writer, this);
-                }
-            }
+            File.WriteAllText(path, JsonConvert.SerializeObject(this));
         }
 
         public static ProjectJsonDependencyInfo FromFile(string path)
         {
-            ProjectJsonDependencyInfo dependInfo = new ProjectJsonDependencyInfo();
-            
+            ProjectJsonDependencyInfo dependInfo = null;
             //if a project.json file exists next to the test binary load it
             if (File.Exists(path))
             {
-                var serializer = JsonSerializer.CreateDefault();
+                var data = JObject.Parse(File.ReadAllText(path));
 
-                using (var srdr = new StreamReader(File.OpenRead(path)))
-                {
-                    var jrdr = new JsonTextReader(srdr);
+                (data["dependencies"] as JObject)?.Property("test-runtime")?.Remove();
 
-                    var obj = serializer.Deserialize<JObject>(jrdr);
-                    
-                    foreach(var prop in FindAllDependencyProperties(obj))
-                    {
-                        dependInfo.dependencies[prop.Key] = prop.Value;
-                    }
-                }
+                dependInfo = data.ToObject<ProjectJsonDependencyInfo>();
             }
 
             return dependInfo;
         }
 
-        public static IEnumerable<KeyValuePair<string, string>> FindAllDependencyProperties(JObject projectJsonObj)
+        public static JEnumerable<JProperty> FetchPrimaryDependenciesProperties(JObject projectJsonObj)
         {
-            return projectJsonObj
-                .Descendants()
-                .OfType<JProperty>()
-                .Where(property => property.Name == "dependencies")
-                .Select(property => property.Value)
-                .SelectMany(o => o.Children<JProperty>())
-                .Where(p => !p.Name.Contains("TargetingPack"))
-                .Select(p => GetDependencyPair(p))
-                .Where(p => !string.IsNullOrEmpty(p.Value));
+            return projectJsonObj["dependencies"].Children<JProperty>();
         }
 
-        public static KeyValuePair<string, string> GetDependencyPair(JProperty dependProp)
-        {
-            string dependencyVersion;
 
-            if (dependProp.Value is JObject)
-            {
-                dependencyVersion = dependProp.Value["version"]?.Value<string>();
-            }
-            else if (dependProp.Value is JValue)
-            {
-                dependencyVersion = dependProp.Value.ToObject<string>();
-            }
-            else
-            {
-                throw new ArgumentException("Unrecognized dependency element");
-            }
-
-            return new KeyValuePair<string, string>(dependProp.Name, dependencyVersion);
-        }
 
         public static ProjectJsonDependencyInfo MergeToLatest(IEnumerable<ProjectJsonDependencyInfo> projectJsons, string oldprerelease = null, string newprerelease = null)
         {
             var merged = new ProjectJsonDependencyInfo();
 
-            merged.dependencies = new Dictionary<string, string>();
-            
+            merged.dependencies = new JObject();
+
             foreach (var pjson in projectJsons)
             {
                 if (pjson.dependencies != null)
                 {
                     foreach (var depend in pjson.dependencies)
                     {
-                        var depVer = ComplexVersion.Parse(depend.Value);
-                        
-                        if(newprerelease != null && depVer.Prerelease == oldprerelease)
+                        var depVer = ComplexVersion.Parse(depend.Value.Value<string>());
+
+                        if (newprerelease != null && depVer.Prerelease != null && depVer.Prerelease == oldprerelease)
                         {
                             depVer.Prerelease = newprerelease;
                         }
 
                         //if the dependency is not present in the merged dependencies OR the version in the current pjson is a greater than the one in merged 
                         //if string.Compare returns > 0 then depend.Value is greater than the one in merged, this should mean a later version 
-                        if (!merged.dependencies.ContainsKey(depend.Key) || (ComplexVersion.Parse(merged.dependencies[depend.Key]) < depVer))
+                        if (merged.dependencies[depend.Key] == null || (ComplexVersion.Parse(merged.dependencies[depend.Key].Value<string>()) < depVer))
                         {
                             merged.dependencies[depend.Key] = depVer.ToString();
                         }

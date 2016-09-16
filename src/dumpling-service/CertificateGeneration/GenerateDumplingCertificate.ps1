@@ -26,7 +26,6 @@ function Add-CertificateToKeyVault([string] $secretKey, [SecureString] $securePa
 	Add-AzureKeyVaultKey -VaultName $globalVar_keyVaultName -Name $secretKey -KeyFilePath $pathToPfx -KeyFilePassword $securePassword -Destination Software
 }
 
-# TODO: Load in real certificate with legitimate start date and end date.
 function Register-DumplingWithAzureAD
 {
 	#login to Azure
