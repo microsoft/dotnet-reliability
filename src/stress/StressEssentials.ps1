@@ -180,12 +180,18 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
 
 
     if($DebuggingBinaries) {
-        Get-Drop "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/checked" $CoreCLRDump
-        Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/packages/debug" $CoreFXDump
+        #Get-Drop "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/checked" $CoreCLRDump
+        #Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/packages/debug" $CoreFXDump
+
+        Get-Drop "dotnet/coreclr/release/1.1.0/$LatestCoreCLRVersion/packages/checked" $CoreCLRDump
+        Get-Drop "dotnet/corefx/release/1.1.0/$LatestCoreFXVersion/packages/debug" $CoreFXDump
     }
     else {
-        Get-Drop "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/release" $CoreCLRDump
-        Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/packages/release" $CoreFXDump
+        #Get-Drop "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/release" $CoreCLRDump
+        #Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/packages/release" $CoreFXDump
+
+        Get-Drop "dotnet/coreclr/release/1.1.0/$LatestCoreCLRVersion/packages/release" $CoreCLRDump
+        Get-Drop "dotnet/corefx/release/1.1.0/$LatestCoreFXVersion/packages/release" $CoreFXDump
     }
 
     # Copy from $CoreCLRDump/pkg to $ProductDirectory
@@ -209,15 +215,22 @@ function Get-TestBinaries([string]$CoreFXBuildMoniker)
     Write-Verbose "retrieving test binaries with CoreFX Version: $LatestCoreFXVersion"
     # "dotnet/corefx/master/$LatestCoreFXVersion/tests/anyos/anycpu/netcoreapp1.0"
     # "dotnet/reliability/stress/prototype/test_binaries"
-    Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/tests/anyos/anycpu/$FilterToTestTFM" $TestDirectory
+    Get-Drop "dotnet/corefx/release/1.1.0/$LatestCoreFXVersion/tests/anyos/anycpu/netcoreapp1.0" $TestDirectory
+    # Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/tests/anyos/anycpu/$FilterToTestTFM" $TestDirectory
     # Get-Drop "dotnet/corefx/master/24513.02/tests/anyos/anycpu/netcoreapp1.0" $TestDirectory
 }
 
 # Fetch CoreCLR/CoreFX Build Monikers: 
-$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/master/Latest.txt"
+# For Master
+#$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/master/Latest.txt"
+$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.1.0/Latest.txt"
+
 Write-Verbose "Using CoreCLR Version: $CoreCLRBuildMoniker"
 
-$CoreFXBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/master/Latest.txt"
+# For Master
+# $CoreFXBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/master/Latest.txt"
+# For Release
+$CoreFXBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.1.0/Latest.txt"
 Write-Verbose "Using CoreFX Version: $CoreFXBuildMoniker"
 
 #retrieve the drop tool - we use this to pull the rest of our binaries

@@ -45,6 +45,7 @@ namespace stress.codegen
             
             foreach (var file in projectJsons)
             {
+                // 
                 merged.Merge(file);
             }
          
@@ -63,7 +64,8 @@ namespace stress.codegen
             merged["supports"]?.Children<JProperty>().ToList().ForEach(x => x.Remove());
             
             // remove all frameworks except the specified one
-            merged["frameworks"]?.Children<JProperty>().Where(x => x.Name != targetFramework).ToList().ForEach(x => x.Remove());
+            merged["frameworks"]?.Children<JProperty>().ToList().ForEach(x => x.Remove());
+            merged["frameworks"][targetFramework] = new JObject();
 
             // since we are creating an anyos test launcher we should list all known runtimes here.
             merged["runtimes"] = new JObject();
@@ -87,7 +89,7 @@ namespace stress.codegen
                 MessageBox.Show($"PID:{Process.GetCurrentProcess().Id} Attach debugger now.", "Debug GenerateStressSuiteTask", MessageBoxButton.OK);
             }
             
-            ProduceAnyOsProjectJson(OutPath, MergeProjectJsonsIn(InPath), "netstandard1.7");
+            ProduceAnyOsProjectJson(OutPath, MergeProjectJsonsIn(InPath), "netcoreapp1.0");
             
             return true;
         }
