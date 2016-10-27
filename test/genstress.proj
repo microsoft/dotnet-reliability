@@ -49,7 +49,7 @@
     <UnitTestExtractedSemaphore>$(UnitTestExtractDir)extraction.complete</UnitTestExtractedSemaphore>
     <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends/</UnitTestDependsBin>
     <TestDependRestoreCommand>$(DotnetToolCommand) restore $(UnitTestCLIProjJson) --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
-    <TestDependPublishCommand>$(DotnetToolCommand) publish $(UnitTestCLIProjJson) --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64 --framework $(TargetFramework)</TestDependPublishCommand>
+    <TestDependPublishCommand>$(DotnetToolCommand) publish $(UnitTestCLIProjJson) --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64 --framework $(FilterToTestTFM)</TestDependPublishCommand>
   </PropertyGroup>
   
   <PropertyGroup>
