@@ -9,7 +9,6 @@
 ## Depending on the value of Logging.OutStream (default is 'stdout') the output locations of these
 ## three may be variable.
 
-## TODO: Implement 'cloud logging'
 from datetime import datetime
 from os import path
 from azure.servicebus   import ServiceBusService, Message

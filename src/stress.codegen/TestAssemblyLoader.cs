@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Newtonsoft.Json;
+using stress.codegen.utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -79,7 +80,7 @@ namespace stress.codegen
                 {
                     //if the assembly is available in the packages add to the framework reference list for legacy projects
                     //(in new projects these will be added through project.json refs)
-                    if (!assmPath.StartsWith(Path.GetDirectoryName(this.AssemblyPath)) || _assembly.PackageInfo.dependencies.ContainsKey(refAssm.Name))
+                    if (!assmPath.StartsWith(Path.GetDirectoryName(this.AssemblyPath)) || _assembly.PackageInfo.dependencies[refAssm.Name] != null)
                     {
                         _assembly.ReferenceInfo.FrameworkReferences.Add(new AssemblyReference() { Path = assmPath, Version = refAssm.Version.ToString() });
                     }
@@ -111,21 +112,28 @@ namespace stress.codegen
             return assmPath;
         }
 
-        public UnitTestInfo[] GetTests<TDiscoverer>()
+        public string GetTests<TDiscoverer>()
             where TDiscoverer : ITestDiscoverer, new()
         {
             try
             {
                 var discoverer = new TDiscoverer();
 
-                return discoverer.GetTests(_assembly);
+                var tests = discoverer.GetTests(_assembly);
+
+                if (tests.Length > 0)
+                {
+                    CodeGenOutput.Info($"{_assembly.Assembly.FullName}: {tests.Length} tests discovered from assembly");
+                }
+
+                return JsonConvert.SerializeObject(tests);
             }
             catch (Exception e)
             {
                 this.LoadError = (this.LoadError ?? string.Empty) + e.ToString();
             }
 
-            return new UnitTestInfo[] { };
+            return JsonConvert.SerializeObject(new UnitTestInfo[] { });
         }
 
         private Assembly IsoDomain_ReflectionOnlyAssemblyResolve(object sender, ResolveEventArgs args)

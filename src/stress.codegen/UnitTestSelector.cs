@@ -110,16 +110,7 @@ namespace stress.codegen
         {
             try
             {
-                // Serialize the RunConfiguration
-                JsonSerializer serializer = JsonSerializer.CreateDefault();
-
-                using (FileStream fs = new FileStream(path, FileMode.Create))
-                {
-                    using (StreamWriter writer = new StreamWriter(fs))
-                    {
-                        serializer.Serialize(writer, _candidates);
-                    }
-                }
+                File.WriteAllText(path, JsonConvert.SerializeObject(_candidates));
             }
             catch (Exception e)
             {
@@ -131,19 +122,7 @@ namespace stress.codegen
         {
             UnitTestInfo[] cache = null;
 
-            // Deserialize the RunConfiguration
-            JsonSerializer serializer = JsonSerializer.CreateDefault();
-
-            using (FileStream fs = new FileStream(path, FileMode.Open))
-            {
-                using (StreamReader reader = new StreamReader(fs))
-                {
-                    JsonTextReader jReader = new JsonTextReader(reader);
-
-                    // Call the Deserialize method to restore the object's state.
-                    cache = serializer.Deserialize<UnitTestInfo[]>(jReader);
-                }
-            }
+            cache = JsonConvert.DeserializeObject<UnitTestInfo[]>(File.ReadAllText(path));
 
             return cache;
         }
@@ -171,6 +150,7 @@ namespace stress.codegen
         private UnitTestInfo[] GetTests(string path, string[] hintPaths)
         {
             List<UnitTestInfo> cachedTests;
+
             if (_candidateCache != null && _candidateCache.TryGetValue(path, out cachedTests))
             {
                 CodeGenOutput.Info($"{path}: {cachedTests.Count} tests discovered from cache");
@@ -178,11 +158,11 @@ namespace stress.codegen
             }
             else
             {
-                return FindTests(path, hintPaths);
+                return JsonConvert.DeserializeObject<UnitTestInfo[]>(FindTests(path, hintPaths));
             }
         }
 
-        private UnitTestInfo[] FindTests(string path, string[] hintPaths)
+        private string FindTests(string path, string[] hintPaths)
         {
             var codeGenDllPath = Assembly.GetExecutingAssembly().Location;
 
@@ -198,8 +178,8 @@ namespace stress.codegen
 
             loader.Load(path, hints.ToArray());
 
-            UnitTestInfo[] tests = loader.GetTests<XUnitTestDiscoverer>();
-
+            var tests = loader.GetTests<XUnitTestDiscoverer>();
+            
             //if no xunit tests were discovered and the assembly is an exe treat as a standalone exe test
             if ((tests == null || tests.Length == 0) && Path.GetExtension(path).ToLowerInvariant() == ".exe")
             {
@@ -207,11 +187,6 @@ namespace stress.codegen
             }
 
             AppDomain.Unload(loaderDomain);
-
-            if (tests.Length > 0)
-            {
-                CodeGenOutput.Info($"{path}: {tests.Length} tests discovered from assembly");
-            }
 
             return tests;
         }

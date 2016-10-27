@@ -46,7 +46,6 @@ namespace dumplingDataWorker
 
                             await receivedMessage.CompleteAsync();
 
-                            // TODO: Debug/Understand: the received message is disposed of after the await call returns. Is this a framework/runtime bug?
                             await DumplingEventHub.FireEvent(new DataWorkerMessageReceivedEvent());
                             using (var reader = new StreamReader(body))
                             {

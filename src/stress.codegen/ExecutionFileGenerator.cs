@@ -67,6 +67,7 @@ namespace stress.codegen
                 // If there is a host then prepend it to the test command line
                 if (!String.IsNullOrEmpty(loadTestInfo.SuiteConfig.Host))
                 {
+                    stressScript.WriteLine($"chmod +x {loadTestInfo.SuiteConfig.Host}");
                     testCommandLine = loadTestInfo.SuiteConfig.Host + " " + testCommandLine;
                     // If the command line isn't a full path or ./ for current directory then add it to ensure we're using the host in the current directory
                     if ((!loadTestInfo.SuiteConfig.Host.StartsWith("/")) && (!loadTestInfo.SuiteConfig.Host.StartsWith("./")))

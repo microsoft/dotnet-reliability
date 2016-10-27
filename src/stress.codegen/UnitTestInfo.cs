@@ -31,7 +31,6 @@ namespace stress.codegen
     }
 
 
-    [Serializable]
     public class TestReferenceInfo
     {
         public TestReferenceInfo()
@@ -48,7 +47,6 @@ namespace stress.codegen
         public ProjectJsonDependencyInfo PackageInfo { get; set; }
     }
 
-    [Serializable]
     public class AssemblyReferenceSet : HashSet<AssemblyReference>
     {
         public AssemblyReferenceSet() : base(new RefComparer())
@@ -59,7 +57,6 @@ namespace stress.codegen
         {
         }
         
-        [Serializable]
         private class RefComparer : IEqualityComparer<AssemblyReference>
         {
             public bool Equals(AssemblyReference x, AssemblyReference y)
@@ -74,7 +71,6 @@ namespace stress.codegen
         }
     }
 
-    [Serializable]
     public class AssemblyReference
     {
         public string Name { get { return System.IO.Path.GetFileName(this.Path); } }
@@ -84,7 +80,6 @@ namespace stress.codegen
         public string Version { get; set; }
     }
 
-    [Serializable]
     public class TestClassInfo
     {
         public bool HasDefaultCtor { get; set; }
@@ -94,7 +89,6 @@ namespace stress.codegen
         public string FullName { get; set; }
     }
 
-    [Serializable]
     public class TestMethodInfo
     {
         public bool IsStatic { get; set; }
@@ -110,7 +104,6 @@ namespace stress.codegen
         public string Name { get; set; }
     }
 
-    [Serializable]
     public class TestArgumentInfo
     {
         public string[] ArgumentTypes { get; set; }
@@ -118,7 +111,6 @@ namespace stress.codegen
         public string[] DataSources { get; set; }
     }
 
-    [Serializable]
     public class UnitTestInfo
     {
         private static int s_aliasIdx = 0;

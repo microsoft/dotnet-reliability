@@ -42,7 +42,7 @@ namespace stress.codegen
 
         private static string GenerateSourceFileItemsSnippet(LoadTestInfo loadTest)
         {
-            StringBuilder snippet = new StringBuilder();
+            StringBuilder snippet = new StringBuilder(); 
 
             foreach (var file in loadTest.SourceFiles)
             {
@@ -88,7 +88,7 @@ namespace stress.codegen
 
                 foreach (var assmref in test.ReferenceInfo.ReferencedAssemblies)
                 {
-                    if (uniqueAssemblies.Add(assmref.Name) && !packageInfo.dependencies.ContainsKey(Path.GetFileNameWithoutExtension(assmref.Name)))
+                    if (uniqueAssemblies.Add(assmref.Name) && packageInfo.dependencies[Path.GetFileNameWithoutExtension(assmref.Name)] == null)
                     {
                         string refSnippet = $@"
     <Reference Include='{assmref.Name}'>
