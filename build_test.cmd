@@ -24,32 +24,9 @@ if not defined VisualStudioVersion (
 
 :EnvSet
 
-call %~dp0init-tools.cmd
-
-:: Log build command line
-set _buildproj=%~dp0build.proj
-set _buildlog=%~dp0msbuild.log
-set _buildprefix=echo
-set _buildpostfix=^> "%_buildlog%"
-call :build %*
-
-:: Build
-set _buildprefix=
-set _buildpostfix=
-call :build %*
-
-goto :AfterBuild
-
-:build
-%_buildprefix% msbuild "%_buildproj%" /nologo /verbosity:minimal /nodeReuse:false /fileloggerparameters:Verbosity=diagnostic;LogFile="%_buildlog%";Append %* %_buildpostfix%
+:: The property FilterToTestTFM is temporarily required because of  https://github.com/dotnet/buildtools/commit/e9007c16b1832dbd0ea9669fa578b61900b7f724 
+call msbuild test/genstress.proj %*
 set BUILDERRORLEVEL=%ERRORLEVEL%
-goto :eof
 
-:AfterBuild
-
-echo.
-:: Pull the build summary from the log file
-findstr /ir /c:".*Warning(s)" /c:".*Error(s)" /c:"Time Elapsed.*" "%_buildlog%"
-echo Build Exit Code = %BUILDERRORLEVEL%
 
 exit /b %BUILDERRORLEVEL%

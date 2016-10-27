@@ -34,44 +34,51 @@ namespace stress.codegen
 
             if (assemblyInfo != null)
             {
-                foreach (var assmClass in assemblyInfo.Assembly.GetTypes())
+                try
                 {
-                    foreach (var method in assmClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+                    foreach (var assmClass in assemblyInfo.Assembly.GetTypes())
                     {
-                        var attributes = method.GetCustomAttributesData();
-
-                        var testAttr = attributes.FirstOrDefault(attr => attr.AttributeType.Name == "FactAttribute" || attr.AttributeType.Name == "TheoryAttribute");
-
-                        if (testAttr != null)
+                        foreach (var method in assmClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
                         {
-                            UnitTestInfo test = new UnitTestInfo()
+                            var attributes = method.GetCustomAttributesData();
+
+                            var testAttr = attributes.FirstOrDefault(attr => attr.AttributeType.Name == "FactAttribute" || attr.AttributeType.Name == "TheoryAttribute");
+
+                            if (testAttr != null)
                             {
-                                AssemblyPath = assemblyInfo.Assembly.Location,
-                                AssemblyLastModified = File.GetLastWriteTime(assemblyInfo.Assembly.Location),
-                                ReferenceInfo = assemblyInfo.ReferenceInfo,
-                                Class = new TestClassInfo
+                                UnitTestInfo test = new UnitTestInfo()
                                 {
-                                    FullName = assmClass.FullName,
-                                    IsAbstract = assmClass.IsAbstract,
-                                    IsGenericType = assmClass.IsGenericType || assmClass.IsGenericTypeDefinition,
-                                    IsPublic = assmClass.IsPublic,
-                                    HasDefaultCtor = assmClass.GetConstructor(Type.EmptyTypes) != null
-                                },
-                                Method = new TestMethodInfo
-                                {
-                                    Name = method.Name,
-                                    IsAbstract = method.IsAbstract,
-                                    IsGenericMethodDefinition = method.IsGenericMethodDefinition,
-                                    IsPublic = method.IsPublic,
-                                    IsStatic = method.IsStatic,
-                                    IsTaskReturn = method.ReturnType.FullName.StartsWith(typeof(Task).FullName),
-                                },
-                                ArgumentInfo = GetTestArgumentInfo(method, attributes),
-                            };
-                            
-                            tests.Add(test);
+                                    AssemblyPath = assemblyInfo.Assembly.Location,
+                                    AssemblyLastModified = File.GetLastWriteTime(assemblyInfo.Assembly.Location),
+                                    ReferenceInfo = assemblyInfo.ReferenceInfo,
+                                    Class = new TestClassInfo
+                                    {
+                                        FullName = assmClass.FullName,
+                                        IsAbstract = assmClass.IsAbstract,
+                                        IsGenericType = assmClass.IsGenericType || assmClass.IsGenericTypeDefinition,
+                                        IsPublic = assmClass.IsPublic,
+                                        HasDefaultCtor = assmClass.GetConstructor(Type.EmptyTypes) != null
+                                    },
+                                    Method = new TestMethodInfo
+                                    {
+                                        Name = method.Name,
+                                        IsAbstract = method.IsAbstract,
+                                        IsGenericMethodDefinition = method.IsGenericMethodDefinition,
+                                        IsPublic = method.IsPublic,
+                                        IsStatic = method.IsStatic,
+                                        IsTaskReturn = method.ReturnType.FullName.StartsWith(typeof(Task).FullName),
+                                    },
+                                    ArgumentInfo = GetTestArgumentInfo(method, attributes),
+                                };
+
+                                tests.Add(test);
+                            }
                         }
                     }
+                }
+                catch(ReflectionTypeLoadException typeException)
+                {
+                    Console.WriteLine($"Type loading exception: {typeException.Message}\r\nLoader Exceptions:\r\n\t{string.Join("\r\n", typeException.LoaderExceptions.Select(x => x.Message))}");
                 }
             }
 
