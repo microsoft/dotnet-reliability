@@ -223,7 +223,7 @@ function Get-TestBinaries([string]$CoreFXBuildMoniker)
 # Fetch CoreCLR/CoreFX Build Monikers: 
 # For Master
 #$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/master/Latest.txt"
-$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.1.0/Latest.txt"
+$CoreCLRBuildMoniker = preview1-24628-01 #Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.1.0/Latest.txt"
 
 Write-Verbose "Using CoreCLR Version: $CoreCLRBuildMoniker"
 

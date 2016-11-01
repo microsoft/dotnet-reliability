@@ -16,7 +16,26 @@ import urllib2
 import time
 import json
 import requests
+
+class OutputController:
+    s_squelch=False
+    s_logPath='';
+
+    @staticmethod
+    def PrintVerbose(output):
+        if not bool(OutputController.s_squelch):
+            OutputController.Print(output)
+    
+    @staticmethod
+    def Print(output):
+        # always print out essential information.
+        print output
         
+        # sometimes amend our essential output to an existing log file.
+        if(os.path.isfile(OutputController.s_logPath)):
+            # Note: The file must exist.
+            with open(OutputController.s_logPath, 'a') as log_file:
+                log_file.write(output)
 
 class DumplingService:
     _dumplingUri = 'http://dotnetrp.azurewebsites.net';
@@ -33,7 +52,7 @@ class DumplingService:
         query = { 'displayname' : strDisplayName }
         upload_url = DumplingService._dumplingUri + '/dumpling/store/chunk/%s/%s/0/0/?%s'%(strUser, strDistro, urllib.urlencode(query))
         
-        print 'Uploading core zip ' + args.zipfile  + ' to ' + upload_url
+        OutputController.PrintVerbose('Uploading core zip ' + args.zipfile  + ' to ' + upload_url)
         
         files = {'file': open(filepath, 'rb')}
     
@@ -43,8 +62,9 @@ class DumplingService:
 
         idstr = response.content.strip('"')
         
-        print 'dumpling upload succeeded. dumplingid: %s'%(idstr)
-        
+        OutputController.PrintVerbose('dumpling upload succeeded. dumplingid: %s'%(idstr))
+        OutputController.Print('%s/dumpling/download/%s'%(DumplingService._dumplingUri, idstr));
+
         return int(idstr)
 
     @staticmethod
@@ -57,7 +77,7 @@ class DumplingService:
 
         response.raise_for_status()
 
-        print 'dumplingid %s client triage information uploaded'%(dumplingid)
+        OutputController.PrintVerbose('dumplingid %s client triage information uploaded'%(dumplingid))
 
     @staticmethod
     def DownloadZip(dumplingId, zipPath):
@@ -118,7 +138,7 @@ def pack(strCorePath, strZipPath, lstAddPaths):
 
         debuggerLoaded = True
     except:
-        print 'Unable to load the core file in degbugger.  Loaded modules will not be included'
+        OutputController.PrintVerbose('Unable to load the core file in degbugger.  Loaded modules will not be included')
 
     #if the core image was loaded into the debugger iterate through the loaded modules and add them to the zip file
     if debuggerLoaded:
@@ -143,11 +163,11 @@ def pack(strCorePath, strZipPath, lstAddPaths):
 
     zip.close()
 
-    print 'core dump related files written to: ' + strZipPath 
+    OutputController.PrintVerbose('core dump related files written to: ' + strZipPath)
 
 def add_to_zip(strPath, zipFile):
     if os.path.exists(strPath):
-        print 'adding ' + strPath
+        OutputController.PrintVerbose('adding ' + str(strPath))
         zipFile.write(strPath)
 
 def unpack(strZipPath, unpackdir):
@@ -156,41 +176,42 @@ def unpack(strZipPath, unpackdir):
         zip = zipfile.ZipFile(f)
 
         for path in zip.namelist():
-            print 'extracting   /' + os.path.join(os.path.basename(strZipPath).replace('.zip', ''), path)
+            OutputController.PrintVerbose('extracting   /' + os.path.join(os.path.basename(strZipPath).replace('.zip', ''), path))
             zip.extract(path, unpackdir)
         zip.close()
-    print '\nall files extracted\n'
+
+    OutputController.PrintVerbose('\nall files extracted\n')
 
 def download(url, zipPath):
     try:
         f = urllib2.urlopen(url)               
-        print 'DOWNLOADING ', url
+        OutputController.PrintVerbose('DOWNLOADING ' + str(url))
         with open(zipPath, 'wb') as localfile:
             localfile.write(f.read())
     except urllib2.HTTPError, e:
-        print 'HTTP Error:', e.code, url
+        OutputController.PrintVerbose('HTTP Error:' + str(e.code) + str(url))
     except urllib2.URLError, e:
-        print 'URL Error:', e.reason, url
+        OutputController.PrintVerbose('URL Error:' + str(e.reason) + str(url))
 
 def run_command(strCmd, interpreter):
     strOut = ""
     result = lldb.SBCommandReturnObject()
     interpreter.HandleCommand(strCmd, result)
     if result.Succeeded():
-        #print "INFO: Command SUCCEEDED: '" + strCmd + "'"
         strOut = result.GetOutput()
-        print result.GetOutput()
-        #print strOut
+        OutputController.PrintVerbose(result.GetOutput())
     else:
-        print "ERROR: Command FAILED: '" + strCmd + "'"
-        print result.GetOutput()
+        OutputController.PrintVerbose("ERROR: Command FAILED: '" + strCmd + "'")
+        OutputController.PrintVerbose(result.GetOutput())
     return strOut
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='dumpling client for managing core files and interacting with the dumpling service')
+    
     parser.add_argument('command',
                       choices = [ 'wrap', 'unwrap', 'upload', 'download', 'update' ],
                       help='The dumpling command to be run')
+
     parser.add_argument('--zipfile', '-z', 
                       type=str,
                       help='path to the core dump zip file')
@@ -198,22 +219,39 @@ if __name__ == '__main__':
     parser.add_argument('--corefile', '-c', 
                       type=str,
                       help='path to the core dump file')
+
     parser.add_argument('--unpackdir', '-d', 
                       type=str,
                       help='path to unpack the core dump zip file')
+
     parser.add_argument('--user', type=str, help='username to pass to the dumpling service')
+
     parser.add_argument('--distro',
                       choices = ['redhat', 'centos', 'ubuntu', 'windows' ], 
                       help = 'specifies the distro of the dump file to be uploaded.  Note, this should only be used to override when uploading from a different machine then the dump was collected on.')
+
     parser.add_argument('--suppresstriage', help='supresses client side triage information from being uploadeded with the dump')
+
     parser.add_argument('--displayname',
                       type=str,
                       help='the name to be displayed in reports for the uploaded dump')
+
     parser.add_argument('--url', '-u', type=str, help='url of dumpling dump to download and unwrap')
+
     parser.add_argument('--dumpid', '-i', type=int, help='the id of the dumpling dump to download and unwrap')
+
     parser.add_argument('--triagefile', type=str, help='path to the file containing json triage data')
+
     parser.add_argument('--addpaths', nargs='*', type=str, help='path to additional files to be included in the packaged coredump')
+
+    parser.add_argument('--squelch', default=False, action='store_true', help='Indicates that we should only print essential information. This is used by Microsoft CI automation.')
+    
+    parser.add_argument('--logpath', type=str, help='specify the path to an EXISTING log file where you want essential output to be routed to.')
+
     args = parser.parse_args()
+
+    OutputController.s_squelch=bool(args.squelch)
+    OutputController.s_logPath=str(args.logpath);
 
     if args.command == 'wrap':
         pack(args.corefile, args.zipfile, args.addpaths)
@@ -239,7 +277,7 @@ if __name__ == '__main__':
     elif args.command == 'unwrap':
         if args.unpackdir == None:
             args.unpackdir = os.path.join(os.getcwd(), os.path.basename(args.zipfile).replace('.zip', '')) + os.path.sep
-        print 'unpacking core dump zip to: ' + args.unpackdir
+        OutputController.PrintVerbose('unpacking core dump zip to: ' + str(args.unpackdir))
         unpack(args.zipfile, args.unpackdir)
     elif args.command == 'download':
         if args.unpackdir == None:                                                    
@@ -256,22 +294,16 @@ if __name__ == '__main__':
             download(args.url, args.zipfile)
         else:
             parser.print_help()
-            print 'either dumpid or url must be specified for the download command'
+            OutputController.Print('either dumpid or url must be specified for the download command')
         if ~os.path.isdir(args.unpackdir):
             os.mkdir(args.unpackdir)
         unpack(args.zipfile, args.unpackdir)
         os.remove(args.zipfile)
     elif args.command == 'update':
         if args.dumpid == None or args.triagefile == None:
-            print '--dumpid and --triagefile are required arguments to the update command'
+            OutputController.Print('--dumpid and --triagefile are required arguments to the update command')
         if not os.path.exists(args.triagefile):
-            print 'FILE NOT FOUND: \'%s\''%(args.triagefile) 
+            OutputController.Print('FILE NOT FOUND: \'%s\''%(args.triagefile))
         with open(args.triagefile, 'rb') as tfile:
             triagedata = json.load(tfile)
-        DumplingService.UploadTriageInfo(args.dumpid, triagedata)     
-            
-            
-        
-
-
-  
+        DumplingService.UploadTriageInfo(args.dumpid, triagedata)

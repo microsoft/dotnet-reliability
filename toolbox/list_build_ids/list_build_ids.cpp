@@ -13,6 +13,7 @@
 #include <cstring>
 #include <cstdio>
 #include <set>
+#include <map>
 #include <string>
 
 // elf.h defines ELF_NOTE_GNU but not a length for it
@@ -39,12 +40,15 @@ int next_note(FILE *file, long offset, bool *is_build_id, bool *is_file_list, lo
 // Walks a file table in a given note.
 int walk_file_table(FILE *file, const Elf64_Ehdr &elf_hdr, Elf64_Phdr *program_headers, char *file_table);
 
+// Walks a core dump building global state in encountered_modules and module_build_ids.
+int walk_core_dump(const char *filename);
+
 // Prints a table of modules that do not have a build id
-void print_missing_table();
+void print_table();
 
 // Global variables to track what modules we've encountered and which have build ids
 std::set<std::string> encountered_modules;
-std::set<std::string> modules_with_build_id;
+std::map<std::string, std::string> module_build_ids;
 
 int main(int argc, char ** argv)
 {
@@ -55,6 +59,18 @@ int main(int argc, char ** argv)
     }
 
     const char *filename = argv[1];
+    int result = walk_core_dump(filename);
+    if (result == 0)
+        print_table();
+
+    return result;
+}
+
+
+int walk_core_dump(const char *filename)
+{
+    encountered_modules.clear();
+    module_build_ids.clear();
 
     FILE *file = fopen(filename, "rb");
     if (file == NULL)
@@ -83,7 +99,6 @@ int main(int argc, char ** argv)
     if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_CORE)
     {
         walk_program_headers(file, elf_header);
-        print_missing_table();
     }
     else if (elf_header.e_type == ET_EXEC || elf_header.e_type == ET_DYN)
     {
@@ -95,10 +110,10 @@ int main(int argc, char ** argv)
         returnCode = -1;
     }
 
-
     fclose(file);
     return returnCode;
 }
+
 
 inline int note_align(int value)
 {
@@ -249,16 +264,18 @@ int walk_notes(FILE *file, const Elf64_Ehdr &elf_hdr, Elf64_Phdr *program_header
             if (data_len <= BUILD_ID_BYTE_MAX)
             {
                 unsigned char build_id[BUILD_ID_BYTE_MAX];
+                char hex_build_id[BUILD_ID_BYTE_MAX * 2 + 1];
                 if (fseek(file, data_offset, SEEK_SET) == 0 && fread(build_id, 1, data_len, file) == data_len)
                 {
                     for (int i = 0; i < data_len; i++)
-                        printf("%c%c", get_hex(build_id[i] >> 4), get_hex(build_id[i] & 0xf));
+                    {
+                        hex_build_id[i * 2] = get_hex(build_id[i] >> 4);
+                        hex_build_id[i * 2 + 1] = get_hex(build_id[i] & 0xf);
+                        hex_build_id[i * 2 + 2] = 0;
+                    }
 
-                    printf(" %s\n", filename);
+                    module_build_ids[filename] = hex_build_id;
                 }
-
-                // Mark that we have a build id for this module.
-                modules_with_build_id.insert(filename);
 
                 // We are enumerating an embedded module in the core.  Once we find the build id we can stop looking.
                 return 0;
@@ -324,12 +341,17 @@ int next_note(FILE *file, long offset, bool *is_build_id, bool *is_file_list, lo
     return offset;
 }
 
-void print_missing_table()
+void print_table()
 {
+    for (std::map<std::string, std::string>::iterator itr = module_build_ids.begin(); itr != module_build_ids.end(); ++itr)
+        printf("%s %s\n", itr->second.c_str(), itr->first.c_str());
+
+    printf("\n");
+
     bool first = true;
     for (std::set<std::string>::iterator itr = encountered_modules.begin(); itr != encountered_modules.end(); ++itr)
     {
-        if (modules_with_build_id.find(*itr) == modules_with_build_id.end())
+        if (module_build_ids.find(*itr) == module_build_ids.end())
         {
             if (itr->find("/dev/") != 0)
             {
