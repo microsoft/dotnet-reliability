@@ -41,6 +41,10 @@ namespace stress.codegen
 
                 stressScript.WriteLine("# environment section");
                 // first take care of the environment variables
+                // add environment variables STRESS_TESTID and STRESS_BUILDID
+                loadTestInfo.EnvironmentVariables["STRESS_TESTID"] = loadTestInfo.TestName;
+                loadTestInfo.EnvironmentVariables["STRESS_BUILDID"] = loadTestInfo.TestName.Split('_')[0];
+
                 foreach (KeyValuePair<string, string> kvp in loadTestInfo.EnvironmentVariables)
                 {
                     stressScript.WriteLine("export {0}={1}", kvp.Key, kvp.Value);

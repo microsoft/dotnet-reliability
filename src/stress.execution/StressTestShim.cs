@@ -22,7 +22,7 @@ namespace stress.execution
         {
             _output = output;
 
-            _outbuff = new OutputBuffer(1024 * 200, output);
+            _outbuff = new OutputBuffer(1024 * 20, output);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace stress.execution
 
                 _output.WriteLine($"EXEC: chmod 777 {file}");
 
-                ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "chmod", Arguments = $"777 {file}", UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
+                ProcessStartInfo startInfo = new ProcessStartInfo() { FileName = "chmod", Arguments = $"+x {file}", UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true, RedirectStandardError = true };
 
                 Process p = Process.Start(startInfo);
 
@@ -87,9 +87,9 @@ namespace stress.execution
             {
                 Task.WhenAll(logout, logerr).GetAwaiter().GetResult();
 
-                _outbuff.FlushToConsole();
+                var output = _outbuff.FlushToString();
 
-                throw new Exception($"Stress test process exited with non-zero exit code {p2.ExitCode}"); // Assert.True(false, string.Format("Stress tests returned error code of {0}.", p.ExitCode));
+                throw new Exception($"Stress test process exited with non-zero exit code {p2.ExitCode}\n\nOUTPUT:\n{output}"); // Assert.True(false, string.Format("Stress tests returned error code of {0}.", p.ExitCode));
             }
         }
 
@@ -145,6 +145,12 @@ namespace stress.execution
 
             public void FlushToConsole()
             {
+                _output.WriteLine(this.FlushToString());
+            }
+
+            
+            public string FlushToString()
+            {
                 lock (s_bufferlock)
                 {
                     if (_curIx >= _size)
@@ -165,10 +171,10 @@ namespace stress.execution
                         builder.Append(_buff[ix % _size]);
                     }
 
-                    _output.WriteLine(builder.ToString());
-
                     //reset the buffer
                     _curIx = -1;
+
+                    return builder.ToString();
                 }
             }
         }
