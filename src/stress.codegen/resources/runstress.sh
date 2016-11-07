@@ -51,9 +51,9 @@ then
   echo "executing  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip $HELIX_WORKITEM_ROOT/execution"
   $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip $HELIX_WORKITEM_ROOT/execution
 
-  echo "uploading coredump zip to $HELIX_RESULTS_CONTAINER_URI{loadTestInfo.TestName}.zip analysis"
-  echo "executing  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip -result_name {loadTestInfo.TestName}.zip -upload_client_type Blob"
-  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/{loadTestInfo.TestName}.zip -result_name {loadTestInfo.TestName}.zip -upload_client_type Blob
+  echo "uploading coredump zip to $HELIX_RESULTS_CONTAINER_URI$STRESS_TESTID.zip analysis"
+  echo "executing  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip -result_name $STRESS_TESTID.zip -upload_client_type Blob"
+  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip -result_name $STRESS_TESTID.zip -upload_client_type Blob
 fi
 
 exit $_EXITCODE
