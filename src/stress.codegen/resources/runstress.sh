@@ -39,8 +39,8 @@ then
   then
     echo "uploading core to dumpling service"
     
-    echo "executing $HELIX_PYTHONPATH dumpling.py install --full upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID"
-    $HELIX_PYTHONPATH dumpling.py install --full upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID
+    echo "executing $HELIX_PYTHONPATH dumpling.py upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID"
+    $HELIX_PYTHONPATH dumpling.py upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID
   else
     echo "no coredump file was found in $PWD"
   fi
