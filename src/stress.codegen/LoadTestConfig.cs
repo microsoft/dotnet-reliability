@@ -33,6 +33,9 @@ namespace stress.codegen
         // The execution strategy for this load test
         public string WorkerStrategy;
 
+        //if true the load test will exit with unhandled exception to force dump collection
+        public bool SelfDestruct;
+
         public Dictionary<string, string> EnvironmentVariables;
 
         public LoadTestConfig()
