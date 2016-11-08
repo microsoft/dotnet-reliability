@@ -23,8 +23,15 @@ using stress.execution;
 
 namespace stress.generated
 {{
+    public class SelfDestructException : Exception
+    {{
+        public SelfDestructException() : base(""The operation self destructed."") {{ }}
+    }}
+    
     public static class Program
     {{
+        static private bool s_selfdestruct = {loadTest.SelfDestruct.ToString().ToLower()};
+
         public static void Main(string[] args)
         {{
             TimeSpan duration = TimeSpan.Parse(""{loadTest.Duration.ToString()}"");
@@ -32,6 +39,11 @@ namespace stress.generated
             CancellationTokenSource tokenSource = new CancellationTokenSource(duration);
             
             LoadTestClass.LoadTestMethod(tokenSource.Token);
+
+            if(s_selfdestruct)
+            {{
+                throw new SelfDestructException();
+            }}
         }}
     }}
 }}
