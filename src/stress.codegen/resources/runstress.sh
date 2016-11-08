@@ -9,6 +9,7 @@ $HELIX_PYTHONPATH dumpling.py install --full
 echo "executing ulimit -c unlimited"
 ulimit -c unlimited
 
+
 echo "executing ulimit -a"
 ulimit -a
 
