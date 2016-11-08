@@ -41,6 +41,7 @@ namespace stress.codegen
                         TestPatternType = typeof(RandomTestPattern),                          //Type.GetType(loadTestConfig.TestPattern),
                         WorkerStrategyType = typeof(DedicatedThreadWorkerStrategy),           //Type.GetType(loadTestConfig.WorkerStrategy),
                         WorkerCount = loadTestConfig.NumWorkers,
+                        SelfDestruct = loadTestConfig.SelfDestruct,
                         EnvironmentVariables = loadTestConfig.EnvironmentVariables,
                         SuiteConfig = config,
                         Seed = rand.Next(),

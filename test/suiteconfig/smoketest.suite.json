@@ -13,6 +13,20 @@
         "COMPlus_DebugBreakOnAssert": "1",
         "COMPlus_AssertOnFailFast": "1"
       }
+    },
+    {
+      "TestCount": 10,
+      "NumTests": 10,
+      "Duration": "00:01:30",
+      "NumWorkers": 8,
+      "TestPattern": "stress.execution.RandomTestPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "LoadPattern": "stress.execution.StaticLoadPattern, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "WorkerStrategy": "stress.execution.DedicatedThreadWorkerStrategy, stress.execution, Version=1.0.0, Culture=neutral, PublicKeyToken=null",
+      "SelfDestruct": true,
+      "EnvironmentVariables": {
+        "COMPlus_DebugBreakOnAssert": "1",
+        "COMPlus_AssertOnFailFast": "1"
+      }
     }
   ]
 }
