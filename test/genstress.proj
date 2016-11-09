@@ -86,6 +86,11 @@
    
 <ItemGroup>
     <ZipFile Include="$(UnitTestDirectory)*.zip"/>
+    <!-- Add ignored tests here for now -->
+    <ZipFile Exclude="$(UnitTestDirectory)System.Diagnostics.Process.Tests.zip"/>
+    <ZipFile Exclude="$(UnitTestDirectory)System.Reflection.Emit.ILGeneration.Tests.zip"/>
+    <ZipFile Exclude="$(UnitTestDirectory)System.Reflection.Emit.Lightweight.Tests.zip"/>
+    <ZipFile Exclude="$(UnitTestDirectory)System.Reflection.Emit.Tests.zip"/>
   </ItemGroup>
 
  <Target Name="UnzipAllTests" 
