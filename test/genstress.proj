@@ -83,14 +83,17 @@
   <ItemGroup>
     <JsonFile Include="$(UnitTestDirectory)**\project.json"/>
   </ItemGroup>
-   
-<ItemGroup>
-    <ZipFile Include="$(UnitTestDirectory)*.zip"/>
+
+  <PropertyGroup>
     <!-- Add ignored tests here for now -->
-    <ZipFile Exclude="$(UnitTestDirectory)System.Diagnostics.Process.Tests.zip"/>
-    <ZipFile Exclude="$(UnitTestDirectory)System.Reflection.Emit.ILGeneration.Tests.zip"/>
-    <ZipFile Exclude="$(UnitTestDirectory)System.Reflection.Emit.Lightweight.Tests.zip"/>
-    <ZipFile Exclude="$(UnitTestDirectory)System.Reflection.Emit.Tests.zip"/>
+    <ExcludedTestAssemblies>$(UnitTestDirectory)System.Diagnostics.Process.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Reflection.Emit.ILGeneration.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Reflection.Emit.Lightweight.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Reflection.Emit.Tests.zip</ExcludedTestAssemblies>
+  </PropertyGroup> 
+  
+  <ItemGroup>
+    <ZipFile Include="$(UnitTestDirectory)*.zip" Exclude="$(ExcludedTestAssemblies)"/>
   </ItemGroup>
 
  <Target Name="UnzipAllTests" 
