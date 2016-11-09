@@ -3,7 +3,9 @@
 #download the dumpling client
 wget https://dumpling.azurewebsites.net/api/client/dumpling.py
 
-$HELIX_PYTHONPATH dumpling.py install --full
+$HELIX_PYTHONPATH dumpling.py install --update
+
+$HELIX_PYTHONPATH ~/.dumpling/dumpling.py install --full
 
 #Set the rlimit for coredumps
 echo "executing ulimit -c unlimited"
@@ -27,7 +29,7 @@ then
   #This is a temporary hack workaround for the fact that the process exits before the coredump file is completely written
   #We need to replace this with a more hardened way to guaruntee that we don't zip and upload before the coredump is available
   echo "command failed waiting for coredump" 
-  sleep 3m
+  sleep 2m
   
   #test if the core file was created.  
   #this condition makes the assumption that the file will be name either 'core' or 'core.*' and be in the current directory which is true all the distros tested so far
@@ -39,8 +41,8 @@ then
   then
     echo "uploading core to dumpling service"
     
-    echo "executing $HELIX_PYTHONPATH dumpling.py upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID"
-    $HELIX_PYTHONPATH dumpling.py upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID
+    echo "executing $HELIX_PYTHONPATH ~/.dumpling/dumpling.py upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID"
+    $HELIX_PYTHONPATH ~/.dumpling/dumpling.py upload --dumppath $_corefile --noprompt --triage full --displayname $STRESS_TESTID --incpaths $HELIX_WORKITEM_ROOT/execution --properties STRESS_BUILDID=$STRESS_BUILDID STRESS_TESTID=$STRESS_TESTID
   else
     echo "no coredump file was found in $PWD"
   fi
