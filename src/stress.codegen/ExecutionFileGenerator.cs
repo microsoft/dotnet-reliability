@@ -88,7 +88,9 @@ namespace stress.codegen
             //add runstress.sh to the source directory as well
             var runstressPath = Path.Combine(loadTestInfo.SourceDirectory, "runstress.sh");
 
-            File.WriteAllBytes(runstressPath, Resources.runstress);
+            string unixContent = Encoding.UTF8.GetString(Resources.runstress).Replace("\r\n", "\n");
+
+            File.WriteAllText(runstressPath, unixContent);
 
             //add runstress.sh to the source files
             loadTestInfo.SourceFiles.Add(new SourceFileInfo("runstress.sh", SourceFileAction.Binplace));
