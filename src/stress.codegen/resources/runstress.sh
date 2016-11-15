@@ -49,8 +49,8 @@ then
   #it is here as a backup source of dump file storage until we are satisfied that the uploading dumps to 
   #the dumpling service is solid and complete.  After that this can be removed as it is redundant
   echo "zipping work item data for coredump analysis"
-  echo "executing  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip $HELIX_WORKITEM_ROOT/execution"
-  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip $HELIX_WORKITEM_ROOT/execution
+  echo "executing  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip $PWD"
+  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/zip_script.py -zipFile $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip "$PWD"
 
   echo "uploading coredump zip to $HELIX_RESULTS_CONTAINER_URI$STRESS_TESTID.zip analysis"
   echo "executing  $HELIX_PYTHONPATH $HELIX_SCRIPT_ROOT/upload_result.py -result $HELIX_WORKITEM_ROOT/$STRESS_TESTID.zip -result_name $STRESS_TESTID.zip -upload_client_type Blob"
