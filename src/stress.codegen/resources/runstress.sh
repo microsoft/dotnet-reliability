@@ -3,7 +3,11 @@
 #download the dumpling client
 wget https://dumpling.azurewebsites.net/api/client/dumpling.py
 
-$HELIX_PYTHONPATH dumpling.py install --full --update
+#install and make sure the client script is up to doate
+$HELIX_PYTHONPATH dumpling.py install --update
+
+#install the tooling without --update so that it will not pull down the debugger if it's already installed
+$HELIX_PYTHONPATH ~/.dumpling/dumpling.py install --full
 
 #Set the rlimit for coredumps
 echo "executing ulimit -c unlimited"
