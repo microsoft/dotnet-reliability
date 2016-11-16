@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="..\dir.props" />
   <PropertyGroup>
@@ -62,6 +61,7 @@
     <Compile Include="LoadAttribute.cs" />
     <!--Compile Include="Properties\AssemblyInfo.cs" /-->
     <Compile Include="RandomTestPattern.cs" />
+    <Compile Include="SelfDestruct.cs" />
     <Compile Include="StaticLoadPattern.cs" />
     <Compile Include="StepLoadPattern.cs" />
     <Compile Include="StressTestShim.cs" />

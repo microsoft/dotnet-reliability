@@ -22,12 +22,7 @@ using System.Threading.Tasks;
 using stress.execution;
 
 namespace stress.generated
-{{
-    public class SelfDestructException : Exception
-    {{
-        public SelfDestructException() : base(""The operation self destructed."") {{ }}
-    }}
-    
+{{    
     public static class Program
     {{
         static private bool s_selfdestruct = {loadTest.SelfDestruct.ToString().ToLower()};
@@ -42,7 +37,7 @@ namespace stress.generated
 
             if(s_selfdestruct)
             {{
-                throw new SelfDestructException();
+                SelfDestruct.WithException();
             }}
         }}
     }}
