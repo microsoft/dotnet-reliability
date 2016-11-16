@@ -41,10 +41,23 @@ namespace stress.codegen
 
                 stressScript.WriteLine("# environment section");
                 // first take care of the environment variables
-                // add environment variables STRESS_TESTID and STRESS_BUILDID
+
+                // add environment variables STRESS_TESTID, STRESS_BUILDID
                 loadTestInfo.EnvironmentVariables["STRESS_TESTID"] = loadTestInfo.TestName;
                 loadTestInfo.EnvironmentVariables["STRESS_BUILDID"] = loadTestInfo.TestName.Split('_')[0];
 
+                // build a string of all the env var pairs to be passed as properties to dumpling 
+                StringBuilder envVarPropertiesBuilder = new StringBuilder();
+
+                foreach (var kvp in loadTestInfo.EnvironmentVariables)
+                {
+                    envVarPropertiesBuilder.Append(kvp.Key + "=" + kvp.Value);
+                }
+
+                // add this string to the env vars as DUMPLING_PROPERTIES
+                loadTestInfo.EnvironmentVariables["DUMPLING_PROPERTIES"] = "\"" + envVarPropertiesBuilder.ToString() + "\"";
+
+                //write commands to setup environment environment 
                 foreach (KeyValuePair<string, string> kvp in loadTestInfo.EnvironmentVariables)
                 {
                     stressScript.WriteLine("export {0}={1}", kvp.Key, kvp.Value);
