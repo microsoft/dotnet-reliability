@@ -4,6 +4,7 @@
   <Import Project="$(MSBuildThisFileDirectory)dir.props" />
 
   <PropertyGroup>
+    <BuildMoniker Condition="'$(BuildMoniker)' == ''">$(OfficialBuildId)</BuildMoniker>
     <BuildMoniker Condition="'$(BuildMoniker)' == ''">$(USERNAME)-$([System.DateTime]::Now.ToString(MMdd-hhmmss))</BuildMoniker>
   </PropertyGroup>
   

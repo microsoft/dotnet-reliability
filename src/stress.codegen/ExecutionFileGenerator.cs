@@ -42,6 +42,13 @@ namespace stress.codegen
                 stressScript.WriteLine("# environment section");
                 // first take care of the environment variables
 
+                //if the environment variable "DUMPLING_PROPERTIES" already exists remove it
+                //this is needed because multiple LoadTestInfo objects use the same environment dictionary instance
+                if(loadTestInfo.EnvironmentVariables.ContainsKey("DUMPLING_PROPERTIES"))
+                {
+                    loadTestInfo.EnvironmentVariables.Remove("DUMPLING_PROPERTIES");
+                }
+
                 // add environment variables STRESS_TESTID, STRESS_BUILDID
                 loadTestInfo.EnvironmentVariables["STRESS_TESTID"] = loadTestInfo.TestName;
                 loadTestInfo.EnvironmentVariables["STRESS_BUILDID"] = loadTestInfo.TestName.Split('_')[0];
@@ -51,11 +58,11 @@ namespace stress.codegen
 
                 foreach (var kvp in loadTestInfo.EnvironmentVariables)
                 {
-                    envVarPropertiesBuilder.Append(kvp.Key + "=" + kvp.Value);
+                    envVarPropertiesBuilder.Append(kvp.Key + "=" + kvp.Value + " ");
                 }
 
-                // add this string to the env vars as DUMPLING_PROPERTIES
-                loadTestInfo.EnvironmentVariables["DUMPLING_PROPERTIES"] = "\"" + envVarPropertiesBuilder.ToString() + "\"";
+                // add this string to the env vars as DUMPLING_PROPERTIES trimming the last space
+                loadTestInfo.EnvironmentVariables["DUMPLING_PROPERTIES"] = "\"" + envVarPropertiesBuilder.ToString().TrimEnd(' ') + "\"";
 
                 //write commands to setup environment environment 
                 foreach (KeyValuePair<string, string> kvp in loadTestInfo.EnvironmentVariables)
