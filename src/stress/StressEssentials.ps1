@@ -1,6 +1,7 @@
 # Ideally, we should use the current logged in user but this appears to require domain joining. 
-
-param([String]$DropPat, [String]$WorkingDirectory, [String]$FilterToTestTFM, [Switch]$DebuggingBinaries = $false)
+# Note: Currently we only have one 'Branch' variable, this is because we have a convention of branching coreclr and corefx together and maintaining 
+#       names and versions together if this changes we will need to break Branch into distinct variables for coreclr branch name and corefx branch name 
+param([String]$DropPat, [String]$WorkingDirectory, [Switch]$DebuggingBinaries = $false, [String]$Branch = "master")
 
 $WorkingDirectory = [System.Environment]::ExpandEnvironmentVariables($WorkingDirectory)
 if(!(Test-Path $WorkingDirectory))
@@ -183,15 +184,15 @@ function Get-ProductBinaries([string]$CoreCLRBuildMoniker,
         #Get-Drop "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/checked" $CoreCLRDump
         #Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/packages/debug" $CoreFXDump
 
-        Get-Drop "dotnet/coreclr/release/1.1.0/$LatestCoreCLRVersion/packages/checked" $CoreCLRDump
-        Get-Drop "dotnet/corefx/release/1.1.0/$LatestCoreFXVersion/packages/debug" $CoreFXDump
+        Get-Drop "dotnet/coreclr/$Branch/$LatestCoreCLRVersion/packages/checked" $CoreCLRDump
+        Get-Drop "dotnet/corefx/$Branch/$LatestCoreFXVersion/packages/debug" $CoreFXDump
     }
     else {
         #Get-Drop "dotnet/coreclr/master/$LatestCoreCLRVersion/packages/release" $CoreCLRDump
         #Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/packages/release" $CoreFXDump
 
-        Get-Drop "dotnet/coreclr/release/1.1.0/$LatestCoreCLRVersion/packages/release" $CoreCLRDump
-        Get-Drop "dotnet/corefx/release/1.1.0/$LatestCoreFXVersion/packages/release" $CoreFXDump
+        Get-Drop "dotnet/coreclr/$Branch/$LatestCoreCLRVersion/packages/release" $CoreCLRDump
+        Get-Drop "dotnet/corefx/$Branch/$LatestCoreFXVersion/packages/release" $CoreFXDump
     }
 
     # Copy from $CoreCLRDump/pkg to $ProductDirectory
@@ -215,7 +216,7 @@ function Get-TestBinaries([string]$CoreFXBuildMoniker)
     Write-Verbose "retrieving test binaries with CoreFX Version: $LatestCoreFXVersion"
     # "dotnet/corefx/master/$LatestCoreFXVersion/tests/anyos/anycpu/netcoreapp1.0"
     # "dotnet/reliability/stress/prototype/test_binaries"
-    Get-Drop "dotnet/corefx/release/1.1.0/$LatestCoreFXVersion/tests/anyos/anycpu/netcoreapp1.0" $TestDirectory
+    Get-Drop "dotnet/corefx/$Branch/$LatestCoreFXVersion/tests/anyos/anycpu/netcoreapp1.1" $TestDirectory
     # Get-Drop "dotnet/corefx/master/$LatestCoreFXVersion/tests/anyos/anycpu/$FilterToTestTFM" $TestDirectory
     # Get-Drop "dotnet/corefx/master/24513.02/tests/anyos/anycpu/netcoreapp1.0" $TestDirectory
 }
@@ -223,14 +224,14 @@ function Get-TestBinaries([string]$CoreFXBuildMoniker)
 # Fetch CoreCLR/CoreFX Build Monikers: 
 # For Master
 #$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/master/Latest.txt"
-$CoreCLRBuildMoniker = "preview1-24628-01" #Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/release/1.1.0/Latest.txt"
+$CoreCLRBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/coreclr/$Branch/Latest.txt"
 
 Write-Verbose "Using CoreCLR Version: $CoreCLRBuildMoniker"
 
 # For Master
 # $CoreFXBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/master/Latest.txt"
 # For Release
-$CoreFXBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/release/1.1.0/Latest.txt"
+$CoreFXBuildMoniker = Get-StringFromUrl "https://raw.githubusercontent.com/dotnet/versions/master/build-info/dotnet/corefx/$Branch/Latest.txt"
 Write-Verbose "Using CoreFX Version: $CoreFXBuildMoniker"
 
 #retrieve the drop tool - we use this to pull the rest of our binaries
