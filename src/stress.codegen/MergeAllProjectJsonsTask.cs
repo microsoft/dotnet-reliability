@@ -21,7 +21,7 @@ namespace stress.codegen
         // we assume that anyos test project.jsons (AND ONLY THESE; any other ones will mess up the merge) are 
         // present in the directory or subdirectories of InPath
         [Required]
-        public string InPath { get; set; }
+        public string InPath  { get; set; }
         
         // the path to the project.json we are spawning.
         [Required]
@@ -38,32 +38,37 @@ namespace stress.codegen
         // this method walks the directory tree of inPath and uses the Newtonsoft JObject::Merge to merge together
         // our project jsons.
         // we require there to be at least ONE project.json present somewhere in the directory tree of inPath
-        private JObject MergeProjectJsonsIn(string inPath)
-        {
-            var projectJsons = Directory.EnumerateFiles(InPath, "project.json", SearchOption.AllDirectories).Select(p => JObject.Parse(File.ReadAllText(p)));
-            JObject merged = new JObject(projectJsons.First());
+        //private JObject MergeProjectJsonsIn(string inPath, string targetFramework)
+        //{
+        //    //var projectJsons = Directory.EnumerateFiles(InPath, "project.json", SearchOption.AllDirectories).Select(p => JObject.Parse(File.ReadAllText(p)));
+        //    JObject merged = new JObject(projectJsons.First());
             
-            foreach (var file in projectJsons)
-            {
-                // 
-                merged.Merge(file);
-            }
+        //    foreach (var file in projectJsons)
+        //    {
+        //       // if (file["frameworks"].Contains(targetFramework))
+        //       // {
+        //            merged.Merge(file);
+        //        //}
+        //    }
          
-            return merged;   
-        }
+        //    return merged;   
+        //}
         
         // this method:
         // strips out test-runtime object if it is present in the dependencies list.
         // removes all frameworks except for the one that is to be targeted for the run
         private void ProduceAnyOsProjectJson(string outPath, JObject merged, string targetFramework)
         {
-            // remove test-runtime if it is present.
+            // Filter out unwanted JObjects.
+
             (merged["dependencies"] as JObject)?.Property("test-runtime")?.Remove();
+            (merged["dependencies"] as JObject)?.Property("perf")?.Remove();
 
             // remove all supports.
             merged["supports"]?.Children<JProperty>().ToList().ForEach(x => x.Remove());
-            
-            // remove all frameworks except the specified one
+
+
+            //// remove all frameworks except the specified one
             merged["frameworks"]?.Children<JProperty>().ToList().ForEach(x => x.Remove());
             merged["frameworks"][targetFramework] = new JObject();
 
@@ -88,8 +93,10 @@ namespace stress.codegen
             {
                 MessageBox.Show($"PID:{Process.GetCurrentProcess().Id} Attach debugger now.", "Debug GenerateStressSuiteTask", MessageBoxButton.OK);
             }
-            
-            ProduceAnyOsProjectJson(OutPath, MergeProjectJsonsIn(InPath), "netcoreapp1.0");
+
+            var x = Directory.EnumerateFiles(InPath, "project.json", SearchOption.AllDirectories).First();
+
+            ProduceAnyOsProjectJson(OutPath, JObject.Parse(File.ReadAllText(x)), "netstandard1.7");
             
             return true;
         }
