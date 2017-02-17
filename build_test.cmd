@@ -23,10 +23,7 @@ if not defined VisualStudioVersion (
 )
 
 :EnvSet
-
-:: The property FilterToTestTFM is temporarily required because of  https://github.com/dotnet/buildtools/commit/e9007c16b1832dbd0ea9669fa578b61900b7f724 
 call msbuild test/genstress.proj /maxcpucount %*
 set BUILDERRORLEVEL=%ERRORLEVEL%
-
 
 exit /b %BUILDERRORLEVEL%
