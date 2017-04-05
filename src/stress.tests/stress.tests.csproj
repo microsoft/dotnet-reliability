@@ -51,8 +51,15 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ArrayTests.cs" />
     <Compile Include="JaggedArray.cs" />
-    <Compile Include="TestAssemblyClass.cs" />
+    <Compile Include="StressTestsAssemblyTestEnumerator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\stress.execution\stress.execution.csproj">
+      <Project>{7E1E57D9-8587-4EA1-86F7-02813819B118}</Project>
+      <Name>stress.execution</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\dir.targets" />
   <!--<Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />-->
