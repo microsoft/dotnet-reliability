@@ -17,12 +17,42 @@ namespace stress.run
 
         public static void Main(string[] args)
         {
+            if(args.Length > 3)
+            {
+                PrintUsage();
+                return;
+            }
 
+            if(args.Length > 0 && !TimeSpan.TryParse(args[0], out s_duration))
+            {
+                PrintUsage();
+                return;
+            }
+
+            if (args.Length > 1 && !int.TryParse(args[1], out s_workerCount))
+            {
+                PrintUsage();
+                return;
+            }
+
+            if (args.Length > 2 && !int.TryParse(args[1], out s_seed))
+            {
+                PrintUsage();
+                return;
+            }
+
+            ExecuteTestMix();
         }
 
+        public static void PrintUsage()
+        {
+            Console.WriteLine("USAGE: stress.run.exe [duration (timespan)] [workerCount (int)] [seed (int)]");
+        }
 
         public static void ExecuteTestMix()
         {
+            Console.WriteLine($"executing stress test mix (duration={s_duration} workercount={s_workerCount} seed={s_seed})");
+
             CancellationTokenSource completeSource = new CancellationTokenSource(s_duration);
 
             var unitTests = new StressTestsAssemblyTestEnumerator().ToArray();
