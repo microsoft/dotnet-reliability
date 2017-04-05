@@ -36,6 +36,10 @@ namespace stress.codegen
             {
                 try
                 {
+                    var explExcluded = assemblyInfo.Assembly.GetCustomAttributesData().FirstOrDefault(attrData => attrData.AttributeType.Name == "AssemblyTraitAttribute"
+                                                                                                        && attrData.ConstructorArguments.Count == 2
+                                                                                                        && attrData.ConstructorArguments[0].Value as string == "StressCategory"
+                                                                                                        && attrData.ConstructorArguments[1].Value as string == "Excluded") != null;
                     foreach (var assmClass in assemblyInfo.Assembly.GetTypes())
                     {
                         foreach (var method in assmClass.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
@@ -67,6 +71,7 @@ namespace stress.codegen
                                         IsPublic = method.IsPublic,
                                         IsStatic = method.IsStatic,
                                         IsTaskReturn = method.ReturnType.FullName.StartsWith(typeof(Task).FullName),
+                                        ExplicitlyExcluded = explExcluded,
                                     },
                                     ArgumentInfo = GetTestArgumentInfo(method, attributes),
                                 };

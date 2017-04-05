@@ -271,12 +271,12 @@ namespace stress.generated
 
             foreach (var testName in _testNames)
             {
-                arrayContentSnippet.Append($@"new UnitTest(UnitTests.{testName}),
+                arrayContentSnippet.Append($@"new ActionUnitTest(UnitTests.{testName}),
             ");
             }
 
             return $@"
-        static UnitTest[] g_unitTests = new UnitTest[] 
+        static ActionUnitTest[] g_unitTests = new ActionUnitTest[] 
         {{
             {arrayContentSnippet}
         }};";

@@ -2,7 +2,8 @@
   "dependencies": {
     "NETStandard.Library": "1.6.1",
     "System.Diagnostics.Process": "4.3.0",
-    "xunit.core": "2.2.0"
+    "xunit.core": "2.2.0",
+    "xunit.assert":  "2.2.0"
   },
   "frameworks": {
     "netstandard1.3": {

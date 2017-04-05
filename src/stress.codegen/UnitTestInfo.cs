@@ -101,6 +101,10 @@ namespace stress.codegen
 
         public bool IsGenericMethodDefinition { get; set; }
 
+        public bool ExplicitlyExcluded { get; set; }
+
+        public bool FullyValidated { get; set; }
+
         public string Name { get; set; }
     }
 
