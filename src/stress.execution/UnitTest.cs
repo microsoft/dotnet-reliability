@@ -7,18 +7,14 @@ using System.Reflection;
 
 namespace stress.execution
 {
-    public class UnitTest : ITestPattern
+    public abstract class UnitTest : ITestPattern
     {
-        public UnitTest(Action action = null, bool trapExceptions = true)
+        public UnitTest(bool trapExceptions = true)
         {
             this.Log = new TestExecutionLog();
 
-            this.Action = action;
-
             this.TrapExceptions = trapExceptions;
         }
-
-        public Action Action { get; set; }
 
         public bool TrapExceptions { get; set; }
 
@@ -32,7 +28,7 @@ namespace stress.execution
             {
                 try
                 {
-                    this.Action();
+                    this.ExecuteTest();
 
                     this.Log.EndTest(begin, true);
                 }
@@ -43,11 +39,14 @@ namespace stress.execution
             }
             else
             {
-                this.Action();
+                this.ExecuteTest();
 
                 this.Log.EndTest(begin, true);
             }
         }
+
+        protected abstract void ExecuteTest();
+
 
         UnitTest ITestPattern.GetNextTest()
         {

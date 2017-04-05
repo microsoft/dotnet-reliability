@@ -6,11 +6,11 @@
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7E1E57D9-8587-4EA1-86F7-02813819B118}</ProjectGuid>
+    <ProjectGuid>{D6F0FF51-AFDA-4D01-A052-E1889861ECFB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>stress.execution</RootNamespace>
-    <AssemblyName>stress.execution</AssemblyName>
+    <RootNamespace>stress.tests</RootNamespace>
+    <AssemblyName>stress.tests</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -51,28 +51,8 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncWorkerStrategy.cs" />
-    <Compile Include="DedicatedThreadWorkerStrategy.cs" />
-    <Compile Include="ExecutionEngine.cs" />
-    <Compile Include="FairTestPattern.cs" />
-    <Compile Include="ILoadPattern.cs" />
-    <Compile Include="IUnitTestEnumerator.cs" />
-    <Compile Include="ITestPattern.cs" />
-    <Compile Include="IWorkerStrategy.cs" />
-    <Compile Include="LoadAttribute.cs" />
-    <!--Compile Include="Properties\AssemblyInfo.cs" /-->
-    <Compile Include="RandomTestPattern.cs" />
-    <Compile Include="SelfDestruct.cs" />
-    <Compile Include="StaticLoadPattern.cs" />
-    <Compile Include="StepLoadPattern.cs" />
-    <Compile Include="StressTestShim.cs" />
-    <Compile Include="TestExecutionLog.cs" />
-    <Compile Include="UnitTest.cs" />
-    <Compile Include="ActionUnitTest.cs" />
-    <Compile Include="UnitTestEnumerator.cs" />
-    <Compile Include="XunitTestAssemblyEnumerator.cs" />
-    <Compile Include="XunitTestClassEnumerator.cs" />
-    <Compile Include="XunitUnitTest.cs" />
+    <Compile Include="JaggedArray.cs" />
+    <Compile Include="TestAssemblyClass.cs" />
   </ItemGroup>
   <Import Project="..\dir.targets" />
   <!--<Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />-->

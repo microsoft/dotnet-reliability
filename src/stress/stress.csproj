@@ -72,6 +72,8 @@
       <Project>{b60a62ba-77b2-49fa-94b8-cffd2c3f5825}</Project>
       <Name>stress.codegen</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\stress.execution\stress.execution.csproj">
       <Project>{7e1e57d9-8587-4ea1-86f7-02813819b118}</Project>
       <Name>stress.execution</Name>
