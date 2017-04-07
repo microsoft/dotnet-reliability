@@ -91,22 +91,33 @@
     <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Reflection.Emit.ILGeneration.Tests.zip</ExcludedTestAssemblies>
     <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Reflection.Emit.Lightweight.Tests.zip</ExcludedTestAssemblies>
     <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Reflection.Emit.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Configuration.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Net.Mail.Functional.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Net.Mail.Unit.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Transactions.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Security.Permissions.Tests.zip</ExcludedTestAssemblies>
+    <ExcludedTestAssemblies>$(ExcludedTestAssemblies);$(UnitTestDirectory)System.Net.WebProxy.Tests.zip</ExcludedTestAssemblies>
   </PropertyGroup> 
   
   <ItemGroup>
     <ZipFile Include="$(UnitTestDirectory)*.zip" Exclude="$(ExcludedTestAssemblies)"/>
   </ItemGroup>
 
+  <Target Name="CleanUpUtExtracted" 
+        DependsOnTargets="SelectTestZips">
+    <RemoveDir Directories="$(UnitTestExtractDir)" />
+  </Target>
+
  <Target Name="UnzipAllTests" 
     Condition="!Exists('$(UnitTestExtractedSemaphore)')"
     DependsOnTargets="UnzipTest">
     <WriteLinesToFile File="$(UnitTestExtractedSemaphore)" Lines="" Overwrite="false" />
   </Target>
- 
+    
     <Target Name="UnzipTest"
     Inputs="@(ZipFile)"
     Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"
-    DependsOnTargets="SelectTestZips">
+    DependsOnTargets="CleanUpUtExtracted">
         <Message Text="Unzipping tests: @(ZipFile)" Importance="Low" />
         
         <ZipFileExtractToDirectory Condition="Exists('%(RootDir)%(Directory)%(ZipFile.FileName)%(ZipFile.Extension)')"
@@ -133,8 +144,12 @@
     <Message Text="Restoring test dependencies..." />
     
     <RemoveDir Directories="$(UnitTestCLIProjDir)" />
+
     <RemoveDir Directories="$(UnitTestDependsBin)" />
-    
+
+    <Message Text="Removing " />
+
+
     <!-- create a dummy project used to restore test binaries -->
     <MakeDir Directories="$(UnitTestCLIProjDir)"/>
     <Exec Command="$(DotnetToolCommand) new" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
@@ -170,7 +185,6 @@
     </ItemGroup>
     
   <Target Name="GenerateStressSuiteSource" DependsOnTargets="RestoreTestDependsBin">
-
     <Error Condition="!Exists('$(SuiteConfigPath)')" Text="ERROR: File not found. Stress suite config path '$(SuiteConfigPath)' is invalid " />
 
     <MakeDir Directories="$(StressGeneratedRoot)"/>
