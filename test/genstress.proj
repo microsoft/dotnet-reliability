@@ -1,13 +1,7 @@
 <Project ToolsVersion="12.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-
   <Import Project="$(MSBuildThisFileDirectory)dir.props" />
 
-  <PropertyGroup>
-    <BuildMoniker Condition="'$(BuildMoniker)' == ''">$(OfficialBuildId)</BuildMoniker>
-    <BuildMoniker Condition="'$(BuildMoniker)' == ''">$(USERNAME)-$([System.DateTime]::Now.ToString(MMdd-hhmmss))</BuildMoniker>
-  </PropertyGroup>
-  
    <!--
     Stress suite generation properties
    -->
@@ -31,6 +25,10 @@
     <UnitTestDirectory Condition="'$(UnitTestDirectory)' == ''">$(MSBuildThisFileDirectory)../bin/obj/TestArchives/</UnitTestDirectory>
   </PropertyGroup>
   
+  <PropertyGroup>
+    <FetchedDataDir>$(MSBuildThisFileDirectory)../bin/FetchedData/</FetchedDataDir>
+  </PropertyGroup>
+  
   <!-- 
     Stress tooling locations
     get stress.codegen and stress.execution from the bin directory (using the latest built version) 
@@ -38,19 +36,14 @@
     without affecting runs
   -->
   <PropertyGroup>
-    <StressCodegenAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
-    <StressExecAssmPath>$(BinDir)$(TargetOS).$(Platform).$(Configuration)\stress.codegen\stress.execution.dll</StressExecAssmPath>
+    <StressCodegenAssmPath>$(BinDir)$(OSGroup).$(Platform).$(Configuration)\stress.codegen\stress.codegen.dll</StressCodegenAssmPath>
+    <StressExecAssmPath>$(BinDir)$(OSGroup).$(Platform).$(Configuration)\stress.codegen\stress.execution.dll</StressExecAssmPath>
   </PropertyGroup>
   <PropertyGroup>
-    <UnitTestCLIProjDir>$(BaseIntermediateOutputPath)utcli/</UnitTestCLIProjDir>
-    <UnitTestCLIProjJson>$(UnitTestCLIProjDir)project.json</UnitTestCLIProjJson>
-    <UnitTestCLIProjLockJson>$(UnitTestCLIProjDir)project.lock.json</UnitTestCLIProjLockJson>
     <UnitTestPackageDir>$(MSBuildThisFileDirectory)../packages/</UnitTestPackageDir>
     <UnitTestExtractDir>$(BaseIntermediateOutputPath)utextracted/</UnitTestExtractDir>
     <UnitTestExtractedSemaphore>$(UnitTestExtractDir)extraction.complete</UnitTestExtractedSemaphore>
     <UnitTestDependsBin>$(BaseIntermediateOutputPath)utdepends/</UnitTestDependsBin>
-    <TestDependRestoreCommand>$(DotnetToolCommand) restore $(UnitTestCLIProjJson) --packages "$(UnitTestPackageDir.TrimEnd('/\'.ToCharArray()))" $(DnuRestoreSource)</TestDependRestoreCommand>
-    <TestDependPublishCommand>$(DotnetToolCommand) publish $(UnitTestCLIProjJson) --output "$(UnitTestDependsBin.TrimEnd('/\'.ToCharArray()))" --runtime win7-x64 --framework $(FilterToTestTFM)</TestDependPublishCommand>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -59,7 +52,6 @@
   -->
     <GeneratedProjectBuildProps>UnitTestDependsBin=$(UnitTestDependsBin);DisableReferenceCopyLocal=true</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(LocalPackageSource)' != ''">$(GeneratedProjectBuildProps);LocalPackageSource=$(LocalPackageSource)</GeneratedProjectBuildProps>
-    <GeneratedProjectBuildProps Condition="'$(TestWithLocalLibraries)' != ''">$(GeneratedProjectBuildProps);TestWithLocalLibraries=$(TestWithLocalLibraries)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ConfigurationGroup)' != ''">$(GeneratedProjectBuildProps);ConfigurationGroup=$(ConfigurationGroup)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(ArchiveTests)' != ''">$(GeneratedProjectBuildProps);ArchiveTests=$(ArchiveTests)</GeneratedProjectBuildProps>
     <GeneratedProjectBuildProps Condition="'$(BuildMoniker)' != ''">$(GeneratedProjectBuildProps);BuildMoniker=$(BuildMoniker)</GeneratedProjectBuildProps>
@@ -68,8 +60,26 @@
     <GeneratedProjectBuildProps Condition="'$(TestNugetRuntimeId)' != ''">$(GeneratedProjectBuildProps);TestNugetRuntimeId=$(TestNugetRuntimeId)</GeneratedProjectBuildProps>
   </PropertyGroup>
   
-  <Import Project="..\dir.targets" />
+  <ItemGroup>
+    <Repos Include="corefx" >
+      <SelectedConfigurationGroup>$(SelectedConfigurationGroup)</SelectedConfigurationGroup>
+      <CloudDropAccessToken>$(CoreFxCloudDropAccessToken)</CloudDropAccessToken>
+      <TestStorageAccountKey>$(CoreFxCloudDropAccessToken)</TestStorageAccountKey>
+    </Repos>
+    <Repos Include="coreclr" >
+      <SubType>$(SubType)</SubType>
+      <CloudDropAccessToken>$(CoreClrCloudDropAccessToken)</CloudDropAccessToken>
+      <TestStorageAccountKey>$(CoreClrCloudDropAccessToken)</TestStorageAccountKey>
+    </Repos>
+    <TestRepos Include="corefx" />
+  </ItemGroup>
+  <PropertyGroup>
+    <BranchName>master</BranchName>
+    <SelectedConfigurationGroup>Debug</SelectedConfigurationGroup>
+    <SubType>native</SubType>
+  </PropertyGroup>
   
+  <Import Project="..\dir.targets" />
   <Import Project="..\dir.traversal.targets" />
   <Import Project="$(ToolsDir)Build.Post.targets" Condition="Exists('$(ToolsDir)Build.Post.targets')" />
   
@@ -77,8 +87,9 @@
      <TestCommandLines Condition="'$(TargetOS)'!='Windows_NT'" Include="chmod +x corerun" /> 
    </ItemGroup>
 
-  <UsingTask TaskName="MergeAllProjectJsonsTask" AssemblyFile="$(StressCodegenAssmPath)"/>
   <UsingTask TaskName="GenerateStressSuiteTask" AssemblyFile="$(StressCodegenAssmPath)"/>
+  <UsingTask TaskName="RetreiveBuildContainerInformation" AssemblyFile="$(StressCodegenAssmPath)"/>
+  <UsingTask TaskName="DownloadFromAzure" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll"/>
   <UsingTask TaskName="ZipFileExtractToDirectory" AssemblyFile="$(BuildToolsTaskDir)Microsoft.DotNet.Build.Tasks.dll"/>
 
   <ItemGroup>
@@ -103,73 +114,96 @@
     <WriteLinesToFile File="$(UnitTestExtractedSemaphore)" Lines="" Overwrite="false" />
   </Target>
  
-    <Target Name="UnzipTest"
+  <Target Name="UnzipTest"
+    DependsOnTargets="GetRepoProduct"
     Inputs="@(ZipFile)"
-    Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))"
-    DependsOnTargets="SelectTestZips">
+    Outputs="@(ZipFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))">
         <Message Text="Unzipping tests: @(ZipFile)" Importance="Low" />
         
         <ZipFileExtractToDirectory Condition="Exists('%(RootDir)%(Directory)%(ZipFile.FileName)%(ZipFile.Extension)')"
             SourceArchive="%(ZipFile.FullPath)"
             DestinationDirectory="$(UnitTestExtractDir)\%(filename)%(extension)"
             OverwriteDestination="true" />
-        
-        <Copy SourceFiles="@(JsonFile)" DestinationFiles="@(JsonFile->Replace('$(UnitTestDirectory)','$(UnitTestExtractDir)'))" />
     </Target>
-  
-    <Target Name="SelectTestZips">
-        <Error Condition="!Exists('$(MSBuildThisFileDirectory)\..\AnyOS.AnyCPU.Debug-Test-Archive-List.txt')" Text="Can't find AnyOS Test List.'" />
-      
-        <ReadLinesFromFile File="$(MSBuildThisFileDirectory)\..\AnyOS.AnyCPU.Debug-Test-Archive-List.txt">
-            <Output TaskParameter="Lines" ItemName="ItemsFromFile" />
-        </ReadLinesFromFile>
-
-        <ItemGroup>
-            <ZipFile Include="@(ItemsFromFile->'$(UnitTestDirectory)\%(filename)%(extension)')" />
-        </ItemGroup>
-    </Target>
-
-  <Target Name="RestoreTestDependsBin" DependsOnTargets="UnzipAllTests">
-    <Message Text="Restoring test dependencies..." />
     
-    <RemoveDir Directories="$(UnitTestCLIProjDir)" />
-    <RemoveDir Directories="$(UnitTestDependsBin)" />
+    <!-- Download latest product from Azure
+         to avoid restoring time to just get a project.json and lockfile
+         Query engineering infrastructure for latest build moniker if not set
+    -->
+  <Target Name="GetRepoProduct" 
+          Inputs="%(Repos.Identity)"
+          Outputs="CompletedDownloads" 
+          Condition="'$(SkipGetRepoProduct)'!='true'" >
+    <!-- Pass in specific build parameters if required 
+         OS must be in 
+        Alpine3.4.3
+        Debian8.2
+        Fedora23
+        Fedora24
+        openSUSE42.1
+        OSX
+        RedHat7
+        Ubuntu14.04
+        Ubuntu16.04
+        Ubuntu16.10
+        Windows
+    -->
+    <PropertyGroup>
+      <CurrentRepo>%(Repos.Identity)</CurrentRepo>
+    </PropertyGroup>
+    <Message Importance="High" Text="Gathering build information for %(Repos.Identity) ..." />
+    <RetreiveBuildContainerInformation
+        BuildPAT="$(BuildPAT)"
+        HelixAPIKey="$(HelixApiAccessKey)"
+        Repo="$(CurrentRepo)"
+        Branch="$(BranchName)"
+        OperatingSystem="$(OperatingSystem)"
+        ConfigurationGroup="%(Repos.SelectedConfigurationGroup)"
+        Platform="$(Architecture)"
+        SubType="%(Repos.SubType)"
+        BuildNumber="$(BuildMoniker)"
+        TestStorageAccountKey="%(Repos.TestStorageAccountKey)"
+        >
+      <Output TaskParameter="ProductStorageAccount"
+              PropertyName="_EvaluatedProductStorageAccount" />
+      <Output TaskParameter="ProductContainerName"
+              PropertyName="_EvaluatedProductContainerName" />
+      <Output TaskParameter="TestStorageAccount"
+              PropertyName="_EvaluatedTestStorageAccount" />
+      <Output TaskParameter="TestContainerName"
+              PropertyName="_EvaluatedTestContainerName" />
+      <Output TaskParameter="TestPattern"
+              PropertyName="_EvaluatedTestPattern" />
+    </RetreiveBuildContainerInformation>
     
-    <!-- create a dummy project used to restore test binaries -->
-    <MakeDir Directories="$(UnitTestCLIProjDir)"/>
-    <Exec Command="$(DotnetToolCommand) new" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
-
-    <!-- delete the dummy project.json and replace with merged project json from the unit test drop -->
-    <Delete Files="$(UnitTestCLIProjJson)" />
-    <MergeAllProjectJsonsTask 
-        InPath="$(UnitTestExtractDir)" 
-        OutPath="$(UnitTestCLIProjJson)"
-        OldPrerelease="$(UpgradableMoniker)"
-        NewPrerelease="$(BuildMoniker)"
-        Debug="$(DebugMergeProjectJson)"/>
+    <RemoveDir Directories="$(FetchedDataDir)" Condition="!Exists('$(FetchedDataDir)')" />
+    <MakeDir Directories="$(FetchedDataDir)" />
     
+    <Message Importance="High" Text="$(CurrentRepo) Product SA: $(_EvaluatedProductStorageAccount) Product Container:$(_EvaluatedProductContainerName) Test SA: $(_EvaluatedTestStorageAccount) Test Container:$(_EvaluatedTestContainerName) " />
+    <Message Importance="High" Text="Downloading $(CurrentRepo) Product ... " />
+    
+    <DownloadFromAzure AccountName="$(_EvaluatedProductStorageAccount)"
+                       AccountKey="%(Repos.CloudDropAccessToken)"
+                       ContainerName="$(_EvaluatedProductContainerName)"
+                       DownloadDirectory="$(FetchedDataDir)%(Repos.Identity)" />
+    
+    <Message Importance="High" Text="Downloading $(CurrentRepo) Test ... " Condition="'%(TestRepos.Identity)'=='$(CurrentRepo)'"/>
+    <DownloadFromAzure AccountName="$(_EvaluatedTestStorageAccount)"
+                   AccountKey="%(Repos.CloudDropAccessToken)"
+                   ContainerName="$(_EvaluatedTestContainerName)"
+                   DownloadDirectory="$(FetchedDataDir)tests/%(TestRepos.Identity)" 
+                   Condition="'%(TestRepos.Identity)'=='$(CurrentRepo)'" />
+                   
     <ItemGroup>
-      <GlobalJsonLines Include="{"/>
-      <GlobalJsonLines Include="&quot;packages&quot;: &quot;../../packages&quot;"/>
-      <GlobalJsonLines Include="}"/>
+      <CompletedDownloads Include="%(Repos.Identity)" Condition="Exists('$(FetchedDataDir)%(Repos.Identity)')">
+        <Semaphore>true</Semaphore>
+        <TestPattern>$(_EvaluatedTestPattern)</TestPattern>
+      </CompletedDownloads>
     </ItemGroup>
-   
-    <WriteLinesToFile File="$(BaseIntermediateOutputPath)global.json" Lines="@(GlobalJsonLines)" Overwrite="true" />
-    
-    <!-- restore and publish the dummy project to get a flat  -->
-    <Exec Command="$(TestDependRestoreCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
-    <Exec Command="$(TestDependPublishCommand)" StandardOutputImportance="Low" CustomErrorRegularExpression="^Unable to locate .*" WorkingDirectory="$(UnitTestCLIProjDir)"/>
-    
-    
-    <MakeDir Directories="$(SuitePath)"/>
-    <Copy SourceFiles="$(UnitTestCLIProjJson)" DestinationFiles="$(SuitePath)project.json"/>
   </Target>
 
-    <ItemGroup>
-      <GeneratedJsonFiles Include="$(SuitePath)**/project.json"/>
-    </ItemGroup>
     
-  <Target Name="GenerateStressSuiteSource" DependsOnTargets="RestoreTestDependsBin">
+  <Target Name="GenerateStressSuiteSource" DependsOnTargets="UnzipAllTests">
 
     <Error Condition="!Exists('$(SuiteConfigPath)')" Text="ERROR: File not found. Stress suite config path '$(SuiteConfigPath)' is invalid " />
 
@@ -186,11 +220,8 @@
       TestPaths="$(UnitTestExtractDir)"
       TestSearchStrings="$(UnitTestFileMask)"
       FrameworkPaths="$(UnitTestDependsBin)"
-      PackageConfigPath="$(UnitTestCLIProjJson)"/>    
-     
-     <ItemGroup>
-      <GeneratedJsonFiles Include="$(SuitePath)**/project.json"/>
-    </ItemGroup>
+      PackageConfigPath="$(UnitTestCLIProjJson)"/>
+      
   </Target>
 
   <Target Name="Build" DependsOnTargets="GenerateStressSuiteSource">

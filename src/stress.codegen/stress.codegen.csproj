@@ -53,6 +53,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.DotNet.Build.CloudTestTasks">
+      <HintPath>$(BuildToolsTaskDir)Microsoft.DotNet.Build.CloudTestTasks.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ExecutionFileGenerator.cs" />
@@ -68,6 +72,8 @@
     <Compile Include="ProgramSourceFileGenerator.cs" />
     <Compile Include="ProjectJsonDependencyInfo.cs" />
     <Compile Include="resources\Resources.Designer.cs" />
+    <Compile Include="RetreiveBuildContainerInformation.cs" />
+    <Compile Include="RetreiveContainerInformation.cs" />
     <Compile Include="SourceFileInfo.cs" />
     <Compile Include="StandAloneTestDiscoverer.cs" />
     <Compile Include="ToFProjectFileGenerator.cs" />

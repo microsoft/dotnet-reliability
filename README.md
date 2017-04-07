@@ -9,3 +9,9 @@ Contains the tooling and infrastructure used for .NET stress testing and reliabi
 - unified dump collection, storage, and bucketing across all .NET supported platforms
 - investigating and diagnosis of reliability failures 
  
+Steps to Build:
+build.cmd - builds stress tooling
+build_test.cmd should run
+```
+msbuild test\genstress.proj /p:CoreFxCloudDropAccessToken="" /p:CoreClrCloudDropAccessToken="" /p:HelixApiAccessKey="" /p:BuildPAT="" /p:OperatingSystem="Ubuntu14.04" /flp:v=diag
+```
